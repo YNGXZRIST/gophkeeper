@@ -32,8 +32,7 @@ func (c *PostgresErrorClassifier) Classify(err error) PGErrorClassification {
 	if err == nil {
 		return NonRetriable
 	}
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) {
+	if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 		return СlassifyPgError(pgErr)
 	}
 	return NonRetriable
