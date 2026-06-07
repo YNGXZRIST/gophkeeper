@@ -1,0 +1,6 @@
+.git
+.idea
+logs
+*.log
+docker
+*.md

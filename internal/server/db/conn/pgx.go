@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"gophkeeper/internal/server/db/retryable"
 	"gophkeeper/internal/shared/errors/labelerrors"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const (
