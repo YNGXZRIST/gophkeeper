@@ -6,7 +6,6 @@ package conn
 import (
 	"database/sql"
 	"errors"
-	"gophermart-loyalty/internal/gopherman/config/db"
 	"gophermart-loyalty/migrations"
 	"os"
 	"testing"
@@ -59,7 +58,7 @@ func TestMain(m *testing.M) {
 	}
 
 	var connErr error
-	testDB, connErr = NewConn(db.NewCfg(dsn))
+	testDB, connErr = NewConn(NewCfg(dsn))
 	if connErr != nil {
 		_ = pool.Purge(resource)
 		panic(connErr)

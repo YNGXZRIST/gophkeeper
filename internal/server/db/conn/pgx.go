@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"gophkeeper/internal/server/config/db"
 	"gophkeeper/internal/server/db/retryable"
 	"gophkeeper/internal/shared/errors/labelerrors"
 )
@@ -20,15 +19,15 @@ const (
 // DB wraps sql.DB and DB configuration.
 type DB struct {
 	*sql.DB
-	*db.Config
+	*Config
 }
 
 // NewConn opens new PostgreSQL connection.
-func NewConn(cfg *db.Config) (*DB, error) {
-	if cfg == nil || cfg.DNS == "" {
+func NewConn(cfg *Config) (*DB, error) {
+	if cfg == nil || cfg.DSN == "" {
 		return nil, labelerrors.NewLabelError(PGXLabel+".NewConn.DSN", fmt.Errorf("database DSN is not set"))
 	}
-	dsn := cfg.DNS
+	dsn := cfg.DSN
 	conn, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, labelerrors.NewLabelError(PGXLabel+".NewConn.Open", fmt.Errorf("error connecting to database: %w", err))

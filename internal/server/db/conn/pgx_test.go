@@ -2,7 +2,6 @@ package conn
 
 import (
 	"errors"
-	"gophkeeper/internal/server/config/db"
 	"gophkeeper/internal/server/db/retryable"
 	"testing"
 
@@ -150,7 +149,7 @@ func TestDB_QueryContext(t *testing.T) {
 }
 
 func TestNewConn(t *testing.T) {
-	cfg := db.NewCfg("test")
+	cfg := NewCfg("test")
 	conn, err := NewConn(cfg)
 	if err != nil {
 		t.Fatalf("NewConn() error = %v, want nil", err)
@@ -158,8 +157,8 @@ func TestNewConn(t *testing.T) {
 	if conn == nil {
 		t.Fatalf("NewConn() conn = nil, want non-nil")
 	}
-	if conn.DNS != "test" {
-		t.Fatalf("NewConn() DNS = %q, want %q", conn.DNS, "test")
+	if conn.DSN != "test" {
+		t.Fatalf("NewConn() DSN = %q, want %q", conn.DSN, "test")
 	}
 	if err := conn.Close(); err != nil {
 		t.Fatalf("conn.Close() error = %v, want nil", err)

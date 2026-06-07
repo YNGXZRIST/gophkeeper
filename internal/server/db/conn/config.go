@@ -1,9 +1,8 @@
-// Package db contains database connection configuration.
-package db
+package conn
 
 // Config stores database DSN and retry settings.
 type Config struct {
-	DNS        string
+	DSN        string
 	MaxRetries int
 }
 
@@ -11,9 +10,9 @@ type Config struct {
 const MaxRetries int = 3
 
 // NewCfg creates DB configuration from DSN string.
-func NewCfg(dns string) *Config {
+func NewCfg(dsn string) *Config {
 	return &Config{
-		DNS:        dns,
+		DSN:        dsn,
 		MaxRetries: MaxRetries,
 	}
 }
