@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"gophkeeper/internal/server/logger"
+	"gophkeeper/internal/server/transport"
 	"os"
 	"strings"
 
@@ -180,12 +181,12 @@ func applyDefaults(opt *Flags) {
 // validate checks invariants that cannot be defaulted.
 func validate(opt *Flags) error {
 	switch opt.Transport {
-	case "grpc", "http":
+	case transport.GRPC, transport.HTTP:
 	default:
 		return fmt.Errorf("invalid transport %q: want grpc or http", opt.Transport)
 	}
 	switch opt.AppMode {
-	case "development", "production":
+	case logger.ModeDevelopment, logger.ModeProduction:
 	default:
 		return fmt.Errorf("invalid app mode %q: want development or production", opt.AppMode)
 	}

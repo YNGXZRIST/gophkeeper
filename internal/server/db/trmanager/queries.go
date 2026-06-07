@@ -4,7 +4,7 @@ package trmanager
 import (
 	"context"
 	"database/sql"
-	"gophermart-loyalty/internal/gopherman/db/conn"
+	"gophkeeper/internal/server/db/conn"
 )
 
 // Querier describes minimal DB methods used by repositories.

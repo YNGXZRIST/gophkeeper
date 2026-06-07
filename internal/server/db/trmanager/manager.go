@@ -3,8 +3,8 @@ package trmanager
 import (
 	"context"
 	"database/sql"
-	"gophermart-loyalty/internal/gopherman/db/conn"
-	"gophermart-loyalty/internal/gopherman/db/retryable"
+	"gophkeeper/internal/server/db/conn"
+	"gophkeeper/internal/server/db/retryable"
 )
 
 // Manager coordinates transactional execution.

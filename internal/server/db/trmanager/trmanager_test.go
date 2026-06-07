@@ -3,7 +3,7 @@ package trmanager
 import (
 	"context"
 	"errors"
-	"gophermart-loyalty/internal/gopherman/db/conn"
+	"gophkeeper/internal/server/db/conn"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
