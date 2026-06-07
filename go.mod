@@ -9,7 +9,9 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/ory/dockertest/v3 v3.12.0
+	go.uber.org/zap v1.28.0
 	google.golang.org/grpc v1.81.1
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
@@ -55,6 +57,7 @@ require (
 	go.opentelemetry.io/otel v1.44.0 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
+	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
