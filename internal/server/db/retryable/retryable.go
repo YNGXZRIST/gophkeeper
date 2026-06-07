@@ -3,8 +3,8 @@ package retryable
 
 import (
 	"context"
-	"gophermart-loyalty/internal/gopherman/db/pgerrors"
-	"gophermart-loyalty/internal/gopherman/errors/labelerrors"
+	"gophkeeper/internal/server/db/pgerrors"
+	"gophkeeper/internal/shared/errors/labelerrors"
 	"time"
 )
 
