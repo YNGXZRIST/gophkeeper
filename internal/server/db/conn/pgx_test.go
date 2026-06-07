@@ -2,8 +2,8 @@ package conn
 
 import (
 	"errors"
-	"gophermart-loyalty/internal/gopherman/config/db"
-	"gophermart-loyalty/internal/gopherman/db/retryable"
+	"gophkeeper/internal/server/config/db"
+	"gophkeeper/internal/server/db/retryable"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
