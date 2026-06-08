@@ -10,6 +10,7 @@ import (
 	"gophkeeper/internal/server/service"
 	"gophkeeper/internal/server/transport"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	mg "gophkeeper/migrations/server"
 )
 
 const (
@@ -44,13 +45,15 @@ func Bootstrap(args []string) (_ *App, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("init db: %w", err)
 	}
-	// Close the DB if Bootstrap fails after this point; on success App owns it.
 	defer func() {
 		if err != nil {
 			_ = dbConn.Close()
 		}
 	}()
-
+	err = mg.Migrate(opt.DSN)
+	if err != nil {
+		return nil, fmt.Errorf("migrate: %w", err)
+	}
 	repos := buildRepos(dbConn)
 	services := buildServices(repos)
 
