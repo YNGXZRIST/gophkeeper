@@ -4,16 +4,19 @@ import (
 	"gophkeeper/internal/client/view/tui/login"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/welcome"
+	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
 	tea "charm.land/bubbletea/v2"
 )
 
 type rootModel struct {
+	client  userv1.UserServiceClient
 	current tea.Model
 }
 
-func New() rootModel {
+func New(client userv1.UserServiceClient) rootModel {
 	return rootModel{
+		client:  client,
 		current: welcome.NewWelcomeModel(),
 	}
 }
@@ -27,9 +30,9 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case welcome.SelectMsg:
 		switch msg.Choice {
 		case welcome.SignIn:
-			m.current = login.InitialModel()
+			m.current = login.InitialModel(m.client)
 		case welcome.SignUp:
-			m.current = register.InitialModel()
+			m.current = register.InitialModel(m.client)
 		}
 		return m, m.current.Init()
 	}

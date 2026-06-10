@@ -24,6 +24,12 @@ func main() {
 		log.Fatalf("fatal error: %v", err)
 	}
 
+	go func() {
+		if errRun := a.Run(); errRun != nil {
+			log.Fatalf("server run: %v", errRun)
+		}
+	}()
+
 	<-ctx.Done()
 
 	log.Println("shutting down application...")
