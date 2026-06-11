@@ -18,6 +18,7 @@ message RegisterRequest{
 message RegisterResponse{
   User user = 1;
   string access_token = 2;
+  string refresh_token=3;
 }
 message LoginRequest{
   string login = 1;
@@ -26,6 +27,7 @@ message LoginRequest{
 message LoginResponse{
   User user = 1;
   string access_token = 2;
+  string refresh_token=3;
 }
 
 service UserService {
