@@ -3,8 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"gophkeeper/internal/server/auth/token"
 	"gophkeeper/internal/server/config"
 	"gophkeeper/internal/server/db/conn"
+	"gophkeeper/internal/server/db/trmanager"
 	"gophkeeper/internal/server/logger"
 	"gophkeeper/internal/server/repository"
 	"gophkeeper/internal/server/service"
@@ -54,8 +56,15 @@ func Bootstrap(args []string) (_ *App, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+	mgr := trmanager.NewManager(dbConn)
 	repos := buildRepos(dbConn)
-	services := buildServices(repos)
+	registrar := repository.NewRegistrar(mgr, repos, []byte(opt.RefreshSecret), repository.DefaultRefreshTTL)
+	issuer := token.NewIssuer([]byte(opt.JWTSecret), token.DefaultAccessTTL)
+	services := buildServices(serviceDeps{
+		Repos:     repos,
+		Registrar: registrar,
+		Issuer:    issuer,
+	})
 
 	server, err := transport.NewServer(
 		transport.ServerProp{
@@ -92,12 +101,20 @@ func initDB(cfg *config.Flags) (*conn.DB, error) {
 }
 func buildRepos(db *conn.DB) repository.Repositories {
 	return repository.Repositories{
-		User: repository.NewUserRepo(db),
+		User:         repository.NewUserRepo(db),
+		RefreshToken: repository.NewRefreshTokenRepo(db),
 	}
 
 }
-func buildServices(repos repository.Repositories) *service.Services {
+
+type serviceDeps struct {
+	Repos     repository.Repositories
+	Registrar *repository.Registrar
+	Issuer    *token.Issuer
+}
+
+func buildServices(d serviceDeps) *service.Services {
 	return &service.Services{
-		User: service.NewUserService(repos.User),
+		User: service.NewUserService(d.Repos.User, d.Registrar, d.Issuer),
 	}
 }

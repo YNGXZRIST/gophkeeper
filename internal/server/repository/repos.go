@@ -6,6 +6,8 @@ import (
 	"gophkeeper/internal/server/db/trmanager"
 )
 
+const labelRepository = "REPOSITORY"
+
 type repoBase struct{ db *conn.DB }
 
 func (b *repoBase) q(ctx context.Context) trmanager.Querier {
@@ -13,5 +15,6 @@ func (b *repoBase) q(ctx context.Context) trmanager.Querier {
 }
 
 type Repositories struct {
-	User *UserRepo
+	User         *UserRepo
+	RefreshToken *RefreshTokenRepo
 }

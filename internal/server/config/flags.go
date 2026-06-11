@@ -26,6 +26,8 @@ type Flags struct {
 	DSN            string `json:"database_dsn"  env:"DATABASE_DSN"`
 	AppMode        string `json:"app_mode"      env:"APP_MODE"`
 	LogDir         string `json:"log_dir"       env:"LOG_DIR"`
+	JWTSecret      string `json:"jwt_secret"     env:"JWT_SECRET"`
+	RefreshSecret  string `json:"refresh_secret" env:"REFRESH_SECRET"`
 	ConfigFilePath string `json:"-"`
 }
 
@@ -160,6 +162,12 @@ func override(dst, src *Flags) {
 	if src.LogDir != "" {
 		dst.LogDir = src.LogDir
 	}
+	if src.JWTSecret != "" {
+		dst.JWTSecret = src.JWTSecret
+	}
+	if src.RefreshSecret != "" {
+		dst.RefreshSecret = src.RefreshSecret
+	}
 }
 
 // applyDefaults sets defaults for fields left empty by every source.
@@ -189,6 +197,12 @@ func validate(opt *Flags) error {
 	case logger.ModeDevelopment, logger.ModeProduction:
 	default:
 		return fmt.Errorf("invalid app mode %q: want development or production", opt.AppMode)
+	}
+	if opt.JWTSecret == "" {
+		return fmt.Errorf("jwt_secret is required: set it in the config file or JWT_SECRET env")
+	}
+	if opt.RefreshSecret == "" {
+		return fmt.Errorf("refresh_secret is required: set it in the config file or REFRESH_SECRET env")
 	}
 	return nil
 }

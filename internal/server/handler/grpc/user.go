@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	"fmt"
+	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/user/v1"
 
@@ -22,14 +22,18 @@ func NewUserServer(prop UserServerProp) *UserServer {
 	return &UserServer{UserServerProp: prop}
 }
 func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	login := in.GetLogin()
-	password := in.GetPassword()
-	fmt.Println(password, login)
-	return &pb.RegisterResponse{}, nil
+	user, tokens, err := s.Service.Register(ctx, model.User{Login: in.GetLogin(), Pass: in.GetPassword()})
+	if err != nil {
+		return nil, err
+	}
+	pbUser := &pb.User{}
+	pbUser.SetId(user.ID)
+	pbUser.SetLogin(user.Login)
+	resp := &pb.RegisterResponse{}
+	resp.SetUser(pbUser)
+	resp.SetAccessToken(tokens.Access)
+	return resp, nil
 }
 func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginResponse, error) {
-	login := in.GetLogin()
-	password := in.GetPassword()
-	fmt.Println(password, login)
 	return &pb.LoginResponse{}, nil
 }

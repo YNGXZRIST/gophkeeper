@@ -3,7 +3,7 @@ package model
 import "time"
 
 type User struct {
-	ID        int64
+	ID        string
 	Login     string
 	Pass      string
 	CreatedAt time.Time
