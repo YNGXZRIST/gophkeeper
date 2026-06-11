@@ -294,13 +294,14 @@ func (b0 RegisterRequest_builder) Build() *RegisterRequest {
 }
 
 type RegisterResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_User        *User                  `protobuf:"bytes,1,opt,name=user"`
-	xxx_hidden_AccessToken *string                `protobuf:"bytes,2,opt,name=access_token,json=accessToken"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_User         *User                  `protobuf:"bytes,1,opt,name=user"`
+	xxx_hidden_AccessToken  *string                `protobuf:"bytes,2,opt,name=access_token,json=accessToken"`
+	xxx_hidden_RefreshToken *string                `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *RegisterResponse) Reset() {
@@ -345,13 +346,28 @@ func (x *RegisterResponse) GetAccessToken() string {
 	return ""
 }
 
+func (x *RegisterResponse) GetRefreshToken() string {
+	if x != nil {
+		if x.xxx_hidden_RefreshToken != nil {
+			return *x.xxx_hidden_RefreshToken
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *RegisterResponse) SetUser(v *User) {
 	x.xxx_hidden_User = v
 }
 
 func (x *RegisterResponse) SetAccessToken(v string) {
 	x.xxx_hidden_AccessToken = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *RegisterResponse) SetRefreshToken(v string) {
+	x.xxx_hidden_RefreshToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
 func (x *RegisterResponse) HasUser() bool {
@@ -368,6 +384,13 @@ func (x *RegisterResponse) HasAccessToken() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
+func (x *RegisterResponse) HasRefreshToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
 func (x *RegisterResponse) ClearUser() {
 	x.xxx_hidden_User = nil
 }
@@ -377,11 +400,17 @@ func (x *RegisterResponse) ClearAccessToken() {
 	x.xxx_hidden_AccessToken = nil
 }
 
+func (x *RegisterResponse) ClearRefreshToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_RefreshToken = nil
+}
+
 type RegisterResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	User        *User
-	AccessToken *string
+	User         *User
+	AccessToken  *string
+	RefreshToken *string
 }
 
 func (b0 RegisterResponse_builder) Build() *RegisterResponse {
@@ -390,8 +419,12 @@ func (b0 RegisterResponse_builder) Build() *RegisterResponse {
 	_, _ = b, x
 	x.xxx_hidden_User = b.User
 	if b.AccessToken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
 		x.xxx_hidden_AccessToken = b.AccessToken
+	}
+	if b.RefreshToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_RefreshToken = b.RefreshToken
 	}
 	return m0
 }
@@ -508,13 +541,14 @@ func (b0 LoginRequest_builder) Build() *LoginRequest {
 }
 
 type LoginResponse struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_User        *User                  `protobuf:"bytes,1,opt,name=user"`
-	xxx_hidden_AccessToken *string                `protobuf:"bytes,2,opt,name=access_token,json=accessToken"`
-	XXX_raceDetectHookData protoimpl.RaceDetectHookData
-	XXX_presence           [1]uint32
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_User         *User                  `protobuf:"bytes,1,opt,name=user"`
+	xxx_hidden_AccessToken  *string                `protobuf:"bytes,2,opt,name=access_token,json=accessToken"`
+	xxx_hidden_RefreshToken *string                `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *LoginResponse) Reset() {
@@ -559,13 +593,28 @@ func (x *LoginResponse) GetAccessToken() string {
 	return ""
 }
 
+func (x *LoginResponse) GetRefreshToken() string {
+	if x != nil {
+		if x.xxx_hidden_RefreshToken != nil {
+			return *x.xxx_hidden_RefreshToken
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *LoginResponse) SetUser(v *User) {
 	x.xxx_hidden_User = v
 }
 
 func (x *LoginResponse) SetAccessToken(v string) {
 	x.xxx_hidden_AccessToken = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *LoginResponse) SetRefreshToken(v string) {
+	x.xxx_hidden_RefreshToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
 func (x *LoginResponse) HasUser() bool {
@@ -582,6 +631,13 @@ func (x *LoginResponse) HasAccessToken() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
+func (x *LoginResponse) HasRefreshToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
 func (x *LoginResponse) ClearUser() {
 	x.xxx_hidden_User = nil
 }
@@ -591,11 +647,17 @@ func (x *LoginResponse) ClearAccessToken() {
 	x.xxx_hidden_AccessToken = nil
 }
 
+func (x *LoginResponse) ClearRefreshToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_RefreshToken = nil
+}
+
 type LoginResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	User        *User
-	AccessToken *string
+	User         *User
+	AccessToken  *string
+	RefreshToken *string
 }
 
 func (b0 LoginResponse_builder) Build() *LoginResponse {
@@ -604,8 +666,12 @@ func (b0 LoginResponse_builder) Build() *LoginResponse {
 	_, _ = b, x
 	x.xxx_hidden_User = b.User
 	if b.AccessToken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
 		x.xxx_hidden_AccessToken = b.AccessToken
+	}
+	if b.RefreshToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_RefreshToken = b.RefreshToken
 	}
 	return m0
 }
@@ -624,16 +690,18 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"C\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"X\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"}\n" +
 	"\x10RegisterResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\x12!\n" +
-	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\"@\n" +
+	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"U\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"z\n" +
 	"\rLoginResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\x12!\n" +
-	"\faccess_token\x18\x02 \x01(\tR\vaccessToken2\x86\x01\n" +
+	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken2\x86\x01\n" +
 	"\vUserService\x12?\n" +
 	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\x126\n" +
 	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponseB1Z/gophkeeper/internal/shared/proto/user/v1;userv1b\beditionsp\xe8\a"

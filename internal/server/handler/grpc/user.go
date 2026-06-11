@@ -32,6 +32,7 @@ func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.
 	resp := &pb.RegisterResponse{}
 	resp.SetUser(pbUser)
 	resp.SetAccessToken(tokens.Access)
+	resp.SetRefreshToken(tokens.Refresh)
 	return resp, nil
 }
 func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginResponse, error) {
