@@ -1,0 +1,9 @@
+{
+  "transport": "grpc",
+  "address": ":8080",
+  "database_dsn": "",
+  "app_mode": "development",
+  "log_dir": "logs",
+  "jwt_secret": "generate with: openssl rand -base64 48",
+  "refresh_secret": "generate with: openssl rand -base64 48"
+}
