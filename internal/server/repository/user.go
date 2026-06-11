@@ -2,10 +2,14 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"gophkeeper/internal/server/auth/hasher"
 	"gophkeeper/internal/server/db/conn"
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/shared/errors/labelerrors"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type UserRepo struct {
@@ -27,6 +31,9 @@ func (ur *UserRepo) Create(ctx context.Context, u model.User) (*model.User, erro
 		u.Login, hash,
 	).Scan(&u.ID, &u.Login, &u.Pass, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
+		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation {
+			return nil, model.ErrLoginTaken
+		}
 		return nil, labelerrors.NewLabelError(labelRepository+".User.Register.Insert", err)
 	}
 	return &u, nil

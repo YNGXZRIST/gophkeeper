@@ -2,11 +2,14 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/user/v1"
 
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserServer struct {
@@ -24,7 +27,11 @@ func NewUserServer(prop UserServerProp) *UserServer {
 func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	user, tokens, err := s.Service.Register(ctx, model.User{Login: in.GetLogin(), Pass: in.GetPassword()})
 	if err != nil {
-		return nil, err
+		if errors.Is(err, model.ErrLoginTaken) {
+			return nil, status.Error(codes.AlreadyExists, "user already registered")
+		}
+		s.Logger.Error("register failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
 	}
 	pbUser := &pb.User{}
 	pbUser.SetId(user.ID)
