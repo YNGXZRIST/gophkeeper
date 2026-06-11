@@ -6,6 +6,7 @@ import "charm.land/lipgloss/v2"
 const (
 	RoseWater = "#dc8a78"
 	Teal      = "#179299"
+	Red       = "#d20f39"
 )
 
 // Reusable styles shared across every screen.
@@ -14,4 +15,5 @@ var (
 	Focused = lipgloss.NewStyle().Foreground(lipgloss.Color(RoseWater))
 	Blurred = lipgloss.NewStyle().Foreground(lipgloss.BrightBlack)
 	Filled  = lipgloss.NewStyle().Foreground(lipgloss.Color(Teal))
+	Error   = lipgloss.NewStyle().Foreground(lipgloss.Color(Red)).Bold(true)
 )

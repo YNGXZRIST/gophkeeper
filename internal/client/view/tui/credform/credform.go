@@ -164,7 +164,7 @@ func (m Model) View() (string, *tea.Cursor) {
 	default:
 		button = theme.Focused.Render(label)
 	}
-	fmt.Fprintf(&b, "\n%s\n", button)
+	fmt.Fprintf(&b, "%s\n", button)
 
 	return b.String(), c
 }

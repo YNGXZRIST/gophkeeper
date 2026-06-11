@@ -2,18 +2,19 @@ package register
 
 import (
 	"context"
-	"fmt"
 	"gophkeeper/internal/client/view/tui/credform"
 	"gophkeeper/internal/client/view/tui/theme"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
-	"log"
 
 	tea "charm.land/bubbletea/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type model struct {
 	client userv1.UserServiceClient
 	form   credform.Model
+	errMsg string
 }
 
 func InitialModel(client userv1.UserServiceClient) model {
@@ -33,12 +34,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case credform.SubmitMsg:
-		res, err := m.client.Register(context.Background(), userv1.RegisterRequest_builder{Login: &msg.Login, Password: &msg.Password}.Build())
+		_, err := m.client.Register(context.Background(), userv1.RegisterRequest_builder{Login: &msg.Login, Password: &msg.Password}.Build())
 		if err != nil {
-			log.Fatal(err)
+			st := status.Convert(err)
+			switch st.Code() {
+			case codes.Unavailable:
+				m.errMsg = "Server error. Try again later."
+			case codes.AlreadyExists:
+				m.errMsg = st.Message()
+			default:
+				m.errMsg = "Internal error. Try again later."
+			}
+			return m, nil
 		}
-		fmt.Println(res)
-		fmt.Println(msg.Login, msg.Password)
+		m.errMsg = ""
 		return m, tea.Quit
 	}
 
@@ -49,7 +58,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	body, cur := m.form.View()
-	v := tea.NewView(theme.Title.Render("Register") + "\n\n" + body)
+	content := theme.Title.Render("Register") + "\n\n" + body
+	if m.errMsg != "" {
+		content += "\n" + theme.Error.Render(m.errMsg)
+	}
+	v := tea.NewView(content)
 	v.Cursor = cur
 	return v
 }
