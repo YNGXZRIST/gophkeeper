@@ -3,6 +3,7 @@ package register
 import (
 	"context"
 	"gophkeeper/internal/client/view/tui/credform"
+	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/theme"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
@@ -14,11 +15,12 @@ import (
 type model struct {
 	client userv1.UserServiceClient
 	form   credform.Model
+	store  iface.SessionStore
 	errMsg string
 }
 
-func InitialModel(client userv1.UserServiceClient) model {
-	return model{client: client, form: credform.New()}
+func InitialModel(client userv1.UserServiceClient, store iface.SessionStore) model {
+	return model{client: client, form: credform.New(), store: store}
 }
 
 func (m model) Init() tea.Cmd {
@@ -34,7 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case credform.SubmitMsg:
-		_, err := m.client.Register(context.Background(), userv1.RegisterRequest_builder{Login: &msg.Login, Password: &msg.Password}.Build())
+		res, err := m.client.Register(context.Background(), userv1.RegisterRequest_builder{Login: &msg.Login, Password: &msg.Password}.Build())
 		if err != nil {
 			st := status.Convert(err)
 			switch st.Code() {
@@ -48,6 +50,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.errMsg = ""
+		_, err = m.store.Save(context.Background(), msg.Login, res.GetAccessToken(), res.GetRefreshToken())
+		if err != nil {
+			m.errMsg = "Client error. Try again later."
+			return m, nil
+		}
 		return m, tea.Quit
 	}
 

@@ -20,6 +20,8 @@ const (
 		FROM refresh_tokens WHERE token_hash = $1`
 
 	RefreshTokenDeleteByHashQuery = `DELETE FROM refresh_tokens WHERE token_hash = $1`
+
+	RefreshTokenDeleteByUserIDQuery = `DELETE FROM refresh_tokens WHERE user_id = $1`
 )
 
 func NewRefreshTokenRepo(db *conn.DB) *RefreshTokenRepo {
@@ -54,6 +56,14 @@ func (r *RefreshTokenRepo) GetByHash(ctx context.Context, tokenHash string) (*mo
 func (r *RefreshTokenRepo) DeleteByHash(ctx context.Context, tokenHash string) error {
 	if _, err := r.repoBase.q(ctx).ExecContext(ctx, RefreshTokenDeleteByHashQuery, tokenHash); err != nil {
 		return labelerrors.NewLabelError(labelRepository+".RefreshToken.DeleteByHash", err)
+	}
+	return nil
+}
+
+// DeleteByUserID removes all refresh tokens of a user, e.g. on logout from all devices.
+func (r *RefreshTokenRepo) DeleteByUserID(ctx context.Context, userID string) error {
+	if _, err := r.repoBase.q(ctx).ExecContext(ctx, RefreshTokenDeleteByUserIDQuery, userID); err != nil {
+		return labelerrors.NewLabelError(labelRepository+".RefreshToken.DeleteByUserID", err)
 	}
 	return nil
 }

@@ -58,12 +58,13 @@ func Bootstrap(args []string) (_ *App, err error) {
 	}
 	mgr := trmanager.NewManager(dbConn)
 	repos := buildRepos(dbConn)
-	registrar := repository.NewRegistrar(mgr, repos, []byte(opt.RefreshSecret), repository.DefaultRefreshTTL)
+	refreshIssuer := repository.NewRefreshIssuer(repos.RefreshToken, []byte(opt.RefreshSecret), repository.DefaultRefreshTTL)
+	authWriter := repository.NewAuthWriter(mgr, repos, refreshIssuer)
 	issuer := token.NewIssuer([]byte(opt.JWTSecret), token.DefaultAccessTTL)
 	services := buildServices(serviceDeps{
-		Repos:     repos,
-		Registrar: registrar,
-		Issuer:    issuer,
+		Repos:  repos,
+		Auth:   authWriter,
+		Issuer: issuer,
 	})
 
 	server, err := transport.NewServer(
@@ -108,13 +109,13 @@ func buildRepos(db *conn.DB) repository.Repositories {
 }
 
 type serviceDeps struct {
-	Repos     repository.Repositories
-	Registrar *repository.Registrar
-	Issuer    *token.Issuer
+	Repos  repository.Repositories
+	Auth   *repository.AuthWriter
+	Issuer *token.Issuer
 }
 
 func buildServices(d serviceDeps) *service.Services {
 	return &service.Services{
-		User: service.NewUserService(d.Repos.User, d.Registrar, d.Issuer),
+		User: service.NewUserService(d.Repos.User, d.Auth, d.Issuer),
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/db"
 	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/view/tui/root"
@@ -52,14 +53,19 @@ func main() {
 			fmt.Printf("error:%+v\n", err)
 		}
 	}
-	grpcConn, err := grpc.NewClient(grpcServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConn, err := grpc.NewClient(
+		grpcServerAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(auth.UnaryRefreshInterceptor(sessionRepo)),
+		grpc.WithUnaryInterceptor(auth.UnaryAuthInterceptor(sessionRepo)),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer func() { _ = grpcConn.Close() }()
 	userClient := userv1.NewUserServiceClient(grpcConn)
 
-	if _, err = tea.NewProgram(root.New(userClient)).Run(); err != nil {
+	if _, err = tea.NewProgram(root.New(root.Deps{Client: userClient, SessionsStore: sessionRepo})).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}

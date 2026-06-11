@@ -43,5 +43,20 @@ func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.
 	return resp, nil
 }
 func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginResponse, error) {
-	return &pb.LoginResponse{}, nil
+	user, tokens, err := s.Service.Login(ctx, in.GetLogin(), in.GetPassword())
+	if err != nil {
+		if errors.Is(err, model.ErrInvalidCredentials) {
+			return nil, status.Error(codes.Unauthenticated, "invalid login or password")
+		}
+		s.Logger.Error("login failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	pbUser := &pb.User{}
+	pbUser.SetId(user.ID)
+	pbUser.SetLogin(user.Login)
+	resp := &pb.LoginResponse{}
+	resp.SetUser(pbUser)
+	resp.SetAccessToken(tokens.Access)
+	resp.SetRefreshToken(tokens.Refresh)
+	return resp, nil
 }

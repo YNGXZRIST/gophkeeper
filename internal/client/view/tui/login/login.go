@@ -2,22 +2,25 @@ package login
 
 import (
 	"context"
-	"fmt"
 	"gophkeeper/internal/client/view/tui/credform"
+	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/theme"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
-	"log"
 
 	tea "charm.land/bubbletea/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type model struct {
 	client userv1.UserServiceClient
 	form   credform.Model
+	store  iface.SessionStore
+	errMsg string
 }
 
-func InitialModel(client userv1.UserServiceClient) model {
-	return model{client: client, form: credform.New()}
+func InitialModel(client userv1.UserServiceClient, store iface.SessionStore) model {
+	return model{client: client, form: credform.New(), store: store}
 }
 
 func (m model) Init() tea.Cmd {
@@ -35,10 +38,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case credform.SubmitMsg:
 		res, err := m.client.Login(context.Background(), userv1.LoginRequest_builder{Login: &msg.Login, Password: &msg.Password}.Build())
 		if err != nil {
-			log.Fatal(err)
+			st := status.Convert(err)
+			switch st.Code() {
+			case codes.Unavailable:
+				m.errMsg = "Server error. Try again later."
+			case codes.Unauthenticated:
+				m.errMsg = "Invalid login or password."
+			default:
+				m.errMsg = "Internal error. Try again later."
+			}
+			return m, nil
 		}
-		fmt.Println(res)
-		fmt.Println(msg.Login, msg.Password)
+		m.errMsg = ""
+		_, err = m.store.Save(context.Background(), res.GetUser().GetLogin(), res.GetAccessToken(), res.GetRefreshToken())
+		if err != nil {
+			m.errMsg = "Client error. Try again later."
+			return m, nil
+		}
 		return m, tea.Quit
 	}
 
@@ -49,7 +65,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() tea.View {
 	body, cur := m.form.View()
-	v := tea.NewView(theme.Title.Render("Login") + "\n\n" + body)
+	content := theme.Title.Render("Login") + "\n" + body
+	if m.errMsg != "" {
+		content += "\n" + theme.Error.Render(m.errMsg)
+	}
+	v := tea.NewView(content)
 	v.Cursor = cur
 	return v
 }

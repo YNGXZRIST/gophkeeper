@@ -1,6 +1,7 @@
 package root
 
 import (
+	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/welcome"
@@ -12,12 +13,18 @@ import (
 type rootModel struct {
 	client  userv1.UserServiceClient
 	current tea.Model
+	Deps
 }
 
-func New(client userv1.UserServiceClient) rootModel {
+type Deps struct {
+	Client        userv1.UserServiceClient
+	SessionsStore iface.SessionStore
+}
+
+func New(deps Deps) rootModel {
 	return rootModel{
-		client:  client,
 		current: welcome.NewWelcomeModel(),
+		Deps:    deps,
 	}
 }
 
@@ -30,9 +37,9 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case welcome.SelectMsg:
 		switch msg.Choice {
 		case welcome.SignIn:
-			m.current = login.InitialModel(m.client)
+			m.current = login.InitialModel(m.client, m.SessionsStore)
 		case welcome.SignUp:
-			m.current = register.InitialModel(m.client)
+			m.current = register.InitialModel(m.client, m.SessionsStore)
 		}
 		return m, m.current.Init()
 	}

@@ -18,6 +18,8 @@ type UserRepo struct {
 
 const UserRegisterQuery = `INSERT INTO users(login, password) VALUES ($1, $2) RETURNING id, login, password, created_at, updated_at`
 
+const UserGetByLoginQuery = `SELECT id, login, password, created_at, updated_at FROM users WHERE login = $1`
+
 func NewUserRepo(db *conn.DB) *UserRepo {
 	return &UserRepo{repoBase: repoBase{db: db}}
 }
@@ -39,6 +41,12 @@ func (ur *UserRepo) Create(ctx context.Context, u model.User) (*model.User, erro
 	return &u, nil
 }
 
-func (ur *UserRepo) GetByLogin(ctx context.Context, login string) (model.User, error) {
-	return model.User{}, nil
+func (ur *UserRepo) GetByLogin(ctx context.Context, login string) (*model.User, error) {
+	var u model.User
+	err := ur.repoBase.q(ctx).QueryRowContext(ctx, UserGetByLoginQuery, login).
+		Scan(&u.ID, &u.Login, &u.Pass, &u.CreatedAt, &u.UpdatedAt)
+	if err != nil {
+		return nil, labelerrors.NewLabelError(labelRepository+".User.GetByLogin", err)
+	}
+	return &u, nil
 }
