@@ -15,6 +15,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type SuccessMsg struct{}
+
+type BackMsg struct{}
+
 type model struct {
 	client userv1.UserServiceClient
 	form   credform.Model
@@ -34,8 +38,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "ctrl+c", "esc":
+		case "ctrl+c":
 			return m, tea.Quit
+		case "esc":
+			return m, func() tea.Msg { return BackMsg{} }
 		}
 
 	case credform.SubmitMsg:
@@ -76,7 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.errMsg = "Client error. Try again later."
 			return m, nil
 		}
-		return m, tea.Quit
+		return m, func() tea.Msg { return SuccessMsg{} }
 	}
 
 	var cmd tea.Cmd

@@ -1,9 +1,11 @@
 package root
 
 import (
+	"context"
+	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
-	mainmenu "gophkeeper/internal/client/view/tui/mainmenu"
+	"gophkeeper/internal/client/view/tui/mainmenu"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/welcome"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
@@ -23,9 +25,38 @@ type Deps struct {
 
 func New(deps Deps) rootModel {
 	return rootModel{
-		current: welcome.NewWelcomeModel(),
+		current: resolveStart(deps),
 		Deps:    deps,
 	}
+}
+
+func resolveStart(deps Deps) tea.Model {
+	session, err := deps.SessionsStore.Get(context.Background())
+	if err != nil || session == nil {
+		return welcome.NewWelcomeModel()
+	}
+	if !session.Access.Expired(0) {
+		return mainmenu.New()
+	}
+	if session.Refresh.Raw == "" {
+		return welcome.NewWelcomeModel()
+	}
+	in := &userv1.RefreshRequest{}
+	in.SetRefreshToken(session.Refresh.Raw)
+	resp, err := deps.Client.Refresh(context.Background(), in)
+	if err != nil {
+		return welcome.NewWelcomeModel()
+	}
+	if _, err := deps.SessionsStore.Save(context.Background(), auth.Credentials{
+		Login:        session.Login,
+		AccessToken:  resp.GetAccessToken(),
+		RefreshToken: resp.GetRefreshToken(),
+		EncSalt:      session.EncSalt,
+		WrappedDek:   session.WrappedDek,
+	}); err != nil {
+		return welcome.NewWelcomeModel()
+	}
+	return mainmenu.New()
 }
 
 func (m rootModel) Init() tea.Cmd {
@@ -48,6 +79,15 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case login.BackMsg, register.BackMsg:
 		m.current = welcome.NewWelcomeModel()
 		return m, m.current.Init()
+	case mainmenu.SelectMsg:
+		switch msg.Choice {
+		case mainmenu.Logout:
+			if err := m.SessionsStore.Clear(context.Background()); err != nil {
+				return m, nil
+			}
+			m.current = welcome.NewWelcomeModel()
+			return m, m.current.Init()
+		}
 	}
 
 	var cmd tea.Cmd

@@ -23,5 +23,5 @@ func NewToken(raw string) (Token, error) {
 	return t, nil
 }
 func (t Token) Expired(skew time.Duration) bool {
-	return time.Now().Add(skew).Before(t.ExpiresAt)
+	return !time.Now().Add(skew).Before(t.ExpiresAt)
 }
