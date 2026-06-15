@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"gophkeeper/internal/client/view/tui/layout"
+	"gophkeeper/internal/client/view/tui/nav"
 	"gophkeeper/internal/client/view/tui/theme"
 
 	"charm.land/bubbles/v2/textinput"
@@ -15,16 +16,6 @@ import (
 const titleOffset = 2
 
 const cardHint = "↑/↓ — move · enter — next/save · esc — back"
-
-type SubmitMsg struct {
-	PAN        string
-	Cardholder string
-	Expiry     string
-	CVV        string
-	Meta       string
-}
-
-type BackMsg struct{}
 
 const submitLabel = "save"
 
@@ -77,7 +68,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "esc":
-			return m, func() tea.Msg { return BackMsg{} }
+			return m, nav.Back()
 		case "up":
 			return m, m.moveFocus(-1)
 		case "down":
@@ -144,14 +135,7 @@ func (m model) allFilled() bool {
 }
 
 func (m model) submit() tea.Cmd {
-	pan := m.inputs[0].Value()
-	cardholder := m.inputs[1].Value()
-	expiry := m.inputs[2].Value()
-	cvv := m.inputs[3].Value()
-	meta := m.inputs[4].Value()
-	return func() tea.Msg {
-		return SubmitMsg{PAN: pan, Cardholder: cardholder, Expiry: expiry, CVV: cvv, Meta: meta}
-	}
+	return nav.Back()
 }
 
 func (m model) View() tea.View {

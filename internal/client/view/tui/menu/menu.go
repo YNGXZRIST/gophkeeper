@@ -14,10 +14,11 @@ type Action int
 const (
 	None Action = iota
 	Selected
+	Back
 	Quit
 )
 
-const hint = "↑/↓ — select · enter — accept · q — quit"
+const hint = "↑/↓ — select · enter — accept · esc — back · q — quit"
 
 type Model struct {
 	title   string
@@ -41,6 +42,8 @@ func (m Model) Update(msg tea.Msg) (Model, Action) {
 	switch key.String() {
 	case "q", "ctrl+c":
 		return m, Quit
+	case "esc":
+		return m, Back
 	case "up":
 		m.cursor--
 		if m.cursor < 0 {

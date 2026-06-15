@@ -5,6 +5,7 @@ import (
 	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/view/tui/credform"
 	"gophkeeper/internal/client/view/tui/iface"
+	"gophkeeper/internal/client/view/tui/nav"
 	"gophkeeper/internal/client/view/tui/theme"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
@@ -12,10 +13,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-type SuccessMsg struct{}
-
-type BackMsg struct{}
 
 type model struct {
 	client userv1.UserServiceClient
@@ -39,7 +36,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return m, tea.Quit
 		case "esc":
-			return m, func() tea.Msg { return BackMsg{} }
+			return m, nav.Back()
 		}
 
 	case credform.SubmitMsg:
@@ -68,7 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.errMsg = "Client error. Try again later."
 			return m, nil
 		}
-		return m, func() tea.Msg { return SuccessMsg{} }
+		return m, nav.Reset(nav.MainMenu)
 	}
 
 	var cmd tea.Cmd

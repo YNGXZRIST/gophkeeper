@@ -2,6 +2,7 @@ package mainmenu
 
 import (
 	"gophkeeper/internal/client/view/tui/menu"
+	"gophkeeper/internal/client/view/tui/nav"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -14,10 +15,6 @@ const (
 	DeleteData
 	Logout
 )
-
-type SelectMsg struct {
-	Choice Choice
-}
 
 type model struct {
 	menu menu.Model
@@ -36,8 +33,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.menu, act = m.menu.Update(msg)
 	switch act {
 	case menu.Selected:
-		choice := Choice(m.menu.Cursor())
-		return m, func() tea.Msg { return SelectMsg{Choice: choice} }
+		switch Choice(m.menu.Cursor()) {
+		case SaveData:
+			return m, nav.Push(nav.Save)
+		case Logout:
+			return m, nav.Logout()
+		}
+	case menu.Back:
+		return m, nav.Back()
 	case menu.Quit:
 		return m, tea.Quit
 	}

@@ -7,6 +7,7 @@ import (
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
 	"gophkeeper/internal/client/view/tui/mainmenu"
+	"gophkeeper/internal/client/view/tui/nav"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/save"
 	"gophkeeper/internal/client/view/tui/welcome"
@@ -17,6 +18,7 @@ import (
 
 type rootModel struct {
 	current tea.Model
+	stack   []tea.Model
 	Deps
 }
 
@@ -27,27 +29,44 @@ type Deps struct {
 
 func New(deps Deps) rootModel {
 	return rootModel{
-		current: resolveStart(deps),
+		current: build(deps, resolveStart(deps)),
 		Deps:    deps,
 	}
 }
 
-func resolveStart(deps Deps) tea.Model {
+func build(deps Deps, id nav.ScreenID) tea.Model {
+	switch id {
+	case nav.Login:
+		return login.InitialModel(deps.Client, deps.SessionsStore)
+	case nav.Register:
+		return register.InitialModel(deps.Client, deps.SessionsStore)
+	case nav.MainMenu:
+		return mainmenu.New()
+	case nav.Save:
+		return save.New()
+	case nav.Card:
+		return card.New()
+	default:
+		return welcome.NewWelcomeModel()
+	}
+}
+
+func resolveStart(deps Deps) nav.ScreenID {
 	session, err := deps.SessionsStore.Get(context.Background())
 	if err != nil || session == nil {
-		return welcome.NewWelcomeModel()
+		return nav.Welcome
 	}
 	if !session.Access.Expired(0) {
-		return mainmenu.New()
+		return nav.MainMenu
 	}
 	if session.Refresh.Raw == "" {
-		return welcome.NewWelcomeModel()
+		return nav.Welcome
 	}
 	in := &userv1.RefreshRequest{}
 	in.SetRefreshToken(session.Refresh.Raw)
 	resp, err := deps.Client.Refresh(context.Background(), in)
 	if err != nil {
-		return welcome.NewWelcomeModel()
+		return nav.Welcome
 	}
 	if _, err := deps.SessionsStore.Save(context.Background(), auth.Credentials{
 		Login:        session.Login,
@@ -56,9 +75,9 @@ func resolveStart(deps Deps) tea.Model {
 		EncSalt:      session.EncSalt,
 		WrappedDek:   session.WrappedDek,
 	}); err != nil {
-		return welcome.NewWelcomeModel()
+		return nav.Welcome
 	}
-	return mainmenu.New()
+	return nav.MainMenu
 }
 
 func (m rootModel) Init() tea.Cmd {
@@ -67,43 +86,26 @@ func (m rootModel) Init() tea.Cmd {
 
 func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case welcome.SelectMsg:
-		switch msg.Choice {
-		case welcome.SignIn:
-			m.current = login.InitialModel(m.Client, m.SessionsStore)
-		case welcome.SignUp:
-			m.current = register.InitialModel(m.Client, m.SessionsStore)
+	case nav.PushMsg:
+		m.stack = append(m.stack, m.current)
+		m.current = build(m.Deps, msg.ID)
+		return m, m.current.Init()
+	case nav.ResetMsg:
+		m.stack = nil
+		m.current = build(m.Deps, msg.ID)
+		return m, m.current.Init()
+	case nav.BackMsg:
+		if n := len(m.stack); n > 0 {
+			m.current = m.stack[n-1]
+			m.stack = m.stack[:n-1]
 		}
-		return m, m.current.Init()
-	case login.SuccessMsg, register.SuccessMsg:
-		m.current = mainmenu.New()
-		return m, m.current.Init()
-	case login.BackMsg, register.BackMsg:
-		m.current = welcome.NewWelcomeModel()
-		return m, m.current.Init()
-	case mainmenu.SelectMsg:
-		switch msg.Choice {
-		case mainmenu.Logout:
-			if err := m.SessionsStore.Clear(context.Background()); err != nil {
-				return m, nil
-			}
-			m.current = welcome.NewWelcomeModel()
-			return m, m.current.Init()
-		case mainmenu.ViewData:
-		case mainmenu.SaveData:
-			m.current = save.New()
-		case mainmenu.DeleteData:
+		return m, nil
+	case nav.LogoutMsg:
+		if err := m.SessionsStore.Clear(context.Background()); err != nil {
+			return m, nil
 		}
-	case save.SelectMsg:
-		if msg.Choice == save.DebitCard {
-			m.current = card.New()
-			return m, m.current.Init()
-		}
-	case card.BackMsg:
-		m.current = mainmenu.New()
-		return m, m.current.Init()
-	case card.SubmitMsg:
-		m.current = mainmenu.New()
+		m.stack = nil
+		m.current = build(m.Deps, nav.Welcome)
 		return m, m.current.Init()
 	}
 

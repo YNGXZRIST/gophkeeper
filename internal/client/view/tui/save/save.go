@@ -2,6 +2,7 @@ package save
 
 import (
 	"gophkeeper/internal/client/view/tui/menu"
+	"gophkeeper/internal/client/view/tui/nav"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -13,10 +14,6 @@ const (
 	DebitCard
 	File
 )
-
-type SelectMsg struct {
-	Choice Choice
-}
 
 type model struct {
 	menu menu.Model
@@ -35,8 +32,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.menu, act = m.menu.Update(msg)
 	switch act {
 	case menu.Selected:
-		choice := Choice(m.menu.Cursor())
-		return m, func() tea.Msg { return SelectMsg{Choice: choice} }
+		if Choice(m.menu.Cursor()) == DebitCard {
+			return m, nav.Push(nav.Card)
+		}
+	case menu.Back:
+		return m, nav.Back()
 	case menu.Quit:
 		return m, tea.Quit
 	}
