@@ -3,10 +3,12 @@ package root
 import (
 	"context"
 	"gophkeeper/internal/client/auth"
+	"gophkeeper/internal/client/view/tui/card"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
 	"gophkeeper/internal/client/view/tui/mainmenu"
 	"gophkeeper/internal/client/view/tui/register"
+	"gophkeeper/internal/client/view/tui/save"
 	"gophkeeper/internal/client/view/tui/welcome"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
@@ -87,7 +89,22 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.current = welcome.NewWelcomeModel()
 			return m, m.current.Init()
+		case mainmenu.ViewData:
+		case mainmenu.SaveData:
+			m.current = save.New()
+		case mainmenu.DeleteData:
 		}
+	case save.SelectMsg:
+		if msg.Choice == save.DebitCard {
+			m.current = card.New()
+			return m, m.current.Init()
+		}
+	case card.BackMsg:
+		m.current = mainmenu.New()
+		return m, m.current.Init()
+	case card.SubmitMsg:
+		m.current = mainmenu.New()
+		return m, m.current.Init()
 	}
 
 	var cmd tea.Cmd

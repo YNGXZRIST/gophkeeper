@@ -1,8 +1,7 @@
 package mainmenu
 
 import (
-	"gophkeeper/internal/client/view/tui/theme"
-	"strings"
+	"gophkeeper/internal/client/view/tui/menu"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -21,15 +20,11 @@ type SelectMsg struct {
 }
 
 type model struct {
-	buttons []string
-	cursor  int
+	menu menu.Model
 }
 
 func New() model {
-	return model{
-		buttons: []string{"View data", "Save data", "Delete data", "Logout"},
-		cursor:  0,
-	}
+	return model{menu: menu.New("Gophkeeper", []string{"View data", "Save data", "Delete data", "Logout"})}
 }
 
 func (m model) Init() tea.Cmd {
@@ -37,53 +32,18 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		switch msg.String() {
-		case "q", "ctrl+c":
-			return m, tea.Quit
-		case "up":
-			m.cursor--
-			if m.cursor < 0 {
-				m.cursor = len(m.buttons) - 1
-			}
-		case "down":
-			m.cursor++
-			if m.cursor >= len(m.buttons) {
-				m.cursor = 0
-			}
-		case "enter":
-			return m, m.selectCmd()
-		}
+	var act menu.Action
+	m.menu, act = m.menu.Update(msg)
+	switch act {
+	case menu.Selected:
+		choice := Choice(m.menu.Cursor())
+		return m, func() tea.Msg { return SelectMsg{Choice: choice} }
+	case menu.Quit:
+		return m, tea.Quit
 	}
 	return m, nil
 }
 
-func (m model) selectCmd() tea.Cmd {
-	choice := Choice(m.cursor)
-	return func() tea.Msg {
-		return SelectMsg{Choice: choice}
-	}
-}
-
 func (m model) View() tea.View {
-	var b strings.Builder
-	b.WriteString(theme.Title.Render("Select action"))
-	b.WriteString("\n\n")
-
-	for i, label := range m.buttons {
-		text := "[ " + label + " ]"
-		if i == m.cursor {
-			text = theme.Focused.Bold(true).Render("> " + text)
-		} else {
-			text = theme.Blurred.Render("  " + text)
-		}
-		b.WriteString(text)
-		b.WriteRune('\n')
-	}
-
-	b.WriteString("\n")
-	b.WriteString(theme.Blurred.Render("↑/↓ — select · enter — accept · q — quit"))
-
-	return tea.NewView(b.String())
+	return tea.NewView(m.menu.View())
 }

@@ -1,4 +1,4 @@
-package welcome
+package save
 
 import (
 	"gophkeeper/internal/client/view/tui/menu"
@@ -9,8 +9,9 @@ import (
 type Choice int
 
 const (
-	SignIn Choice = iota
-	SignUp
+	LoginPassword Choice = iota
+	DebitCard
+	File
 )
 
 type SelectMsg struct {
@@ -21,8 +22,8 @@ type model struct {
 	menu menu.Model
 }
 
-func NewWelcomeModel() model {
-	return model{menu: menu.New("Welcome to Gophkeeper!", []string{"Sign In", "Sign Up"})}
+func New() model {
+	return model{menu: menu.New("Select action", []string{"Login/password", "Debit card", "File"})}
 }
 
 func (m model) Init() tea.Cmd {
