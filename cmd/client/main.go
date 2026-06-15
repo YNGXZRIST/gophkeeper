@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/db"
+	"gophkeeper/internal/client/interceptor"
 	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
@@ -68,8 +68,8 @@ func main() {
 		grpcServerAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainUnaryInterceptor(
-			auth.UnaryRefreshInterceptor(sessionRepo, lg),
-			auth.UnaryAuthInterceptor(sessionRepo),
+			interceptor.UnaryRefreshInterceptor(sessionRepo, lg),
+			interceptor.UnaryAuthInterceptor(sessionRepo),
 		),
 	)
 	if err != nil {

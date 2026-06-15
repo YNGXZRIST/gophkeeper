@@ -1,7 +1,8 @@
-package auth
+package interceptor
 
 import (
 	"context"
+	"gophkeeper/internal/client/auth"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	"time"
 
@@ -17,8 +18,8 @@ const refreshMinutes = 1
 // SessionStore loads and persists the current session; satisfied by the
 // session repository.
 type SessionStore interface {
-	Get(ctx context.Context) (*Session, error)
-	Save(ctx context.Context, cred Credentials) (*Session, error)
+	Get(ctx context.Context) (*auth.Session, error)
+	Save(ctx context.Context, cred auth.Credentials) (*auth.Session, error)
 }
 
 // UnaryAuthInterceptor attaches the access token from the session as an
@@ -47,7 +48,7 @@ func UnaryRefreshInterceptor(sessions SessionStore, log *zap.Logger) grpc.UnaryC
 						log.Error("refresh access token", zap.Error(err))
 						return invoker(ctx, method, req, reply, cc, opts...)
 					}
-					if _, err := sessions.Save(ctx, Credentials{
+					if _, err := sessions.Save(ctx, auth.Credentials{
 						Login:        session.Login,
 						AccessToken:  resp.GetAccessToken(),
 						RefreshToken: resp.GetRefreshToken(),

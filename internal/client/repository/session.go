@@ -13,6 +13,7 @@ type SessionRepo struct {
 }
 
 const GetSessionSQL = `SELECT login,access_token,refresh_token,enc_salt,wrapped_dek FROM session`
+const ClearSessionSQL = `DELETE FROM session`
 const SetSessionSQL = `INSERT INTO session (id, login, access_token, refresh_token, enc_salt, wrapped_dek, updated_at)
 VALUES (1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 ON CONFLICT(id) DO UPDATE SET
@@ -67,6 +68,13 @@ func (sr *SessionRepo) Save(ctx context.Context, cred auth.Credentials) (*auth.S
 		return nil, fmt.Errorf("save session: %w", err)
 	}
 	return sr.initSession(cred.Login, cred.AccessToken, cred.RefreshToken, cred.EncSalt, cred.WrappedDek)
+}
+
+func (sr *SessionRepo) Clear(ctx context.Context) error {
+	if _, err := sr.db.ExecContext(ctx, ClearSessionSQL); err != nil {
+		return fmt.Errorf("clear session: %w", err)
+	}
+	return nil
 }
 
 func (sr *SessionRepo) initSession(l, a, r string, encSalt, wrappedDek []byte) (*auth.Session, error) {

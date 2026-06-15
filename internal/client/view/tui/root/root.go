@@ -3,6 +3,7 @@ package root
 import (
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
+	mainmenu "gophkeeper/internal/client/view/tui/mainmenu"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/welcome"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
@@ -40,6 +41,12 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case welcome.SignUp:
 			m.current = register.InitialModel(m.Client, m.SessionsStore)
 		}
+		return m, m.current.Init()
+	case login.SuccessMsg, register.SuccessMsg:
+		m.current = mainmenu.New()
+		return m, m.current.Init()
+	case login.BackMsg, register.BackMsg:
+		m.current = welcome.NewWelcomeModel()
 		return m, m.current.Init()
 	}
 
