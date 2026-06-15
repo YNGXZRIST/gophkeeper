@@ -15,7 +15,7 @@ type Token struct {
 func NewToken(raw string) (Token, error) {
 	t := Token{Raw: raw}
 	claims := jwt.RegisteredClaims{}
-	_, _, err := jwt.NewParser().ParseUnverified(raw, claims)
+	_, _, err := jwt.NewParser().ParseUnverified(raw, &claims)
 	if err != nil {
 		return t, fmt.Errorf("failed to parse token: %w", err)
 	}

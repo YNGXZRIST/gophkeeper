@@ -2,6 +2,7 @@ package login
 
 import (
 	"context"
+	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/view/tui/credform"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/theme"
@@ -50,7 +51,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.errMsg = ""
-		_, err = m.store.Save(context.Background(), res.GetUser().GetLogin(), res.GetAccessToken(), res.GetRefreshToken())
+		_, err = m.store.Save(context.Background(), auth.Credentials{
+			Login:        res.GetUser().GetLogin(),
+			AccessToken:  res.GetAccessToken(),
+			RefreshToken: res.GetRefreshToken(),
+			EncSalt:      res.GetEncSalt(),
+			WrappedDek:   res.GetWrappedDek(),
+		})
 		if err != nil {
 			m.errMsg = "Client error. Try again later."
 			return m, nil

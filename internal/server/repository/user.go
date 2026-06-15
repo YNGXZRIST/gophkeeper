@@ -16,9 +16,9 @@ type UserRepo struct {
 	repoBase
 }
 
-const UserRegisterQuery = `INSERT INTO users(login, password) VALUES ($1, $2) RETURNING id, login, password, created_at, updated_at`
+const UserRegisterQuery = `INSERT INTO users(login, password,enc_salt,wrapped_dek) VALUES ($1, $2,$3,$4) RETURNING id, login, password,enc_salt,wrapped_dek, created_at, updated_at`
 
-const UserGetByLoginQuery = `SELECT id, login, password, created_at, updated_at FROM users WHERE login = $1`
+const UserGetByLoginQuery = `SELECT id, login, password,enc_salt,wrapped_dek,created_at, updated_at FROM users WHERE login = $1`
 
 func NewUserRepo(db *conn.DB) *UserRepo {
 	return &UserRepo{repoBase: repoBase{db: db}}
@@ -30,8 +30,8 @@ func (ur *UserRepo) Create(ctx context.Context, u model.User) (*model.User, erro
 	}
 	err = ur.repoBase.q(ctx).QueryRowContext(ctx,
 		UserRegisterQuery,
-		u.Login, hash,
-	).Scan(&u.ID, &u.Login, &u.Pass, &u.CreatedAt, &u.UpdatedAt)
+		u.Login, hash, u.EncSalt, u.WrappedDesk,
+	).Scan(&u.ID, &u.Login, &u.Pass, &u.EncSalt, &u.WrappedDesk, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok && pgErr.Code == pgerrcode.UniqueViolation {
 			return nil, model.ErrLoginTaken
@@ -44,7 +44,7 @@ func (ur *UserRepo) Create(ctx context.Context, u model.User) (*model.User, erro
 func (ur *UserRepo) GetByLogin(ctx context.Context, login string) (*model.User, error) {
 	var u model.User
 	err := ur.repoBase.q(ctx).QueryRowContext(ctx, UserGetByLoginQuery, login).
-		Scan(&u.ID, &u.Login, &u.Pass, &u.CreatedAt, &u.UpdatedAt)
+		Scan(&u.ID, &u.Login, &u.Pass, &u.EncSalt, &u.WrappedDesk, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		return nil, labelerrors.NewLabelError(labelRepository+".User.GetByLogin", err)
 	}

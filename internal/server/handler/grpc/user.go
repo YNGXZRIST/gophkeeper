@@ -25,7 +25,7 @@ func NewUserServer(prop UserServerProp) *UserServer {
 	return &UserServer{UserServerProp: prop}
 }
 func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	user, tokens, err := s.Service.Register(ctx, model.User{Login: in.GetLogin(), Pass: in.GetPassword()})
+	user, tokens, err := s.Service.Register(ctx, model.User{Login: in.GetLogin(), Pass: in.GetPassword(), WrappedDesk: in.GetWrappedDek(), EncSalt: in.GetEncSalt()})
 	if err != nil {
 		if errors.Is(err, model.ErrLoginTaken) {
 			return nil, status.Error(codes.AlreadyExists, "user already registered")
@@ -58,6 +58,8 @@ func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginR
 	resp.SetUser(pbUser)
 	resp.SetAccessToken(tokens.Access)
 	resp.SetRefreshToken(tokens.Refresh)
+	resp.SetEncSalt(user.EncSalt)
+	resp.SetWrappedDek(user.WrappedDesk)
 	return resp, nil
 }
 

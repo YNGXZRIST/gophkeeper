@@ -18,7 +18,7 @@ const refreshMinutes = 1
 // session repository.
 type SessionStore interface {
 	Get(ctx context.Context) (*Session, error)
-	Save(ctx context.Context, login, accessToken, refreshToken string) (*Session, error)
+	Save(ctx context.Context, cred Credentials) (*Session, error)
 }
 
 // UnaryAuthInterceptor attaches the access token from the session as an
@@ -47,7 +47,13 @@ func UnaryRefreshInterceptor(sessions SessionStore, log *zap.Logger) grpc.UnaryC
 						log.Error("refresh access token", zap.Error(err))
 						return invoker(ctx, method, req, reply, cc, opts...)
 					}
-					if _, err := sessions.Save(ctx, session.Login, resp.GetAccessToken(), resp.GetRefreshToken()); err != nil {
+					if _, err := sessions.Save(ctx, Credentials{
+						Login:        session.Login,
+						AccessToken:  resp.GetAccessToken(),
+						RefreshToken: resp.GetRefreshToken(),
+						EncSalt:      session.EncSalt,
+						WrappedDek:   session.WrappedDek,
+					}); err != nil {
 						log.Error("save refreshed session", zap.Error(err))
 					}
 				}

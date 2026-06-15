@@ -11,7 +11,6 @@ import (
 )
 
 type rootModel struct {
-	client  userv1.UserServiceClient
 	current tea.Model
 	Deps
 }
@@ -37,9 +36,9 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case welcome.SelectMsg:
 		switch msg.Choice {
 		case welcome.SignIn:
-			m.current = login.InitialModel(m.client, m.SessionsStore)
+			m.current = login.InitialModel(m.Client, m.SessionsStore)
 		case welcome.SignUp:
-			m.current = register.InitialModel(m.client, m.SessionsStore)
+			m.current = register.InitialModel(m.Client, m.SessionsStore)
 		}
 		return m, m.current.Init()
 	}
