@@ -1,0 +1,3 @@
+ALTER TABLE users
+    ADD COLUMN enc_salt    BYTEA NOT NULL,
+    ADD COLUMN wrapped_dek BYTEA NOT NULL;

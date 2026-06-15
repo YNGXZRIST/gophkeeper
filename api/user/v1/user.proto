@@ -14,6 +14,8 @@ message User {
 message RegisterRequest{
   string login = 1;
   string password = 2;
+  bytes enc_salt = 3;
+  bytes wrapped_dek = 4;
 }
 message RegisterResponse{
   User user = 1;
@@ -28,6 +30,8 @@ message LoginResponse{
   User user = 1;
   string access_token = 2;
   string refresh_token=3;
+  bytes enc_salt = 4;
+  bytes wrapped_dek = 5;
 }
 
 service UserService {

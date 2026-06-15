@@ -186,6 +186,8 @@ type RegisterRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Login       *string                `protobuf:"bytes,1,opt,name=login"`
 	xxx_hidden_Password    *string                `protobuf:"bytes,2,opt,name=password"`
+	xxx_hidden_EncSalt     []byte                 `protobuf:"bytes,3,opt,name=enc_salt,json=encSalt"`
+	xxx_hidden_WrappedDek  []byte                 `protobuf:"bytes,4,opt,name=wrapped_dek,json=wrappedDek"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -237,14 +239,44 @@ func (x *RegisterRequest) GetPassword() string {
 	return ""
 }
 
+func (x *RegisterRequest) GetEncSalt() []byte {
+	if x != nil {
+		return x.xxx_hidden_EncSalt
+	}
+	return nil
+}
+
+func (x *RegisterRequest) GetWrappedDek() []byte {
+	if x != nil {
+		return x.xxx_hidden_WrappedDek
+	}
+	return nil
+}
+
 func (x *RegisterRequest) SetLogin(v string) {
 	x.xxx_hidden_Login = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 4)
 }
 
 func (x *RegisterRequest) SetPassword(v string) {
 	x.xxx_hidden_Password = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 4)
+}
+
+func (x *RegisterRequest) SetEncSalt(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_EncSalt = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 4)
+}
+
+func (x *RegisterRequest) SetWrappedDek(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_WrappedDek = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 4)
 }
 
 func (x *RegisterRequest) HasLogin() bool {
@@ -261,6 +293,20 @@ func (x *RegisterRequest) HasPassword() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
+func (x *RegisterRequest) HasEncSalt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *RegisterRequest) HasWrappedDek() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
 func (x *RegisterRequest) ClearLogin() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Login = nil
@@ -271,11 +317,23 @@ func (x *RegisterRequest) ClearPassword() {
 	x.xxx_hidden_Password = nil
 }
 
+func (x *RegisterRequest) ClearEncSalt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_EncSalt = nil
+}
+
+func (x *RegisterRequest) ClearWrappedDek() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_WrappedDek = nil
+}
+
 type RegisterRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Login    *string
-	Password *string
+	Login      *string
+	Password   *string
+	EncSalt    []byte
+	WrappedDek []byte
 }
 
 func (b0 RegisterRequest_builder) Build() *RegisterRequest {
@@ -283,12 +341,20 @@ func (b0 RegisterRequest_builder) Build() *RegisterRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Login != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 4)
 		x.xxx_hidden_Login = b.Login
 	}
 	if b.Password != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 4)
 		x.xxx_hidden_Password = b.Password
+	}
+	if b.EncSalt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 4)
+		x.xxx_hidden_EncSalt = b.EncSalt
+	}
+	if b.WrappedDek != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 4)
+		x.xxx_hidden_WrappedDek = b.WrappedDek
 	}
 	return m0
 }
@@ -545,6 +611,8 @@ type LoginResponse struct {
 	xxx_hidden_User         *User                  `protobuf:"bytes,1,opt,name=user"`
 	xxx_hidden_AccessToken  *string                `protobuf:"bytes,2,opt,name=access_token,json=accessToken"`
 	xxx_hidden_RefreshToken *string                `protobuf:"bytes,3,opt,name=refresh_token,json=refreshToken"`
+	xxx_hidden_EncSalt      []byte                 `protobuf:"bytes,4,opt,name=enc_salt,json=encSalt"`
+	xxx_hidden_WrappedDek   []byte                 `protobuf:"bytes,5,opt,name=wrapped_dek,json=wrappedDek"`
 	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
 	XXX_presence            [1]uint32
 	unknownFields           protoimpl.UnknownFields
@@ -603,18 +671,48 @@ func (x *LoginResponse) GetRefreshToken() string {
 	return ""
 }
 
+func (x *LoginResponse) GetEncSalt() []byte {
+	if x != nil {
+		return x.xxx_hidden_EncSalt
+	}
+	return nil
+}
+
+func (x *LoginResponse) GetWrappedDek() []byte {
+	if x != nil {
+		return x.xxx_hidden_WrappedDek
+	}
+	return nil
+}
+
 func (x *LoginResponse) SetUser(v *User) {
 	x.xxx_hidden_User = v
 }
 
 func (x *LoginResponse) SetAccessToken(v string) {
 	x.xxx_hidden_AccessToken = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
 }
 
 func (x *LoginResponse) SetRefreshToken(v string) {
 	x.xxx_hidden_RefreshToken = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *LoginResponse) SetEncSalt(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_EncSalt = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *LoginResponse) SetWrappedDek(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_WrappedDek = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
 }
 
 func (x *LoginResponse) HasUser() bool {
@@ -638,6 +736,20 @@ func (x *LoginResponse) HasRefreshToken() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
 }
 
+func (x *LoginResponse) HasEncSalt() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *LoginResponse) HasWrappedDek() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
 func (x *LoginResponse) ClearUser() {
 	x.xxx_hidden_User = nil
 }
@@ -652,12 +764,24 @@ func (x *LoginResponse) ClearRefreshToken() {
 	x.xxx_hidden_RefreshToken = nil
 }
 
+func (x *LoginResponse) ClearEncSalt() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_EncSalt = nil
+}
+
+func (x *LoginResponse) ClearWrappedDek() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_WrappedDek = nil
+}
+
 type LoginResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	User         *User
 	AccessToken  *string
 	RefreshToken *string
+	EncSalt      []byte
+	WrappedDek   []byte
 }
 
 func (b0 LoginResponse_builder) Build() *LoginResponse {
@@ -666,12 +790,20 @@ func (b0 LoginResponse_builder) Build() *LoginResponse {
 	_, _ = b, x
 	x.xxx_hidden_User = b.User
 	if b.AccessToken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
 		x.xxx_hidden_AccessToken = b.AccessToken
 	}
 	if b.RefreshToken != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
 		x.xxx_hidden_RefreshToken = b.RefreshToken
+	}
+	if b.EncSalt != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_EncSalt = b.EncSalt
+	}
+	if b.WrappedDek != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
+		x.xxx_hidden_WrappedDek = b.WrappedDek
 	}
 	return m0
 }
@@ -687,21 +819,27 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"C\n" +
+	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x7f\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"}\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x19\n" +
+	"\benc_salt\x18\x03 \x01(\fR\aencSalt\x12\x1f\n" +
+	"\vwrapped_dek\x18\x04 \x01(\fR\n" +
+	"wrappedDek\"}\n" +
 	"\x10RegisterResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\x12!\n" +
 	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05login\x18\x01 \x01(\tR\x05login\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"z\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xb6\x01\n" +
 	"\rLoginResponse\x12!\n" +
 	"\x04user\x18\x01 \x01(\v2\r.user.v1.UserR\x04user\x12!\n" +
 	"\faccess_token\x18\x02 \x01(\tR\vaccessToken\x12#\n" +
-	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken2\x86\x01\n" +
+	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\x12\x19\n" +
+	"\benc_salt\x18\x04 \x01(\fR\aencSalt\x12\x1f\n" +
+	"\vwrapped_dek\x18\x05 \x01(\fR\n" +
+	"wrappedDek2\x86\x01\n" +
 	"\vUserService\x12?\n" +
 	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\x126\n" +
 	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponseB1Z/gophkeeper/internal/shared/proto/user/v1;userv1b\beditionsp\xe8\a"
