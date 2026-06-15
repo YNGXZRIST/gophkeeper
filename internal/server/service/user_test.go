@@ -26,6 +26,7 @@ func (s repoStub) GetByLogin(ctx context.Context, login string) (*model.User, er
 type authStub struct {
 	register     func(context.Context, model.User) (*model.User, string, error)
 	issueRefresh func(context.Context, string) (string, error)
+	rotate       func(context.Context, string) (string, string, error)
 }
 
 func (s authStub) Register(ctx context.Context, u model.User) (*model.User, string, error) {
@@ -34,6 +35,10 @@ func (s authStub) Register(ctx context.Context, u model.User) (*model.User, stri
 
 func (s authStub) IssueRefresh(ctx context.Context, userID string) (string, error) {
 	return s.issueRefresh(ctx, userID)
+}
+
+func (s authStub) Rotate(ctx context.Context, refreshToken string) (string, string, error) {
+	return s.rotate(ctx, refreshToken)
 }
 
 type issuerStub struct {

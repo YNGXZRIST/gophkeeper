@@ -60,3 +60,18 @@ func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginR
 	resp.SetRefreshToken(tokens.Refresh)
 	return resp, nil
 }
+
+func (s *UserServer) Refresh(ctx context.Context, in *pb.RefreshRequest) (*pb.RefreshResponse, error) {
+	tokens, err := s.Service.Refresh(ctx, in.GetRefreshToken())
+	if err != nil {
+		if errors.Is(err, model.ErrInvalidRefreshToken) {
+			return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
+		}
+		s.Logger.Error("refresh failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	resp := &pb.RefreshResponse{}
+	resp.SetAccessToken(tokens.Access)
+	resp.SetRefreshToken(tokens.Refresh)
+	return resp, nil
+}

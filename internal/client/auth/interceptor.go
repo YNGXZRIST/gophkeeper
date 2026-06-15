@@ -2,8 +2,10 @@ package auth
 
 import (
 	"context"
+	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -33,14 +35,22 @@ func UnaryAuthInterceptor(sessions SessionStore) grpc.UnaryClientInterceptor {
 
 // UnaryRefreshInterceptor refreshes the access token via the refresh token when
 // it is close to expiry, before the outgoing unary call is sent.
-func UnaryRefreshInterceptor(sessions SessionStore) grpc.UnaryClientInterceptor {
+func UnaryRefreshInterceptor(sessions SessionStore, log *zap.Logger) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-		if session, err := sessions.Get(ctx); err == nil && session != nil {
-			expiredAt := session.Access.ExpiresAt
-			now := time.Now()
-			diff := now.Sub(expiredAt)
-			if diff < 0 || diff.Minutes() < refreshMinutes {
-				//TODO add refresh session
+		if method != userv1.UserService_Refresh_FullMethodName {
+			if session, err := sessions.Get(ctx); err == nil && session != nil && session.Refresh.Raw != "" {
+				if time.Until(session.Access.ExpiresAt) <= refreshMinutes*time.Minute {
+					in := &userv1.RefreshRequest{}
+					in.SetRefreshToken(session.Refresh.Raw)
+					resp, err := userv1.NewUserServiceClient(cc).Refresh(ctx, in)
+					if err != nil {
+						log.Error("refresh access token", zap.Error(err))
+						return invoker(ctx, method, req, reply, cc, opts...)
+					}
+					if _, err := sessions.Save(ctx, session.Login, resp.GetAccessToken(), resp.GetRefreshToken()); err != nil {
+						log.Error("save refreshed session", zap.Error(err))
+					}
+				}
 			}
 		}
 		return invoker(ctx, method, req, reply, cc, opts...)

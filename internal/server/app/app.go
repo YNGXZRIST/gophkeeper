@@ -7,11 +7,11 @@ import (
 	"gophkeeper/internal/server/config"
 	"gophkeeper/internal/server/db/conn"
 	"gophkeeper/internal/server/db/trmanager"
-	"gophkeeper/internal/server/logger"
 	"gophkeeper/internal/server/repository"
 	"gophkeeper/internal/server/service"
 	"gophkeeper/internal/server/transport"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	"gophkeeper/internal/shared/logger"
 	mg "gophkeeper/migrations/server"
 )
 

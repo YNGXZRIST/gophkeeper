@@ -808,6 +808,195 @@ func (b0 LoginResponse_builder) Build() *LoginResponse {
 	return m0
 }
 
+type RefreshRequest struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_RefreshToken *string                `protobuf:"bytes,1,opt,name=refresh_token,json=refreshToken"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *RefreshRequest) Reset() {
+	*x = RefreshRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshRequest) ProtoMessage() {}
+
+func (x *RefreshRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RefreshRequest) GetRefreshToken() string {
+	if x != nil {
+		if x.xxx_hidden_RefreshToken != nil {
+			return *x.xxx_hidden_RefreshToken
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RefreshRequest) SetRefreshToken(v string) {
+	x.xxx_hidden_RefreshToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *RefreshRequest) HasRefreshToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RefreshRequest) ClearRefreshToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_RefreshToken = nil
+}
+
+type RefreshRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	RefreshToken *string
+}
+
+func (b0 RefreshRequest_builder) Build() *RefreshRequest {
+	m0 := &RefreshRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.RefreshToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_RefreshToken = b.RefreshToken
+	}
+	return m0
+}
+
+type RefreshResponse struct {
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_AccessToken  *string                `protobuf:"bytes,1,opt,name=access_token,json=accessToken"`
+	xxx_hidden_RefreshToken *string                `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken"`
+	XXX_raceDetectHookData  protoimpl.RaceDetectHookData
+	XXX_presence            [1]uint32
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *RefreshResponse) Reset() {
+	*x = RefreshResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshResponse) ProtoMessage() {}
+
+func (x *RefreshResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *RefreshResponse) GetAccessToken() string {
+	if x != nil {
+		if x.xxx_hidden_AccessToken != nil {
+			return *x.xxx_hidden_AccessToken
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RefreshResponse) GetRefreshToken() string {
+	if x != nil {
+		if x.xxx_hidden_RefreshToken != nil {
+			return *x.xxx_hidden_RefreshToken
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *RefreshResponse) SetAccessToken(v string) {
+	x.xxx_hidden_AccessToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *RefreshResponse) SetRefreshToken(v string) {
+	x.xxx_hidden_RefreshToken = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+}
+
+func (x *RefreshResponse) HasAccessToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *RefreshResponse) HasRefreshToken() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *RefreshResponse) ClearAccessToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_AccessToken = nil
+}
+
+func (x *RefreshResponse) ClearRefreshToken() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_RefreshToken = nil
+}
+
+type RefreshResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	AccessToken  *string
+	RefreshToken *string
+}
+
+func (b0 RefreshResponse_builder) Build() *RefreshResponse {
+	m0 := &RefreshResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.AccessToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
+		x.xxx_hidden_AccessToken = b.AccessToken
+	}
+	if b.RefreshToken != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_RefreshToken = b.RefreshToken
+	}
+	return m0
+}
+
 var File_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_proto_rawDesc = "" +
@@ -839,31 +1028,41 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\rrefresh_token\x18\x03 \x01(\tR\frefreshToken\x12\x19\n" +
 	"\benc_salt\x18\x04 \x01(\fR\aencSalt\x12\x1f\n" +
 	"\vwrapped_dek\x18\x05 \x01(\fR\n" +
-	"wrappedDek2\x86\x01\n" +
+	"wrappedDek\"5\n" +
+	"\x0eRefreshRequest\x12#\n" +
+	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"Y\n" +
+	"\x0fRefreshResponse\x12!\n" +
+	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken2\xc4\x01\n" +
 	"\vUserService\x12?\n" +
 	"\bRegister\x12\x18.user.v1.RegisterRequest\x1a\x19.user.v1.RegisterResponse\x126\n" +
-	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponseB1Z/gophkeeper/internal/shared/proto/user/v1;userv1b\beditionsp\xe8\a"
+	"\x05Login\x12\x15.user.v1.LoginRequest\x1a\x16.user.v1.LoginResponse\x12<\n" +
+	"\aRefresh\x12\x17.user.v1.RefreshRequest\x1a\x18.user.v1.RefreshResponseB1Z/gophkeeper/internal/shared/proto/user/v1;userv1b\beditionsp\xe8\a"
 
-var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_user_v1_user_proto_goTypes = []any{
 	(*User)(nil),                  // 0: user.v1.User
 	(*RegisterRequest)(nil),       // 1: user.v1.RegisterRequest
 	(*RegisterResponse)(nil),      // 2: user.v1.RegisterResponse
 	(*LoginRequest)(nil),          // 3: user.v1.LoginRequest
 	(*LoginResponse)(nil),         // 4: user.v1.LoginResponse
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*RefreshRequest)(nil),        // 5: user.v1.RefreshRequest
+	(*RefreshResponse)(nil),       // 6: user.v1.RefreshResponse
+	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_user_v1_user_proto_depIdxs = []int32{
-	5, // 0: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	5, // 1: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	7, // 0: user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	7, // 1: user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
 	0, // 2: user.v1.RegisterResponse.user:type_name -> user.v1.User
 	0, // 3: user.v1.LoginResponse.user:type_name -> user.v1.User
 	1, // 4: user.v1.UserService.Register:input_type -> user.v1.RegisterRequest
 	3, // 5: user.v1.UserService.Login:input_type -> user.v1.LoginRequest
-	2, // 6: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
-	4, // 7: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
+	5, // 6: user.v1.UserService.Refresh:input_type -> user.v1.RefreshRequest
+	2, // 7: user.v1.UserService.Register:output_type -> user.v1.RegisterResponse
+	4, // 8: user.v1.UserService.Login:output_type -> user.v1.LoginResponse
+	6, // 9: user.v1.UserService.Refresh:output_type -> user.v1.RefreshResponse
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
 	4, // [4:4] is the sub-list for extension extendee
 	0, // [0:4] is the sub-list for field type_name
@@ -880,7 +1079,7 @@ func file_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_v1_user_proto_rawDesc), len(file_user_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

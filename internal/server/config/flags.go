@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"gophkeeper/internal/server/logger"
 	"gophkeeper/internal/server/transport"
+	"gophkeeper/internal/shared/logger"
 	"os"
 	"strings"
 

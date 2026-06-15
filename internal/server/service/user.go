@@ -20,6 +20,7 @@ type UserRepository interface {
 type AuthWriter interface {
 	Register(ctx context.Context, u model.User) (*model.User, string, error)
 	IssueRefresh(ctx context.Context, userID string) (string, error)
+	Rotate(ctx context.Context, refreshToken string) (string, string, error)
 }
 
 // TokenIssuer signs short-lived access tokens for a user.
@@ -81,4 +82,18 @@ func (s *UserService) Login(ctx context.Context, login, password string) (*model
 		return nil, Tokens{}, fmt.Errorf("issue access token: %w", err)
 	}
 	return user, Tokens{Access: access, Refresh: refresh}, nil
+}
+
+// Refresh rotates a refresh token and issues a matching new access token. An
+// unknown or expired refresh token yields model.ErrInvalidRefreshToken.
+func (s *UserService) Refresh(ctx context.Context, refreshToken string) (Tokens, error) {
+	userID, refresh, err := s.Auth.Rotate(ctx, refreshToken)
+	if err != nil {
+		return Tokens{}, err
+	}
+	access, err := s.Issuer.Issue(userID)
+	if err != nil {
+		return Tokens{}, fmt.Errorf("issue access token: %w", err)
+	}
+	return Tokens{Access: access, Refresh: refresh}, nil
 }

@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"gophkeeper/internal/server/auth/refresh"
 	"gophkeeper/internal/server/model"
@@ -43,4 +45,29 @@ func (i *RefreshIssuer) Issue(ctx context.Context, userID string) (string, error
 		return "", err
 	}
 	return plain, nil
+}
+
+// Rotate validates a plaintext refresh token, revokes it and issues a fresh one
+// for the same user, returning the user ID and the new plaintext token. An
+// unknown or expired token yields model.ErrInvalidRefreshToken.
+func (i *RefreshIssuer) Rotate(ctx context.Context, plain string) (string, string, error) {
+	hash := refresh.Hash(plain, i.secret)
+	rt, err := i.tokens.GetByHash(ctx, hash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", "", model.ErrInvalidRefreshToken
+		}
+		return "", "", err
+	}
+	if time.Now().After(rt.ExpiresAt) {
+		return "", "", model.ErrInvalidRefreshToken
+	}
+	if err := i.tokens.DeleteByHash(ctx, hash); err != nil {
+		return "", "", err
+	}
+	newPlain, err := i.Issue(ctx, rt.UserID)
+	if err != nil {
+		return "", "", err
+	}
+	return rt.UserID, newPlain, nil
 }

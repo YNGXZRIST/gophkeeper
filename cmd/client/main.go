@@ -9,6 +9,7 @@ import (
 	"gophkeeper/internal/client/db"
 	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/view/tui/root"
+	"gophkeeper/internal/shared/logger"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	mg "gophkeeper/migrations/client"
 	"log"
@@ -35,6 +36,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	lg, err := logger.Initialize(&logger.Config{
+		Mode:   logger.ModeProduction,
+		Dir:    logger.DefaultLogDir,
+		Prefix: "client",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = lg.Sync() }()
+
 	sessionRepo := repository.NewSessionRepo(conn)
 	session, err := sessionRepo.Get(context.Background())
 	if err != nil {
@@ -56,8 +67,10 @@ func main() {
 	grpcConn, err := grpc.NewClient(
 		grpcServerAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(auth.UnaryRefreshInterceptor(sessionRepo)),
-		grpc.WithUnaryInterceptor(auth.UnaryAuthInterceptor(sessionRepo)),
+		grpc.WithChainUnaryInterceptor(
+			auth.UnaryRefreshInterceptor(sessionRepo, lg),
+			auth.UnaryAuthInterceptor(sessionRepo),
+		),
 	)
 	if err != nil {
 		log.Fatal(err)

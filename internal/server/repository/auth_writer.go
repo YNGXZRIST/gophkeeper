@@ -48,3 +48,22 @@ func (w *AuthWriter) Register(ctx context.Context, u model.User) (*model.User, s
 func (w *AuthWriter) IssueRefresh(ctx context.Context, userID string) (string, error) {
 	return w.refresh.Issue(ctx, userID)
 }
+
+// Rotate revokes the given refresh token and issues a replacement atomically,
+// returning the owning user ID and the new plaintext token, so a crash cannot
+// leave the user with neither a valid old nor a valid new token.
+func (w *AuthWriter) Rotate(ctx context.Context, plain string) (string, string, error) {
+	var (
+		userID   string
+		newPlain string
+	)
+	err := w.mgr.WithinTx(ctx, nil, func(ctx context.Context) error {
+		var err error
+		userID, newPlain, err = w.refresh.Rotate(ctx, plain)
+		return err
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return userID, newPlain, nil
+}
