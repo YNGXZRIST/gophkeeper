@@ -28,10 +28,10 @@ func TestUserRepoCreate(t *testing.T) {
 		{
 			name: "success",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"id", "login", "password", "created_at", "updated_at"}).
-					AddRow("u1", "alice", "hash", time.Now(), time.Now())
+				rows := sqlmock.NewRows([]string{"id", "login", "password", "enc_salt", "wrapped_dek", "created_at", "updated_at"}).
+					AddRow("u1", "alice", "hash", []byte("salt"), []byte("dek"), time.Now(), time.Now())
 				m.ExpectQuery(regexp.QuoteMeta(UserRegisterQuery)).
-					WithArgs("alice", sqlmock.AnyArg()).
+					WithArgs("alice", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnRows(rows)
 			},
 		},
@@ -39,7 +39,7 @@ func TestUserRepoCreate(t *testing.T) {
 			name: "duplicate login",
 			mockFn: func(m sqlmock.Sqlmock) {
 				m.ExpectQuery(regexp.QuoteMeta(UserRegisterQuery)).
-					WithArgs("alice", sqlmock.AnyArg()).
+					WithArgs("alice", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(&pgconn.PgError{Code: pgerrcode.UniqueViolation})
 			},
 			sentinel: model.ErrLoginTaken,
@@ -49,7 +49,7 @@ func TestUserRepoCreate(t *testing.T) {
 			name: "other db error",
 			mockFn: func(m sqlmock.Sqlmock) {
 				m.ExpectQuery(regexp.QuoteMeta(UserRegisterQuery)).
-					WithArgs("alice", sqlmock.AnyArg()).
+					WithArgs("alice", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(errors.New("connection refused"))
 			},
 			wantErr: true,
@@ -91,8 +91,8 @@ func TestUserRepoGetByLogin(t *testing.T) {
 		{
 			name: "found",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows([]string{"id", "login", "password", "created_at", "updated_at"}).
-					AddRow("u1", "alice", "hash", time.Now(), time.Now())
+				rows := sqlmock.NewRows([]string{"id", "login", "password", "enc_salt", "wrapped_dek", "created_at", "updated_at"}).
+					AddRow("u1", "alice", "hash", []byte("salt"), []byte("dek"), time.Now(), time.Now())
 				m.ExpectQuery(regexp.QuoteMeta(UserGetByLoginQuery)).
 					WithArgs("alice").
 					WillReturnRows(rows)

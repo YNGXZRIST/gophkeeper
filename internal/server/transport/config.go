@@ -25,18 +25,20 @@ type Config struct {
 	Address   string
 }
 type ServerProp struct {
-	Config   *Config
-	Services *service.Services
-	Logger   *zap.Logger
+	Config      *Config
+	Services    *service.Services
+	Logger      *zap.Logger
+	TokenParser grpcServer.TokenParser
 }
 
 func NewServer(prop ServerProp) (Server, error) {
 	switch prop.Config.Transport {
 	case GRPC:
 		return grpcServer.New(grpcServer.Deps{
-			Address:  prop.Config.Address,
-			Services: prop.Services,
-			Logger:   prop.Logger,
+			Address:     prop.Config.Address,
+			Services:    prop.Services,
+			Logger:      prop.Logger,
+			TokenParser: prop.TokenParser,
 		})
 	default:
 		return nil, fmt.Errorf("transport %q not yet implemented", prop.Config.Transport)

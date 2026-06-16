@@ -35,10 +35,10 @@ func TestAuthWriterRegister(t *testing.T) {
 			name: "success commits",
 			mockFn: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
-				userRows := sqlmock.NewRows([]string{"id", "login", "password", "created_at", "updated_at"}).
-					AddRow("u1", "alice", "hash", time.Now(), time.Now())
+				userRows := sqlmock.NewRows([]string{"id", "login", "password", "enc_salt", "wrapped_dek", "created_at", "updated_at"}).
+					AddRow("u1", "alice", "hash", []byte("salt"), []byte("dek"), time.Now(), time.Now())
 				m.ExpectQuery(regexp.QuoteMeta(UserRegisterQuery)).
-					WithArgs("alice", sqlmock.AnyArg()).
+					WithArgs("alice", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnRows(userRows)
 				tokenRows := sqlmock.NewRows([]string{"id", "user_id", "token_hash", "expires_at", "created_at"}).
 					AddRow("t1", "u1", "hash", time.Now(), time.Now())
@@ -53,7 +53,7 @@ func TestAuthWriterRegister(t *testing.T) {
 			mockFn: func(m sqlmock.Sqlmock) {
 				m.ExpectBegin()
 				m.ExpectQuery(regexp.QuoteMeta(UserRegisterQuery)).
-					WithArgs("alice", sqlmock.AnyArg()).
+					WithArgs("alice", sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnError(errors.New("boom"))
 				m.ExpectRollback()
 			},

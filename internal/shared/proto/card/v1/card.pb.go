@@ -21,20 +21,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Card is a user's client-side encrypted card record.
 type Card struct {
-	state                     protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id             *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Pan            *string                `protobuf:"bytes,2,opt,name=pan"`
-	xxx_hidden_CardholderName *string                `protobuf:"bytes,3,opt,name=cardholder_name,json=cardholderName"`
-	xxx_hidden_Expiry         *string                `protobuf:"bytes,4,opt,name=expiry"`
-	xxx_hidden_Cvv            *string                `protobuf:"bytes,5,opt,name=cvv"`
-	xxx_hidden_Meta           *string                `protobuf:"bytes,6,opt,name=meta"`
-	xxx_hidden_CreatedAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt"`
-	xxx_hidden_UpdatedAt      *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt"`
-	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
-	XXX_presence              [1]uint32
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Data        []byte                 `protobuf:"bytes,2,opt,name=data"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	xxx_hidden_CreatedAt   *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *Card) Reset() {
@@ -72,54 +70,18 @@ func (x *Card) GetId() string {
 	return ""
 }
 
-func (x *Card) GetPan() string {
+func (x *Card) GetData() []byte {
 	if x != nil {
-		if x.xxx_hidden_Pan != nil {
-			return *x.xxx_hidden_Pan
-		}
-		return ""
+		return x.xxx_hidden_Data
 	}
-	return ""
+	return nil
 }
 
-func (x *Card) GetCardholderName() string {
+func (x *Card) GetVersion() int64 {
 	if x != nil {
-		if x.xxx_hidden_CardholderName != nil {
-			return *x.xxx_hidden_CardholderName
-		}
-		return ""
+		return x.xxx_hidden_Version
 	}
-	return ""
-}
-
-func (x *Card) GetExpiry() string {
-	if x != nil {
-		if x.xxx_hidden_Expiry != nil {
-			return *x.xxx_hidden_Expiry
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *Card) GetCvv() string {
-	if x != nil {
-		if x.xxx_hidden_Cvv != nil {
-			return *x.xxx_hidden_Cvv
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *Card) GetMeta() string {
-	if x != nil {
-		if x.xxx_hidden_Meta != nil {
-			return *x.xxx_hidden_Meta
-		}
-		return ""
-	}
-	return ""
+	return 0
 }
 
 func (x *Card) GetCreatedAt() *timestamppb.Timestamp {
@@ -138,32 +100,20 @@ func (x *Card) GetUpdatedAt() *timestamppb.Timestamp {
 
 func (x *Card) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 8)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
 }
 
-func (x *Card) SetPan(v string) {
-	x.xxx_hidden_Pan = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 8)
+func (x *Card) SetData(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Data = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
 }
 
-func (x *Card) SetCardholderName(v string) {
-	x.xxx_hidden_CardholderName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 8)
-}
-
-func (x *Card) SetExpiry(v string) {
-	x.xxx_hidden_Expiry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 8)
-}
-
-func (x *Card) SetCvv(v string) {
-	x.xxx_hidden_Cvv = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 8)
-}
-
-func (x *Card) SetMeta(v string) {
-	x.xxx_hidden_Meta = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 8)
+func (x *Card) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
 }
 
 func (x *Card) SetCreatedAt(v *timestamppb.Timestamp) {
@@ -181,39 +131,18 @@ func (x *Card) HasId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *Card) HasPan() bool {
+func (x *Card) HasData() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *Card) HasCardholderName() bool {
+func (x *Card) HasVersion() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *Card) HasExpiry() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *Card) HasCvv() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *Card) HasMeta() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
 func (x *Card) HasCreatedAt() bool {
@@ -235,29 +164,14 @@ func (x *Card) ClearId() {
 	x.xxx_hidden_Id = nil
 }
 
-func (x *Card) ClearPan() {
+func (x *Card) ClearData() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Pan = nil
+	x.xxx_hidden_Data = nil
 }
 
-func (x *Card) ClearCardholderName() {
+func (x *Card) ClearVersion() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_CardholderName = nil
-}
-
-func (x *Card) ClearExpiry() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Expiry = nil
-}
-
-func (x *Card) ClearCvv() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Cvv = nil
-}
-
-func (x *Card) ClearMeta() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
-	x.xxx_hidden_Meta = nil
+	x.xxx_hidden_Version = 0
 }
 
 func (x *Card) ClearCreatedAt() {
@@ -271,14 +185,11 @@ func (x *Card) ClearUpdatedAt() {
 type Card_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Id             *string
-	Pan            *string
-	CardholderName *string
-	Expiry         *string
-	Cvv            *string
-	Meta           *string
-	CreatedAt      *timestamppb.Timestamp
-	UpdatedAt      *timestamppb.Timestamp
+	Id        *string
+	Data      []byte
+	Version   *int64
+	CreatedAt *timestamppb.Timestamp
+	UpdatedAt *timestamppb.Timestamp
 }
 
 func (b0 Card_builder) Build() *Card {
@@ -286,28 +197,16 @@ func (b0 Card_builder) Build() *Card {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 8)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
 		x.xxx_hidden_Id = b.Id
 	}
-	if b.Pan != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 8)
-		x.xxx_hidden_Pan = b.Pan
+	if b.Data != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Data = b.Data
 	}
-	if b.CardholderName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 8)
-		x.xxx_hidden_CardholderName = b.CardholderName
-	}
-	if b.Expiry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 8)
-		x.xxx_hidden_Expiry = b.Expiry
-	}
-	if b.Cvv != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 8)
-		x.xxx_hidden_Cvv = b.Cvv
-	}
-	if b.Meta != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 8)
-		x.xxx_hidden_Meta = b.Meta
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Version = *b.Version
 	}
 	x.xxx_hidden_CreatedAt = b.CreatedAt
 	x.xxx_hidden_UpdatedAt = b.UpdatedAt
@@ -315,16 +214,12 @@ func (b0 Card_builder) Build() *Card {
 }
 
 type AddRequest struct {
-	state                     protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Pan            *string                `protobuf:"bytes,1,opt,name=pan"`
-	xxx_hidden_CardholderName *string                `protobuf:"bytes,2,opt,name=cardholder_name,json=cardholderName"`
-	xxx_hidden_Expiry         *string                `protobuf:"bytes,3,opt,name=expiry"`
-	xxx_hidden_Cvv            *string                `protobuf:"bytes,4,opt,name=cvv"`
-	xxx_hidden_Meta           *string                `protobuf:"bytes,5,opt,name=meta"`
-	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
-	XXX_presence              [1]uint32
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Data        []byte                 `protobuf:"bytes,1,opt,name=data"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *AddRequest) Reset() {
@@ -352,174 +247,46 @@ func (x *AddRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *AddRequest) GetPan() string {
+func (x *AddRequest) GetData() []byte {
 	if x != nil {
-		if x.xxx_hidden_Pan != nil {
-			return *x.xxx_hidden_Pan
-		}
-		return ""
+		return x.xxx_hidden_Data
 	}
-	return ""
+	return nil
 }
 
-func (x *AddRequest) GetCardholderName() string {
-	if x != nil {
-		if x.xxx_hidden_CardholderName != nil {
-			return *x.xxx_hidden_CardholderName
-		}
-		return ""
+func (x *AddRequest) SetData(v []byte) {
+	if v == nil {
+		v = []byte{}
 	}
-	return ""
+	x.xxx_hidden_Data = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
 }
 
-func (x *AddRequest) GetExpiry() string {
-	if x != nil {
-		if x.xxx_hidden_Expiry != nil {
-			return *x.xxx_hidden_Expiry
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *AddRequest) GetCvv() string {
-	if x != nil {
-		if x.xxx_hidden_Cvv != nil {
-			return *x.xxx_hidden_Cvv
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *AddRequest) GetMeta() string {
-	if x != nil {
-		if x.xxx_hidden_Meta != nil {
-			return *x.xxx_hidden_Meta
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *AddRequest) SetPan(v string) {
-	x.xxx_hidden_Pan = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
-}
-
-func (x *AddRequest) SetCardholderName(v string) {
-	x.xxx_hidden_CardholderName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
-}
-
-func (x *AddRequest) SetExpiry(v string) {
-	x.xxx_hidden_Expiry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
-}
-
-func (x *AddRequest) SetCvv(v string) {
-	x.xxx_hidden_Cvv = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
-}
-
-func (x *AddRequest) SetMeta(v string) {
-	x.xxx_hidden_Meta = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 5)
-}
-
-func (x *AddRequest) HasPan() bool {
+func (x *AddRequest) HasData() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *AddRequest) HasCardholderName() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
-}
-
-func (x *AddRequest) HasExpiry() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *AddRequest) HasCvv() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *AddRequest) HasMeta() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *AddRequest) ClearPan() {
+func (x *AddRequest) ClearData() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
-	x.xxx_hidden_Pan = nil
-}
-
-func (x *AddRequest) ClearCardholderName() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_CardholderName = nil
-}
-
-func (x *AddRequest) ClearExpiry() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_Expiry = nil
-}
-
-func (x *AddRequest) ClearCvv() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Cvv = nil
-}
-
-func (x *AddRequest) ClearMeta() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Meta = nil
+	x.xxx_hidden_Data = nil
 }
 
 type AddRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Pan            *string
-	CardholderName *string
-	Expiry         *string
-	Cvv            *string
-	Meta           *string
+	Data []byte
 }
 
 func (b0 AddRequest_builder) Build() *AddRequest {
 	m0 := &AddRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.Pan != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
-		x.xxx_hidden_Pan = b.Pan
-	}
-	if b.CardholderName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
-		x.xxx_hidden_CardholderName = b.CardholderName
-	}
-	if b.Expiry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
-		x.xxx_hidden_Expiry = b.Expiry
-	}
-	if b.Cvv != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
-		x.xxx_hidden_Cvv = b.Cvv
-	}
-	if b.Meta != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 5)
-		x.xxx_hidden_Meta = b.Meta
+	if b.Data != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Data = b.Data
 	}
 	return m0
 }
@@ -738,10 +505,16 @@ func (b0 GetResponse_builder) Build() *GetResponse {
 	return m0
 }
 
+// ListRequest pages a user's cards in chunks.
 type ListRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_LastId      *string                `protobuf:"bytes,1,opt,name=last_id,json=lastId"`
+	xxx_hidden_Limit       int32                  `protobuf:"varint,2,opt,name=limit"`
+	xxx_hidden_Offset      int32                  `protobuf:"varint,3,opt,name=offset"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *ListRequest) Reset() {
@@ -769,15 +542,105 @@ func (x *ListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+func (x *ListRequest) GetLastId() string {
+	if x != nil {
+		if x.xxx_hidden_LastId != nil {
+			return *x.xxx_hidden_LastId
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ListRequest) GetLimit() int32 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *ListRequest) GetOffset() int32 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *ListRequest) SetLastId(v string) {
+	x.xxx_hidden_LastId = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *ListRequest) SetLimit(v int32) {
+	x.xxx_hidden_Limit = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *ListRequest) SetOffset(v int32) {
+	x.xxx_hidden_Offset = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *ListRequest) HasLastId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ListRequest) HasLimit() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *ListRequest) HasOffset() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *ListRequest) ClearLastId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_LastId = nil
+}
+
+func (x *ListRequest) ClearLimit() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Limit = 0
+}
+
+func (x *ListRequest) ClearOffset() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Offset = 0
+}
+
 type ListRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	LastId *string
+	Limit  *int32
+	Offset *int32
 }
 
 func (b0 ListRequest_builder) Build() *ListRequest {
 	m0 := &ListRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
+	if b.LastId != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_LastId = b.LastId
+	}
+	if b.Limit != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Limit = *b.Limit
+	}
+	if b.Offset != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Offset = *b.Offset
+	}
 	return m0
 }
 
@@ -841,17 +704,14 @@ func (b0 ListResponse_builder) Build() *ListResponse {
 }
 
 type UpdateRequest struct {
-	state                     protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Id             *string                `protobuf:"bytes,1,opt,name=id"`
-	xxx_hidden_Pan            *string                `protobuf:"bytes,2,opt,name=pan"`
-	xxx_hidden_CardholderName *string                `protobuf:"bytes,3,opt,name=cardholder_name,json=cardholderName"`
-	xxx_hidden_Expiry         *string                `protobuf:"bytes,4,opt,name=expiry"`
-	xxx_hidden_Cvv            *string                `protobuf:"bytes,5,opt,name=cvv"`
-	xxx_hidden_Meta           *string                `protobuf:"bytes,6,opt,name=meta"`
-	XXX_raceDetectHookData    protoimpl.RaceDetectHookData
-	XXX_presence              [1]uint32
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Data        []byte                 `protobuf:"bytes,2,opt,name=data"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *UpdateRequest) Reset() {
@@ -889,84 +749,36 @@ func (x *UpdateRequest) GetId() string {
 	return ""
 }
 
-func (x *UpdateRequest) GetPan() string {
+func (x *UpdateRequest) GetData() []byte {
 	if x != nil {
-		if x.xxx_hidden_Pan != nil {
-			return *x.xxx_hidden_Pan
-		}
-		return ""
+		return x.xxx_hidden_Data
 	}
-	return ""
+	return nil
 }
 
-func (x *UpdateRequest) GetCardholderName() string {
+func (x *UpdateRequest) GetVersion() int64 {
 	if x != nil {
-		if x.xxx_hidden_CardholderName != nil {
-			return *x.xxx_hidden_CardholderName
-		}
-		return ""
+		return x.xxx_hidden_Version
 	}
-	return ""
-}
-
-func (x *UpdateRequest) GetExpiry() string {
-	if x != nil {
-		if x.xxx_hidden_Expiry != nil {
-			return *x.xxx_hidden_Expiry
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *UpdateRequest) GetCvv() string {
-	if x != nil {
-		if x.xxx_hidden_Cvv != nil {
-			return *x.xxx_hidden_Cvv
-		}
-		return ""
-	}
-	return ""
-}
-
-func (x *UpdateRequest) GetMeta() string {
-	if x != nil {
-		if x.xxx_hidden_Meta != nil {
-			return *x.xxx_hidden_Meta
-		}
-		return ""
-	}
-	return ""
+	return 0
 }
 
 func (x *UpdateRequest) SetId(v string) {
 	x.xxx_hidden_Id = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 6)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
 }
 
-func (x *UpdateRequest) SetPan(v string) {
-	x.xxx_hidden_Pan = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
+func (x *UpdateRequest) SetData(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Data = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
 }
 
-func (x *UpdateRequest) SetCardholderName(v string) {
-	x.xxx_hidden_CardholderName = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
-}
-
-func (x *UpdateRequest) SetExpiry(v string) {
-	x.xxx_hidden_Expiry = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
-}
-
-func (x *UpdateRequest) SetCvv(v string) {
-	x.xxx_hidden_Cvv = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
-}
-
-func (x *UpdateRequest) SetMeta(v string) {
-	x.xxx_hidden_Meta = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+func (x *UpdateRequest) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
 }
 
 func (x *UpdateRequest) HasId() bool {
@@ -976,39 +788,18 @@ func (x *UpdateRequest) HasId() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
-func (x *UpdateRequest) HasPan() bool {
+func (x *UpdateRequest) HasData() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *UpdateRequest) HasCardholderName() bool {
+func (x *UpdateRequest) HasVersion() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
-}
-
-func (x *UpdateRequest) HasExpiry() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
-}
-
-func (x *UpdateRequest) HasCvv() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
-}
-
-func (x *UpdateRequest) HasMeta() bool {
-	if x == nil {
-		return false
-	}
-	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
 }
 
 func (x *UpdateRequest) ClearId() {
@@ -1016,40 +807,22 @@ func (x *UpdateRequest) ClearId() {
 	x.xxx_hidden_Id = nil
 }
 
-func (x *UpdateRequest) ClearPan() {
+func (x *UpdateRequest) ClearData() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
-	x.xxx_hidden_Pan = nil
+	x.xxx_hidden_Data = nil
 }
 
-func (x *UpdateRequest) ClearCardholderName() {
+func (x *UpdateRequest) ClearVersion() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
-	x.xxx_hidden_CardholderName = nil
-}
-
-func (x *UpdateRequest) ClearExpiry() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
-	x.xxx_hidden_Expiry = nil
-}
-
-func (x *UpdateRequest) ClearCvv() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
-	x.xxx_hidden_Cvv = nil
-}
-
-func (x *UpdateRequest) ClearMeta() {
-	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
-	x.xxx_hidden_Meta = nil
+	x.xxx_hidden_Version = 0
 }
 
 type UpdateRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	Id             *string
-	Pan            *string
-	CardholderName *string
-	Expiry         *string
-	Cvv            *string
-	Meta           *string
+	Id      *string
+	Data    []byte
+	Version *int64
 }
 
 func (b0 UpdateRequest_builder) Build() *UpdateRequest {
@@ -1057,28 +830,16 @@ func (b0 UpdateRequest_builder) Build() *UpdateRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Id != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 6)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
 		x.xxx_hidden_Id = b.Id
 	}
-	if b.Pan != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
-		x.xxx_hidden_Pan = b.Pan
+	if b.Data != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Data = b.Data
 	}
-	if b.CardholderName != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
-		x.xxx_hidden_CardholderName = b.CardholderName
-	}
-	if b.Expiry != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
-		x.xxx_hidden_Expiry = b.Expiry
-	}
-	if b.Cvv != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
-		x.xxx_hidden_Cvv = b.Cvv
-	}
-	if b.Meta != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
-		x.xxx_hidden_Meta = b.Meta
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Version = *b.Version
 	}
 	return m0
 }
@@ -1276,42 +1037,35 @@ var File_user_v1_card_proto protoreflect.FileDescriptor
 
 const file_user_v1_card_proto_rawDesc = "" +
 	"\n" +
-	"\x12user/v1/card.proto\x12\acard.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x85\x02\n" +
+	"\x12user/v1/card.proto\x12\acard.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xba\x01\n" +
 	"\x04Card\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
-	"\x03pan\x18\x02 \x01(\tR\x03pan\x12'\n" +
-	"\x0fcardholder_name\x18\x03 \x01(\tR\x0ecardholderName\x12\x16\n" +
-	"\x06expiry\x18\x04 \x01(\tR\x06expiry\x12\x10\n" +
-	"\x03cvv\x18\x05 \x01(\tR\x03cvv\x12\x12\n" +
-	"\x04meta\x18\x06 \x01(\tR\x04meta\x129\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x85\x01\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\" \n" +
 	"\n" +
-	"AddRequest\x12\x10\n" +
-	"\x03pan\x18\x01 \x01(\tR\x03pan\x12'\n" +
-	"\x0fcardholder_name\x18\x02 \x01(\tR\x0ecardholderName\x12\x16\n" +
-	"\x06expiry\x18\x03 \x01(\tR\x06expiry\x12\x10\n" +
-	"\x03cvv\x18\x04 \x01(\tR\x03cvv\x12\x12\n" +
-	"\x04meta\x18\x05 \x01(\tR\x04meta\"0\n" +
+	"AddRequest\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\"0\n" +
 	"\vAddResponse\x12!\n" +
 	"\x04card\x18\x01 \x01(\v2\r.card.v1.CardR\x04card\"\x1c\n" +
 	"\n" +
 	"GetRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"0\n" +
 	"\vGetResponse\x12!\n" +
-	"\x04card\x18\x01 \x01(\v2\r.card.v1.CardR\x04card\"\r\n" +
-	"\vListRequest\"3\n" +
+	"\x04card\x18\x01 \x01(\v2\r.card.v1.CardR\x04card\"T\n" +
+	"\vListRequest\x12\x17\n" +
+	"\alast_id\x18\x01 \x01(\tR\x06lastId\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x05R\x06offset\"3\n" +
 	"\fListResponse\x12#\n" +
-	"\x05cards\x18\x01 \x03(\v2\r.card.v1.CardR\x05cards\"\x98\x01\n" +
+	"\x05cards\x18\x01 \x03(\v2\r.card.v1.CardR\x05cards\"M\n" +
 	"\rUpdateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x10\n" +
-	"\x03pan\x18\x02 \x01(\tR\x03pan\x12'\n" +
-	"\x0fcardholder_name\x18\x03 \x01(\tR\x0ecardholderName\x12\x16\n" +
-	"\x06expiry\x18\x04 \x01(\tR\x06expiry\x12\x10\n" +
-	"\x03cvv\x18\x05 \x01(\tR\x03cvv\x12\x12\n" +
-	"\x04meta\x18\x06 \x01(\tR\x04meta\"3\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\"3\n" +
 	"\x0eUpdateResponse\x12!\n" +
 	"\x04card\x18\x01 \x01(\v2\r.card.v1.CardR\x04card\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +

@@ -17,4 +17,5 @@ func (b *repoBase) q(ctx context.Context) trmanager.Querier {
 type Repositories struct {
 	User         *UserRepo
 	RefreshToken *RefreshTokenRepo
+	Card         *CardRepo
 }

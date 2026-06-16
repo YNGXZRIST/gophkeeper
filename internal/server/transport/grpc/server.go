@@ -5,7 +5,8 @@ import (
 	"fmt"
 	handler "gophkeeper/internal/server/handler/grpc"
 	"gophkeeper/internal/server/service"
-	pb "gophkeeper/internal/shared/proto/user/v1"
+	pbC "gophkeeper/internal/shared/proto/card/v1"
+	pbU "gophkeeper/internal/shared/proto/user/v1"
 	"net"
 
 	"go.uber.org/zap"
@@ -14,9 +15,10 @@ import (
 
 // Deps are the dependencies the gRPC server needs to register its handlers.
 type Deps struct {
-	Address  string
-	Services *service.Services
-	Logger   *zap.Logger
+	Address     string
+	Services    *service.Services
+	Logger      *zap.Logger
+	TokenParser TokenParser
 }
 
 type Server struct {
@@ -37,9 +39,13 @@ func New(d Deps) (*Server, error) {
 		return nil, fmt.Errorf("listen %q: %w", d.Address, err)
 	}
 
-	grpcSrv := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcSrv, handler.NewUserServer(handler.UserServerProp{
+	grpcSrv := grpc.NewServer(grpc.ChainUnaryInterceptor(AuthUnaryInterceptor(d.TokenParser)))
+	pbU.RegisterUserServiceServer(grpcSrv, handler.NewUserServer(handler.UserServerProp{
 		Service: d.Services.User,
+		Logger:  d.Logger,
+	}))
+	pbC.RegisterCardServiceServer(grpcSrv, handler.NewCardServer(handler.CardServerProp{
+		Service: d.Services.Card,
 		Logger:  d.Logger,
 	}))
 

@@ -6,23 +6,17 @@ option go_package = "gophkeeper/internal/shared/proto/card/v1;cardv1";
 
 import "google/protobuf/timestamp.proto";
 
+// Card is a user's client-side encrypted card record.
 message Card {
   string id = 1;
-  string pan = 2;
-  string cardholder_name = 3;
-  string expiry = 4;
-  string cvv = 5;
-  string meta = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  bytes data = 2;
+  int64 version = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
 }
 
 message AddRequest {
-  string pan = 1;
-  string cardholder_name = 2;
-  string expiry = 3;
-  string cvv = 4;
-  string meta = 5;
+  bytes data = 1;
 }
 message AddResponse {
   Card card = 1;
@@ -35,18 +29,20 @@ message GetResponse {
   Card card = 1;
 }
 
-message ListRequest {}
+// ListRequest pages a user's cards in chunks.
+message ListRequest {
+  string last_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
 message ListResponse {
   repeated Card cards = 1;
 }
 
 message UpdateRequest {
   string id = 1;
-  string pan = 2;
-  string cardholder_name = 3;
-  string expiry = 4;
-  string cvv = 5;
-  string meta = 6;
+  bytes data = 2;
+  int64 version = 3;
 }
 message UpdateResponse {
   Card card = 1;

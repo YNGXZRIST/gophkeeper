@@ -69,9 +69,10 @@ func Bootstrap(args []string) (_ *App, err error) {
 
 	server, err := transport.NewServer(
 		transport.ServerProp{
-			Config:   &transport.Config{Transport: opt.Transport, Address: opt.Address},
-			Services: services,
-			Logger:   log,
+			Config:      &transport.Config{Transport: opt.Transport, Address: opt.Address},
+			Services:    services,
+			Logger:      log,
+			TokenParser: issuer,
 		})
 	if err != nil {
 		return nil, fmt.Errorf("new server: %w", err)
@@ -104,6 +105,7 @@ func buildRepos(db *conn.DB) repository.Repositories {
 	return repository.Repositories{
 		User:         repository.NewUserRepo(db),
 		RefreshToken: repository.NewRefreshTokenRepo(db),
+		Card:         repository.NewCardRepo(db),
 	}
 
 }
@@ -117,5 +119,6 @@ type serviceDeps struct {
 func buildServices(d serviceDeps) *service.Services {
 	return &service.Services{
 		User: service.NewUserService(d.Repos.User, d.Auth, d.Issuer),
+		Card: service.NewCardService(d.Repos.Card),
 	}
 }
