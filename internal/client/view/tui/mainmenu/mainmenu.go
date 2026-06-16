@@ -34,6 +34,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch act {
 	case menu.Selected:
 		switch Choice(m.menu.Cursor()) {
+		case ViewData:
+			return m, nav.Push(nav.Cards)
 		case SaveData:
 			return m, nav.Push(nav.Save)
 		case Logout:

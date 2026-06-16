@@ -12,6 +12,7 @@ const (
 	Save
 	Card
 	Unlock
+	Cards
 )
 
 type PushMsg struct {
