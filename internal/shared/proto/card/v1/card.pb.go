@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v6.33.4
-// source: user/v1/card.proto
+// source: card/v1/card.proto
 
 package cardv1
 
@@ -37,7 +37,7 @@ type Card struct {
 
 func (x *Card) Reset() {
 	*x = Card{}
-	mi := &file_user_v1_card_proto_msgTypes[0]
+	mi := &file_card_v1_card_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -49,7 +49,7 @@ func (x *Card) String() string {
 func (*Card) ProtoMessage() {}
 
 func (x *Card) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[0]
+	mi := &file_card_v1_card_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -224,7 +224,7 @@ type AddRequest struct {
 
 func (x *AddRequest) Reset() {
 	*x = AddRequest{}
-	mi := &file_user_v1_card_proto_msgTypes[1]
+	mi := &file_card_v1_card_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -236,7 +236,7 @@ func (x *AddRequest) String() string {
 func (*AddRequest) ProtoMessage() {}
 
 func (x *AddRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[1]
+	mi := &file_card_v1_card_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +300,7 @@ type AddResponse struct {
 
 func (x *AddResponse) Reset() {
 	*x = AddResponse{}
-	mi := &file_user_v1_card_proto_msgTypes[2]
+	mi := &file_card_v1_card_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -312,7 +312,7 @@ func (x *AddResponse) String() string {
 func (*AddResponse) ProtoMessage() {}
 
 func (x *AddResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[2]
+	mi := &file_card_v1_card_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -370,7 +370,7 @@ type GetRequest struct {
 
 func (x *GetRequest) Reset() {
 	*x = GetRequest{}
-	mi := &file_user_v1_card_proto_msgTypes[3]
+	mi := &file_card_v1_card_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -382,7 +382,7 @@ func (x *GetRequest) String() string {
 func (*GetRequest) ProtoMessage() {}
 
 func (x *GetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[3]
+	mi := &file_card_v1_card_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -446,7 +446,7 @@ type GetResponse struct {
 
 func (x *GetResponse) Reset() {
 	*x = GetResponse{}
-	mi := &file_user_v1_card_proto_msgTypes[4]
+	mi := &file_card_v1_card_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -458,7 +458,7 @@ func (x *GetResponse) String() string {
 func (*GetResponse) ProtoMessage() {}
 
 func (x *GetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[4]
+	mi := &file_card_v1_card_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -519,7 +519,7 @@ type ListRequest struct {
 
 func (x *ListRequest) Reset() {
 	*x = ListRequest{}
-	mi := &file_user_v1_card_proto_msgTypes[5]
+	mi := &file_card_v1_card_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -531,7 +531,7 @@ func (x *ListRequest) String() string {
 func (*ListRequest) ProtoMessage() {}
 
 func (x *ListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[5]
+	mi := &file_card_v1_card_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +653,7 @@ type ListResponse struct {
 
 func (x *ListResponse) Reset() {
 	*x = ListResponse{}
-	mi := &file_user_v1_card_proto_msgTypes[6]
+	mi := &file_card_v1_card_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -665,7 +665,7 @@ func (x *ListResponse) String() string {
 func (*ListResponse) ProtoMessage() {}
 
 func (x *ListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[6]
+	mi := &file_card_v1_card_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -716,7 +716,7 @@ type UpdateRequest struct {
 
 func (x *UpdateRequest) Reset() {
 	*x = UpdateRequest{}
-	mi := &file_user_v1_card_proto_msgTypes[7]
+	mi := &file_card_v1_card_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -728,7 +728,7 @@ func (x *UpdateRequest) String() string {
 func (*UpdateRequest) ProtoMessage() {}
 
 func (x *UpdateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[7]
+	mi := &file_card_v1_card_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -853,7 +853,7 @@ type UpdateResponse struct {
 
 func (x *UpdateResponse) Reset() {
 	*x = UpdateResponse{}
-	mi := &file_user_v1_card_proto_msgTypes[8]
+	mi := &file_card_v1_card_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -865,7 +865,7 @@ func (x *UpdateResponse) String() string {
 func (*UpdateResponse) ProtoMessage() {}
 
 func (x *UpdateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[8]
+	mi := &file_card_v1_card_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -923,7 +923,7 @@ type DeleteRequest struct {
 
 func (x *DeleteRequest) Reset() {
 	*x = DeleteRequest{}
-	mi := &file_user_v1_card_proto_msgTypes[9]
+	mi := &file_card_v1_card_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -935,7 +935,7 @@ func (x *DeleteRequest) String() string {
 func (*DeleteRequest) ProtoMessage() {}
 
 func (x *DeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[9]
+	mi := &file_card_v1_card_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -998,7 +998,7 @@ type DeleteResponse struct {
 
 func (x *DeleteResponse) Reset() {
 	*x = DeleteResponse{}
-	mi := &file_user_v1_card_proto_msgTypes[10]
+	mi := &file_card_v1_card_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1010,7 +1010,7 @@ func (x *DeleteResponse) String() string {
 func (*DeleteResponse) ProtoMessage() {}
 
 func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_card_proto_msgTypes[10]
+	mi := &file_card_v1_card_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1033,11 +1033,11 @@ func (b0 DeleteResponse_builder) Build() *DeleteResponse {
 	return m0
 }
 
-var File_user_v1_card_proto protoreflect.FileDescriptor
+var File_card_v1_card_proto protoreflect.FileDescriptor
 
-const file_user_v1_card_proto_rawDesc = "" +
+const file_card_v1_card_proto_rawDesc = "" +
 	"\n" +
-	"\x12user/v1/card.proto\x12\acard.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xba\x01\n" +
+	"\x12card/v1/card.proto\x12\acard.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xba\x01\n" +
 	"\x04Card\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04data\x18\x02 \x01(\fR\x04data\x12\x18\n" +
@@ -1078,8 +1078,8 @@ const file_user_v1_card_proto_rawDesc = "" +
 	"\x06Update\x12\x16.card.v1.UpdateRequest\x1a\x17.card.v1.UpdateResponse\x129\n" +
 	"\x06Delete\x12\x16.card.v1.DeleteRequest\x1a\x17.card.v1.DeleteResponseB1Z/gophkeeper/internal/shared/proto/card/v1;cardv1b\beditionsp\xe8\a"
 
-var file_user_v1_card_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
-var file_user_v1_card_proto_goTypes = []any{
+var file_card_v1_card_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_card_v1_card_proto_goTypes = []any{
 	(*Card)(nil),                  // 0: card.v1.Card
 	(*AddRequest)(nil),            // 1: card.v1.AddRequest
 	(*AddResponse)(nil),           // 2: card.v1.AddResponse
@@ -1093,7 +1093,7 @@ var file_user_v1_card_proto_goTypes = []any{
 	(*DeleteResponse)(nil),        // 10: card.v1.DeleteResponse
 	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 }
-var file_user_v1_card_proto_depIdxs = []int32{
+var file_card_v1_card_proto_depIdxs = []int32{
 	11, // 0: card.v1.Card.created_at:type_name -> google.protobuf.Timestamp
 	11, // 1: card.v1.Card.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: card.v1.AddResponse.card:type_name -> card.v1.Card
@@ -1117,26 +1117,26 @@ var file_user_v1_card_proto_depIdxs = []int32{
 	0,  // [0:6] is the sub-list for field type_name
 }
 
-func init() { file_user_v1_card_proto_init() }
-func file_user_v1_card_proto_init() {
-	if File_user_v1_card_proto != nil {
+func init() { file_card_v1_card_proto_init() }
+func file_card_v1_card_proto_init() {
+	if File_card_v1_card_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_v1_card_proto_rawDesc), len(file_user_v1_card_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_card_v1_card_proto_rawDesc), len(file_card_v1_card_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_user_v1_card_proto_goTypes,
-		DependencyIndexes: file_user_v1_card_proto_depIdxs,
-		MessageInfos:      file_user_v1_card_proto_msgTypes,
+		GoTypes:           file_card_v1_card_proto_goTypes,
+		DependencyIndexes: file_card_v1_card_proto_depIdxs,
+		MessageInfos:      file_card_v1_card_proto_msgTypes,
 	}.Build()
-	File_user_v1_card_proto = out.File
-	file_user_v1_card_proto_goTypes = nil
-	file_user_v1_card_proto_depIdxs = nil
+	File_card_v1_card_proto = out.File
+	file_card_v1_card_proto_goTypes = nil
+	file_card_v1_card_proto_depIdxs = nil
 }
