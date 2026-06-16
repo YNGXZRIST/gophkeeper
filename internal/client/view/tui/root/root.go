@@ -5,6 +5,7 @@ import (
 	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/card"
+	"gophkeeper/internal/client/view/tui/cards"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
 	"gophkeeper/internal/client/view/tui/mainmenu"
@@ -57,6 +58,8 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 		return save.New()
 	case nav.Card:
 		return card.New(card.Prop{Vault: deps.Vault, Client: deps.CardClient})
+	case nav.Cards:
+		return cards.New(cards.Prop{Vault: deps.Vault, Client: deps.CardClient})
 	default:
 		return welcome.NewWelcomeModel()
 	}
