@@ -76,7 +76,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) submit() tea.Cmd {
-	data := clientmodel.Card{
+	data := clientmodel.CardData{
 		Number: m.form.Values()[0],
 		Holder: m.form.Values()[1],
 		Expiry: m.form.Values()[2],
