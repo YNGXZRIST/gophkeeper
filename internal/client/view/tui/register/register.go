@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/crypto"
+	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/credform"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/nav"
@@ -20,11 +21,18 @@ type model struct {
 	client userv1.UserServiceClient
 	form   credform.Model
 	store  iface.SessionStore
+	vault  *vault.Vault
 	errMsg string
 }
 
-func InitialModel(client userv1.UserServiceClient, store iface.SessionStore) model {
-	return model{client: client, form: credform.New(), store: store}
+type Prop struct {
+	Client userv1.UserServiceClient
+	Store  iface.SessionStore
+	Vault  *vault.Vault
+}
+
+func InitialModel(p Prop) model {
+	return model{client: p.Client, form: credform.New(), store: p.Store, vault: p.Vault}
 }
 
 func (m model) Init() tea.Cmd {
@@ -92,6 +100,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			fmt.Println("Error:", err)
 			m.errMsg = "Client error. Try again later."
+			return m, nil
+		}
+		if err := m.vault.UseDEK(dek); err != nil {
+			m.errMsg = "Crashed."
 			return m, nil
 		}
 		return m, nav.Reset(nav.MainMenu)

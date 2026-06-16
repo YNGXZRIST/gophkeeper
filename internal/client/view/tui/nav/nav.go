@@ -11,6 +11,7 @@ const (
 	MainMenu
 	Save
 	Card
+	Unlock
 )
 
 type PushMsg struct {

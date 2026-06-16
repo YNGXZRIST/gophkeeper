@@ -3,6 +3,7 @@ package root
 import (
 	"context"
 	"gophkeeper/internal/client/auth"
+	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/card"
 	"gophkeeper/internal/client/view/tui/iface"
 	"gophkeeper/internal/client/view/tui/login"
@@ -10,6 +11,7 @@ import (
 	"gophkeeper/internal/client/view/tui/nav"
 	"gophkeeper/internal/client/view/tui/register"
 	"gophkeeper/internal/client/view/tui/save"
+	"gophkeeper/internal/client/view/tui/unlock"
 	"gophkeeper/internal/client/view/tui/welcome"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
@@ -25,6 +27,7 @@ type rootModel struct {
 type Deps struct {
 	Client        userv1.UserServiceClient
 	SessionsStore iface.SessionStore
+	Vault         *vault.Vault
 }
 
 func New(deps Deps) rootModel {
@@ -37,9 +40,15 @@ func New(deps Deps) rootModel {
 func build(deps Deps, id nav.ScreenID) tea.Model {
 	switch id {
 	case nav.Login:
-		return login.InitialModel(deps.Client, deps.SessionsStore)
+		return login.InitialModel(login.Prop{Client: deps.Client, Store: deps.SessionsStore, Vault: deps.Vault})
 	case nav.Register:
-		return register.InitialModel(deps.Client, deps.SessionsStore)
+		return register.InitialModel(register.Prop{Client: deps.Client, Store: deps.SessionsStore, Vault: deps.Vault})
+	case nav.Unlock:
+		session, err := deps.SessionsStore.Get(context.Background())
+		if err != nil {
+			return welcome.NewWelcomeModel()
+		}
+		return unlock.InitialModel(deps.Vault, session)
 	case nav.MainMenu:
 		return mainmenu.New()
 	case nav.Save:
@@ -57,6 +66,9 @@ func resolveStart(deps Deps) nav.ScreenID {
 		return nav.Welcome
 	}
 	if !session.Access.Expired(0) {
+		if deps.Vault.Locked() {
+			return nav.Unlock
+		}
 		return nav.MainMenu
 	}
 	if session.Refresh.Raw == "" {
@@ -76,6 +88,9 @@ func resolveStart(deps Deps) nav.ScreenID {
 		WrappedDek:   session.WrappedDek,
 	}); err != nil {
 		return nav.Welcome
+	}
+	if deps.Vault.Locked() {
+		return nav.Unlock
 	}
 	return nav.MainMenu
 }
@@ -104,6 +119,7 @@ func (m rootModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err := m.SessionsStore.Clear(context.Background()); err != nil {
 			return m, nil
 		}
+		m.Vault.Lock()
 		m.stack = nil
 		m.current = build(m.Deps, nav.Welcome)
 		return m, m.current.Init()
