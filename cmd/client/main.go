@@ -11,10 +11,10 @@ import (
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
+	cardv1 "gophkeeper/internal/shared/proto/card/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	mg "gophkeeper/migrations/client"
 	"log"
-	"os"
 
 	tea "charm.land/bubbletea/v2"
 	"google.golang.org/grpc"
@@ -78,10 +78,10 @@ func main() {
 	}
 	defer func() { _ = grpcConn.Close() }()
 	userClient := userv1.NewUserServiceClient(grpcConn)
+	cardClient := cardv1.NewCardServiceClient(grpcConn)
 
-	if _, err = tea.NewProgram(root.New(root.Deps{Client: userClient, SessionsStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
-		fmt.Printf("could not start program: %s\n", err)
-		os.Exit(1)
+	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, SessionsStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
+		log.Fatal("could not start program:\n", err)
 	}
 	_ = session
 

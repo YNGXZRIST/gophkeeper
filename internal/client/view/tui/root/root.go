@@ -13,6 +13,7 @@ import (
 	"gophkeeper/internal/client/view/tui/save"
 	"gophkeeper/internal/client/view/tui/unlock"
 	"gophkeeper/internal/client/view/tui/welcome"
+	cardv1 "gophkeeper/internal/shared/proto/card/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
 	tea "charm.land/bubbletea/v2"
@@ -25,7 +26,8 @@ type rootModel struct {
 }
 
 type Deps struct {
-	Client        userv1.UserServiceClient
+	UserClient    userv1.UserServiceClient
+	CardClient    cardv1.CardServiceClient
 	SessionsStore iface.SessionStore
 	Vault         *vault.Vault
 }
@@ -40,9 +42,9 @@ func New(deps Deps) rootModel {
 func build(deps Deps, id nav.ScreenID) tea.Model {
 	switch id {
 	case nav.Login:
-		return login.InitialModel(login.Prop{Client: deps.Client, Store: deps.SessionsStore, Vault: deps.Vault})
+		return login.InitialModel(login.Prop{Client: deps.UserClient, Store: deps.SessionsStore, Vault: deps.Vault})
 	case nav.Register:
-		return register.InitialModel(register.Prop{Client: deps.Client, Store: deps.SessionsStore, Vault: deps.Vault})
+		return register.InitialModel(register.Prop{Client: deps.UserClient, Store: deps.SessionsStore, Vault: deps.Vault})
 	case nav.Unlock:
 		session, err := deps.SessionsStore.Get(context.Background())
 		if err != nil {
@@ -54,7 +56,7 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 	case nav.Save:
 		return save.New()
 	case nav.Card:
-		return card.New()
+		return card.New(card.Prop{Vault: deps.Vault, Client: deps.CardClient})
 	default:
 		return welcome.NewWelcomeModel()
 	}
@@ -76,7 +78,7 @@ func resolveStart(deps Deps) nav.ScreenID {
 	}
 	in := &userv1.RefreshRequest{}
 	in.SetRefreshToken(session.Refresh.Raw)
-	resp, err := deps.Client.Refresh(context.Background(), in)
+	resp, err := deps.UserClient.Refresh(context.Background(), in)
 	if err != nil {
 		return nav.Welcome
 	}
