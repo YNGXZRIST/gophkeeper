@@ -42,12 +42,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case credform.SubmitMsg:
-		salt, err := crypto.GenerateSalt(16)
+		salt, err := crypto.GenerateBytes(16)
 		if err != nil {
 			m.errMsg = "Crashed."
 			return m, nil
 		}
-		wrappedDek := crypto.DeriveKey(msg.Password, salt)
+		dek, err := crypto.GenerateBytes(32)
+		if err != nil {
+			m.errMsg = "Crashed."
+			return m, nil
+		}
+		kek := crypto.DeriveKey(msg.Password, salt)
+		enc, err := crypto.NewEncryptor(kek)
+		if err != nil {
+			m.errMsg = "Crashed."
+			return m, nil
+		}
+		wrappedDek, err := enc.Encrypt(dek)
+		if err != nil {
+			m.errMsg = "Crashed."
+			return m, nil
+		}
 		res, err := m.client.Register(context.Background(), userv1.RegisterRequest_builder{
 			Login:      &msg.Login,
 			Password:   &msg.Password,
