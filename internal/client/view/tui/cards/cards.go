@@ -9,6 +9,7 @@ import (
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/layout"
 	"gophkeeper/internal/client/view/tui/nav"
+	"gophkeeper/internal/client/view/tui/theme"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
 
 	tea "charm.land/bubbletea/v2"
@@ -16,7 +17,14 @@ import (
 
 const pageSize = 10
 
-const cardsHint = "←/→ — paginate · esc — back"
+const cardsHint = "↑/↓ — move · enter — reveal · ←/→ — page · esc — back"
+
+// Column widths for the masked card list, in display runes.
+const (
+	colNumber = 13
+	colExpiry = 8
+	colHolder = 18
+)
 
 // loadedMsg carries the result of a single page fetch.
 type loadedMsg struct {
@@ -28,14 +36,16 @@ type loadedMsg struct {
 }
 
 type model struct {
-	vault   *vault.Vault
-	client  cardv1.CardServiceClient
-	items   []clientmodel.Card
-	cursor  string
-	history []string
-	next    string
-	hasNext bool
-	errMsg  string
+	vault    *vault.Vault
+	client   cardv1.CardServiceClient
+	items    []clientmodel.Card
+	cursor   string
+	history  []string
+	next     string
+	hasNext  bool
+	selected int
+	revealed bool
+	errMsg   string
 }
 
 type Prop struct {
@@ -92,6 +102,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.items = msg.items
 		m.next = msg.nextCursor
 		m.hasNext = msg.hasNext
+		m.selected = 0
+		m.revealed = false
 		return m, nil
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -99,6 +111,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "esc":
 			return m, nav.Back()
+		case "up":
+			if m.selected > 0 {
+				m.selected--
+				m.revealed = false
+			}
+		case "down":
+			if m.selected < len(m.items)-1 {
+				m.selected++
+				m.revealed = false
+			}
+		case "enter":
+			if m.canReveal() {
+				m.revealed = !m.revealed
+			}
 		case "right", "l":
 			if m.hasNext {
 				m.history = append(m.history, m.cursor)
@@ -115,16 +141,52 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// canReveal reports whether the selected card carries decryptable data.
+func (m model) canReveal() bool {
+	if m.selected < 0 || m.selected >= len(m.items) {
+		return false
+	}
+	return m.items[m.selected].Data != (clientmodel.CardData{})
+}
+
 // renderItem returns the single-line, masked representation of a card.
 func renderItem(c clientmodel.Card) string {
 	if c.Data == (clientmodel.CardData{}) {
-		return "  [decryption failed]"
+		return "[decryption failed]"
 	}
 	holder := c.Data.Holder
 	if holder == "" {
 		holder = "—"
 	}
-	return fmt.Sprintf("  %s  %s  %s", maskNumber(c.Data.Number), c.Data.Expiry, holder)
+	meta := c.Data.Meta
+	if meta == "" {
+		meta = "—"
+	}
+	return fmt.Sprintf("%-*s%-*s%-*s%s", colNumber, maskNumber(c.Data.Number), colExpiry, c.Data.Expiry, colHolder, holder, meta)
+}
+
+// renderDetail returns the full, unmasked payload of a revealed card, one field per line.
+func renderDetail(c clientmodel.Card) string {
+	d := c.Data
+	rows := []struct{ label, value string }{
+		{"Number", d.Number},
+		{"Holder", d.Holder},
+		{"Expiry", d.Expiry},
+		{"CVV", d.CVV},
+		{"Meta", d.Meta},
+	}
+	var b strings.Builder
+	for i, r := range rows {
+		if i > 0 {
+			b.WriteByte('\n')
+		}
+		value := r.value
+		if value == "" {
+			value = "—"
+		}
+		fmt.Fprintf(&b, "%s: %s", theme.Blurred.Render(r.label), theme.Filled.Render(value))
+	}
+	return b.String()
 }
 
 func (m model) View() tea.View {
@@ -132,9 +194,17 @@ func (m model) View() tea.View {
 	if len(m.items) == 0 {
 		b.WriteString("No cards.")
 	} else {
-		for _, c := range m.items {
-			b.WriteString(renderItem(c))
-			b.WriteByte('\n')
+		header := fmt.Sprintf("  %-*s%-*s%-*s%s", colNumber, "NUMBER", colExpiry, "EXPIRY", colHolder, "HOLDER", "META")
+		b.WriteString(theme.Blurred.Render(header) + "\n")
+		for i, c := range m.items {
+			marker := "  "
+			if i == m.selected {
+				marker = "> "
+			}
+			b.WriteString(marker + renderItem(c) + "\n")
+		}
+		if m.revealed && m.canReveal() {
+			b.WriteString("\n" + renderDetail(m.items[m.selected]) + "\n")
 		}
 	}
 	if m.errMsg != "" {
