@@ -80,7 +80,7 @@ func main() {
 	userClient := userv1.NewUserServiceClient(grpcConn)
 	cardClient := cardv1.NewCardServiceClient(grpcConn)
 
-	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, SessionsStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
+	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
 		log.Fatal("could not start program:\n", err)
 	}
 	_ = session
