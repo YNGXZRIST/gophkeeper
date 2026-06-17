@@ -3,12 +3,14 @@ package card
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	clientmodel "gophkeeper/internal/client/model"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/form"
 	"gophkeeper/internal/client/view/tui/layout"
 	"gophkeeper/internal/client/view/tui/nav"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	"gophkeeper/pkg/luhn"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -60,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case savedMsg:
 		if msg.err != nil {
-			m.errMsg = "Save failed."
+			m.errMsg = "Save failed. " + msg.err.Error()
 			return m, nil
 		}
 		return m, nav.Back()
@@ -76,14 +78,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) submit() tea.Cmd {
-	data := clientmodel.CardData{
-		Number: m.form.Values()[0],
-		Holder: m.form.Values()[1],
-		Expiry: m.form.Values()[2],
-		CVV:    m.form.Values()[3],
-		Meta:   m.form.Values()[4],
-	}
+	cNumber := m.form.Values()[0]
 	return func() tea.Msg {
+		if !luhn.Validate(cNumber) {
+			return savedMsg{err: errors.New("not valid card number")}
+		}
+		data := clientmodel.CardData{
+			Number: cNumber,
+			Holder: m.form.Values()[1],
+			Expiry: m.form.Values()[2],
+			CVV:    m.form.Values()[3],
+			Meta:   m.form.Values()[4],
+		}
 		raw, err := json.Marshal(data)
 		if err != nil {
 			return savedMsg{err: err}
