@@ -106,6 +106,7 @@ func buildRepos(db *conn.DB) repository.Repositories {
 		User:         repository.NewUserRepo(db),
 		RefreshToken: repository.NewRefreshTokenRepo(db),
 		Card:         repository.NewCardRepo(db),
+		Password:     repository.NewPasswordRepo(db),
 	}
 
 }
@@ -118,7 +119,8 @@ type serviceDeps struct {
 
 func buildServices(d serviceDeps) *service.Services {
 	return &service.Services{
-		User: service.NewUserService(d.Repos.User, d.Auth, d.Issuer),
-		Card: service.NewCardService(d.Repos.Card),
+		User:     service.NewUserService(d.Repos.User, d.Auth, d.Issuer),
+		Card:     service.NewCardService(d.Repos.Card),
+		Password: service.NewPasswordService(d.Repos.Password),
 	}
 }

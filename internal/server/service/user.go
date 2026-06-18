@@ -9,22 +9,22 @@ import (
 	"gophkeeper/internal/server/model"
 )
 
-type UserRepository interface {
+type userRepository interface {
 	Create(ctx context.Context, u model.User) (*model.User, error)
 	GetByLogin(ctx context.Context, login string) (*model.User, error)
 }
 
-// AuthWriter persists refresh tokens: Register creates a new user with its first
+// authWriter persists refresh tokens: Register creates a new user with its first
 // token (atomically), IssueRefresh adds a token for an existing user on login.
 // Both return the plaintext refresh token.
-type AuthWriter interface {
+type authWriter interface {
 	Register(ctx context.Context, u model.User) (*model.User, string, error)
 	IssueRefresh(ctx context.Context, userID string) (string, error)
 	Rotate(ctx context.Context, refreshToken string) (string, string, error)
 }
 
-// TokenIssuer signs short-lived access tokens for a user.
-type TokenIssuer interface {
+// tokenIssuer signs short-lived access tokens for a user.
+type tokenIssuer interface {
 	Issue(userID string) (string, error)
 }
 
@@ -35,23 +35,23 @@ type Tokens struct {
 }
 
 type UserService struct {
-	Repo   UserRepository
-	Auth   AuthWriter
-	Issuer TokenIssuer
+	repo   userRepository
+	auth   authWriter
+	issuer tokenIssuer
 }
 
-func NewUserService(repo UserRepository, auth AuthWriter, issuer TokenIssuer) *UserService {
-	return &UserService{Repo: repo, Auth: auth, Issuer: issuer}
+func NewUserService(repo userRepository, auth authWriter, issuer tokenIssuer) *UserService {
+	return &UserService{repo: repo, auth: auth, issuer: issuer}
 }
 
 // Register creates the user with its first refresh token (atomically) and then
 // issues a signed access token for the new account.
 func (s *UserService) Register(ctx context.Context, u model.User) (*model.User, Tokens, error) {
-	user, refresh, err := s.Auth.Register(ctx, u)
+	user, refresh, err := s.auth.Register(ctx, u)
 	if err != nil {
 		return nil, Tokens{}, err
 	}
-	access, err := s.Issuer.Issue(user.ID)
+	access, err := s.issuer.Issue(user.ID)
 	if err != nil {
 		return nil, Tokens{}, fmt.Errorf("issue access token: %w", err)
 	}
@@ -63,7 +63,7 @@ func (s *UserService) Register(ctx context.Context, u model.User) (*model.User, 
 // user or wrong password both yield model.ErrInvalidCredentials, so the caller
 // cannot tell them apart.
 func (s *UserService) Login(ctx context.Context, login, password string) (*model.User, Tokens, error) {
-	user, err := s.Repo.GetByLogin(ctx, login)
+	user, err := s.repo.GetByLogin(ctx, login)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, Tokens{}, model.ErrInvalidCredentials
@@ -73,11 +73,11 @@ func (s *UserService) Login(ctx context.Context, login, password string) (*model
 	if err := hasher.Compare(user.Pass, password); err != nil {
 		return nil, Tokens{}, model.ErrInvalidCredentials
 	}
-	refresh, err := s.Auth.IssueRefresh(ctx, user.ID)
+	refresh, err := s.auth.IssueRefresh(ctx, user.ID)
 	if err != nil {
 		return nil, Tokens{}, fmt.Errorf("issue refresh token: %w", err)
 	}
-	access, err := s.Issuer.Issue(user.ID)
+	access, err := s.issuer.Issue(user.ID)
 	if err != nil {
 		return nil, Tokens{}, fmt.Errorf("issue access token: %w", err)
 	}
@@ -87,11 +87,11 @@ func (s *UserService) Login(ctx context.Context, login, password string) (*model
 // Refresh rotates a refresh token and issues a matching new access token. An
 // unknown or expired refresh token yields model.ErrInvalidRefreshToken.
 func (s *UserService) Refresh(ctx context.Context, refreshToken string) (Tokens, error) {
-	userID, refresh, err := s.Auth.Rotate(ctx, refreshToken)
+	userID, refresh, err := s.auth.Rotate(ctx, refreshToken)
 	if err != nil {
 		return Tokens{}, err
 	}
-	access, err := s.Issuer.Issue(userID)
+	access, err := s.issuer.Issue(userID)
 	if err != nil {
 		return Tokens{}, fmt.Errorf("issue access token: %w", err)
 	}

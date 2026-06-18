@@ -18,4 +18,5 @@ type Repositories struct {
 	User         *UserRepo
 	RefreshToken *RefreshTokenRepo
 	Card         *CardRepo
+	Password     *PassRepo
 }
