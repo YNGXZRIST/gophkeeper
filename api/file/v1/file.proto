@@ -1,0 +1,78 @@
+edition = "2023";
+
+package file.v1;
+
+option go_package = "gophkeeper/internal/shared/proto/file/v1;filev1";
+
+import "google/protobuf/timestamp.proto";
+
+// File is the client-side encrypted metadata of a stored file. The encrypted
+// chunk bodies are not part of this message; they are streamed separately.
+message File {
+  string id = 1;
+  bytes meta = 2;
+  int32 chunk_count = 3;
+  int64 version = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// FileHeader is the first message of an upload stream: encrypted metadata and
+// the total number of chunks that follow.
+message FileHeader {
+  bytes meta = 1;
+  int32 chunk_count = 2;
+}
+
+// FileChunk is one ordered, client-encrypted piece of a file body.
+message FileChunk {
+  int32 idx = 1;
+  bytes data = 2;
+}
+
+// UploadRequest is a single frame of an upload stream: the header comes first,
+// then one chunk per frame.
+message UploadRequest {
+  oneof payload {
+    FileHeader header = 1;
+    FileChunk chunk = 2;
+  }
+}
+message UploadResponse {
+  string id = 1;
+}
+
+message DownloadRequest {
+  string id = 1;
+}
+
+// DownloadResponse is a single frame of a download stream: the encrypted
+// metadata comes first, then the chunks in order.
+message DownloadResponse {
+  oneof payload {
+    bytes meta = 1;
+    FileChunk chunk = 2;
+  }
+}
+
+// ListRequest pages a user's files in chunks.
+message ListRequest {
+  string last_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+message ListResponse {
+  repeated File files = 1;
+}
+
+message DeleteRequest {
+  string id = 1;
+}
+message DeleteResponse {}
+
+service FileService {
+  rpc Upload(stream UploadRequest) returns (UploadResponse);
+  rpc Download(DownloadRequest) returns (stream DownloadResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
