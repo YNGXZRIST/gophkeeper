@@ -6,6 +6,7 @@ import (
 	handler "gophkeeper/internal/server/handler/grpc"
 	"gophkeeper/internal/server/service"
 	pbC "gophkeeper/internal/shared/proto/card/v1"
+	pbN "gophkeeper/internal/shared/proto/note/v1"
 	pbP "gophkeeper/internal/shared/proto/password/v1"
 	pbU "gophkeeper/internal/shared/proto/user/v1"
 	"net"
@@ -51,6 +52,10 @@ func New(d Deps) (*Server, error) {
 	}))
 	pbP.RegisterPasswordServiceServer(grpcSrv, handler.NewPasswordServer(handler.PasswordServerProp{
 		Service: d.Services.Password,
+		Logger:  d.Logger,
+	}))
+	pbN.RegisterNoteServiceServer(grpcSrv, handler.NewNoteServer(handler.NoteServerProp{
+		Service: d.Services.Note,
 		Logger:  d.Logger,
 	}))
 

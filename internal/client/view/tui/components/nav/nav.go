@@ -14,6 +14,8 @@ const (
 	CardAdd
 	Passwords
 	PasswordAdd
+	Notes
+	NoteAdd
 )
 
 type PushMsg struct {

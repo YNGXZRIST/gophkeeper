@@ -5,4 +5,5 @@ type Services struct {
 	User     *UserService
 	Card     *CardService
 	Password *PasswordService
+	Note     *NoteService
 }

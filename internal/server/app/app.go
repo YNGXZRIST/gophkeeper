@@ -107,6 +107,7 @@ func buildRepos(db *conn.DB) repository.Repositories {
 		RefreshToken: repository.NewRefreshTokenRepo(db),
 		Card:         repository.NewCardRepo(db),
 		Password:     repository.NewPasswordRepo(db),
+		Note:         repository.NewNoteRepo(db),
 	}
 
 }
@@ -122,5 +123,6 @@ func buildServices(d serviceDeps) *service.Services {
 		User:     service.NewUserService(d.Repos.User, d.Auth, d.Issuer),
 		Card:     service.NewCardService(d.Repos.Card),
 		Password: service.NewPasswordService(d.Repos.Password),
+		Note:     service.NewNoteService(d.Repos.Note),
 	}
 }

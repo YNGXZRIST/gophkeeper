@@ -12,9 +12,12 @@ import (
 	"gophkeeper/internal/client/view/tui/views/cards/add"
 	"gophkeeper/internal/client/view/tui/views/cards/list"
 	"gophkeeper/internal/client/view/tui/views/home"
+	noteadd "gophkeeper/internal/client/view/tui/views/notes/add"
+	notelist "gophkeeper/internal/client/view/tui/views/notes/list"
 	passwordadd "gophkeeper/internal/client/view/tui/views/passwords/add"
 	passwordlist "gophkeeper/internal/client/view/tui/views/passwords/list"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
@@ -39,6 +42,7 @@ type Deps struct {
 	UserClient     userv1.UserServiceClient
 	CardClient     cardv1.CardServiceClient
 	PasswordClient passwordv1.PasswordServiceClient
+	NoteClient     notev1.NoteServiceClient
 	Vault          *vault.Vault
 	SessionStore
 }
@@ -72,6 +76,10 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 		return passwordlist.New(passwordlist.Prop{Vault: deps.Vault, Client: deps.PasswordClient})
 	case nav.PasswordAdd:
 		return passwordadd.New(passwordadd.Prop{Vault: deps.Vault, Client: deps.PasswordClient})
+	case nav.Notes:
+		return notelist.New(notelist.Prop{Vault: deps.Vault, Client: deps.NoteClient})
+	case nav.NoteAdd:
+		return noteadd.New(noteadd.Prop{Vault: deps.Vault, Client: deps.NoteClient})
 	default:
 		return welcome.New()
 	}

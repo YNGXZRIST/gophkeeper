@@ -13,6 +13,7 @@ func New() tea.Model {
 		{Label: "Cards", Action: nav.Push(nav.Cards)},
 		{Label: "Files"},
 		{Label: "Passwords", Action: nav.Push(nav.Passwords)},
+		{Label: "Notes", Action: nav.Push(nav.Notes)},
 		{Label: "Logout", Action: nav.Logout()},
 	})
 }
