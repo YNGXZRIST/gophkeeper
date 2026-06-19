@@ -12,6 +12,7 @@ import (
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	mg "gophkeeper/migrations/client"
 	"log"
@@ -79,8 +80,9 @@ func main() {
 	defer func() { _ = grpcConn.Close() }()
 	userClient := userv1.NewUserServiceClient(grpcConn)
 	cardClient := cardv1.NewCardServiceClient(grpcConn)
+	passwordClient := passwordv1.NewPasswordServiceClient(grpcConn)
 
-	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
+	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, PasswordClient: passwordClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
 		log.Fatal("could not start program:\n", err)
 	}
 	_ = session

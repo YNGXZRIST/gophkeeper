@@ -17,3 +17,6 @@ var ErrCardNotFound = errors.New("card not found")
 
 // ErrVersionConflict is returned when an update targets a stale card version.
 var ErrVersionConflict = errors.New("card version conflict")
+
+// ErrPasswordNotFound is returned when a password is missing or not owned by the user.
+var ErrPasswordNotFound = errors.New("password not found")

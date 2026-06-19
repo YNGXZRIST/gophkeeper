@@ -18,6 +18,9 @@ const (
 	Submit
 )
 
+// Hint is the keybinding hint shared by every screen built on a form.
+const Hint = "↑/↓ — move · enter — next/save · esc — back"
+
 type Field struct {
 	Placeholder string
 	Value       string

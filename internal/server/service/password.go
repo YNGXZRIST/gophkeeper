@@ -12,10 +12,36 @@ type passwordRepository interface {
 	Update(ctx context.Context, user *model.User, pass *model.Password) (*model.Password, error)
 	Delete(ctx context.Context, user *model.User, id string) error
 }
+
 type PasswordService struct {
-	Repo passwordRepository
+	repo passwordRepository
 }
 
 func NewPasswordService(repo passwordRepository) *PasswordService {
-	return &PasswordService{Repo: repo}
+	return &PasswordService{repo: repo}
+}
+
+// Add stores a new password for the user.
+func (s *PasswordService) Add(ctx context.Context, userID string, data []byte) (*model.Password, error) {
+	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Password{Data: data})
+}
+
+// List returns a chunk of the user's passwords.
+func (s *PasswordService) List(ctx context.Context, userID, lastID string, limit, offset int) ([]*model.Password, error) {
+	return s.repo.GetByUser(ctx, &model.User{ID: userID}, lastID, limit, offset)
+}
+
+// Get returns a single password owned by the user.
+func (s *PasswordService) Get(ctx context.Context, userID, id string) (*model.Password, error) {
+	return s.repo.GetByID(ctx, &model.User{ID: userID}, id)
+}
+
+// Update overwrites a password owned by the user.
+func (s *PasswordService) Update(ctx context.Context, userID, id string, data []byte, version int64) (*model.Password, error) {
+	return s.repo.Update(ctx, &model.User{ID: userID}, &model.Password{ID: id, Data: data, Version: version})
+}
+
+// Delete removes a password owned by the user.
+func (s *PasswordService) Delete(ctx context.Context, userID, id string) error {
+	return s.repo.Delete(ctx, &model.User{ID: userID}, id)
 }

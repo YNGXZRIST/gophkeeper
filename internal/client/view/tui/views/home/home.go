@@ -12,7 +12,7 @@ func New() tea.Model {
 	return picker.New("Gophkeeper", []picker.Item{
 		{Label: "Cards", Action: nav.Push(nav.Cards)},
 		{Label: "Files"},
-		{Label: "Passwords"},
+		{Label: "Passwords", Action: nav.Push(nav.Passwords)},
 		{Label: "Logout", Action: nav.Logout()},
 	})
 }

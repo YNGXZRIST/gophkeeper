@@ -1,15 +1,13 @@
-// Package cardform is the shared card form screen for adding and editing cards.
-package cardform
+// Package passform is the shared password form screen for adding and editing passwords.
+package passform
 
 import (
 	"encoding/json"
-	"errors"
 	clientmodel "gophkeeper/internal/client/model"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/components/form"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/nav"
-	"gophkeeper/pkg/luhn"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -18,7 +16,7 @@ const titleOffset = 2
 
 type savedMsg struct{ err error }
 
-// SaveFunc persists the encrypted card payload (Add or Update).
+// SaveFunc persists the encrypted password payload (Add or Update).
 type SaveFunc func(ciphertext []byte) error
 
 type Model struct {
@@ -29,16 +27,14 @@ type Model struct {
 	errMsg string
 }
 
-func New(vlt *vault.Vault, title string, d clientmodel.CardData, save SaveFunc) Model {
+func New(vlt *vault.Vault, title string, d clientmodel.PasswordData, save SaveFunc) Model {
 	return Model{
 		vault: vlt,
 		title: title,
 		save:  save,
 		form: form.New("save", []form.Field{
-			{Placeholder: "Card number", Value: d.Number, CharLimit: 256, Width: 256},
-			{Placeholder: "Cardholder name", Value: d.Holder, CharLimit: 256, Width: 256},
-			{Placeholder: "Expiry MM/YY", Value: d.Expiry, CharLimit: 256, Width: 256},
-			{Placeholder: "CVV", Value: d.CVV, CharLimit: 4, Width: 256, Password: true},
+			{Placeholder: "Login", Value: d.Login, CharLimit: 256, Width: 256},
+			{Placeholder: "Password", Value: d.Password, CharLimit: 256, Width: 256},
 			{Placeholder: "Meta", Value: d.Meta, CharLimit: 256, Width: 256},
 		}),
 	}
@@ -75,14 +71,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) submit() tea.Cmd {
-	number := m.GetCardNumber()
-	data := m.CardData()
+	data := m.GetPasswordData()
 	vlt := m.vault
 	save := m.save
 	return func() tea.Msg {
-		if !luhn.Validate(number) {
-			return savedMsg{err: errors.New("not valid card number")}
-		}
 		raw, err := json.Marshal(data)
 		if err != nil {
 			return savedMsg{err: err}
@@ -109,18 +101,14 @@ func (m Model) View() tea.View {
 	return v
 }
 
-func (m Model) GetCardNumber() string { return m.form.Values()[0] }
-func (m Model) GetHolder() string     { return m.form.Values()[1] }
-func (m Model) GetExpiry() string     { return m.form.Values()[2] }
-func (m Model) GetCVV() string        { return m.form.Values()[3] }
-func (m Model) GetMeta() string       { return m.form.Values()[4] }
+func (m Model) GetLogin() string    { return m.form.Values()[0] }
+func (m Model) GetPassword() string { return m.form.Values()[1] }
+func (m Model) GetMeta() string     { return m.form.Values()[2] }
 
-func (m Model) CardData() clientmodel.CardData {
-	return clientmodel.CardData{
-		Number: m.GetCardNumber(),
-		Holder: m.GetHolder(),
-		Expiry: m.GetExpiry(),
-		CVV:    m.GetCVV(),
-		Meta:   m.GetMeta(),
+func (m Model) GetPasswordData() clientmodel.PasswordData {
+	return clientmodel.PasswordData{
+		Login:    m.GetLogin(),
+		Password: m.GetPassword(),
+		Meta:     m.GetMeta(),
 	}
 }

@@ -12,6 +12,8 @@ const (
 	Unlock
 	Cards
 	CardAdd
+	Passwords
+	PasswordAdd
 )
 
 type PushMsg struct {

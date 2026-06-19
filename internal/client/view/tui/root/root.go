@@ -12,7 +12,10 @@ import (
 	"gophkeeper/internal/client/view/tui/views/cards/add"
 	"gophkeeper/internal/client/view/tui/views/cards/list"
 	"gophkeeper/internal/client/view/tui/views/home"
+	passwordadd "gophkeeper/internal/client/view/tui/views/passwords/add"
+	passwordlist "gophkeeper/internal/client/view/tui/views/passwords/list"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
 	tea "charm.land/bubbletea/v2"
@@ -33,9 +36,10 @@ type rootModel struct {
 }
 
 type Deps struct {
-	UserClient userv1.UserServiceClient
-	CardClient cardv1.CardServiceClient
-	Vault      *vault.Vault
+	UserClient     userv1.UserServiceClient
+	CardClient     cardv1.CardServiceClient
+	PasswordClient passwordv1.PasswordServiceClient
+	Vault          *vault.Vault
 	SessionStore
 }
 
@@ -64,6 +68,10 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 		return list.New(list.Prop{Vault: deps.Vault, Client: deps.CardClient})
 	case nav.CardAdd:
 		return add.New(add.Prop{Vault: deps.Vault, Client: deps.CardClient})
+	case nav.Passwords:
+		return passwordlist.New(passwordlist.Prop{Vault: deps.Vault, Client: deps.PasswordClient})
+	case nav.PasswordAdd:
+		return passwordadd.New(passwordadd.Prop{Vault: deps.Vault, Client: deps.PasswordClient})
 	default:
 		return welcome.New()
 	}
