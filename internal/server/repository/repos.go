@@ -20,4 +20,5 @@ type Repositories struct {
 	Card         *CardRepo
 	Password     *PassRepo
 	Note         *NoteRepo
+	File         *FileRepo
 }

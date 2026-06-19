@@ -23,3 +23,6 @@ var ErrPasswordNotFound = errors.New("password not found")
 
 // ErrNoteNotFound is returned when a note is missing or not owned by the user.
 var ErrNoteNotFound = errors.New("note not found")
+
+// ErrFileNotFound is returned when a file is missing or not owned by the user.
+var ErrFileNotFound = errors.New("file not found")

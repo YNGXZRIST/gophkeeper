@@ -62,9 +62,10 @@ func Bootstrap(args []string) (_ *App, err error) {
 	authWriter := repository.NewAuthWriter(mgr, repos, refreshIssuer)
 	issuer := token.NewIssuer([]byte(opt.JWTSecret), token.DefaultAccessTTL)
 	services := buildServices(serviceDeps{
-		Repos:  repos,
-		Auth:   authWriter,
-		Issuer: issuer,
+		Repos:   repos,
+		Auth:    authWriter,
+		Issuer:  issuer,
+		Manager: mgr,
 	})
 
 	server, err := transport.NewServer(
@@ -108,14 +109,16 @@ func buildRepos(db *conn.DB) repository.Repositories {
 		Card:         repository.NewCardRepo(db),
 		Password:     repository.NewPasswordRepo(db),
 		Note:         repository.NewNoteRepo(db),
+		File:         repository.NewFileRepo(db),
 	}
 
 }
 
 type serviceDeps struct {
-	Repos  repository.Repositories
-	Auth   *repository.AuthWriter
-	Issuer *token.Issuer
+	Repos   repository.Repositories
+	Auth    *repository.AuthWriter
+	Issuer  *token.Issuer
+	Manager *trmanager.Manager
 }
 
 func buildServices(d serviceDeps) *service.Services {
@@ -124,5 +127,6 @@ func buildServices(d serviceDeps) *service.Services {
 		Card:     service.NewCardService(d.Repos.Card),
 		Password: service.NewPasswordService(d.Repos.Password),
 		Note:     service.NewNoteService(d.Repos.Note),
+		File:     service.NewFileService(d.Repos.File, d.Manager),
 	}
 }
