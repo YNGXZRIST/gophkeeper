@@ -1,5 +1,5 @@
 // Package edit is the screen for updating an existing password.
-package edit
+package passwordedit
 
 import (
 	"context"

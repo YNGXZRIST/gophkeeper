@@ -6,6 +6,7 @@ import (
 	clientmodel "gophkeeper/internal/client/model"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/components/form"
+	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/nav"
 
@@ -48,9 +49,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case "ctrl+c":
+		case keys.CTRL_C:
 			return m, tea.Quit
-		case "esc":
+		case keys.ESC:
 			return m, nav.Back()
 		}
 	case savedMsg:

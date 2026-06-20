@@ -1283,6 +1283,217 @@ func (b0 DeleteResponse_builder) Build() *DeleteResponse {
 	return m0
 }
 
+// UpdateMetaRequest changes only the encrypted metadata of a file; the chunk
+// bodies are left untouched.
+type UpdateMetaRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Meta        []byte                 `protobuf:"bytes,2,opt,name=meta"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *UpdateMetaRequest) Reset() {
+	*x = UpdateMetaRequest{}
+	mi := &file_file_v1_file_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMetaRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMetaRequest) ProtoMessage() {}
+
+func (x *UpdateMetaRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_file_v1_file_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateMetaRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *UpdateMetaRequest) GetMeta() []byte {
+	if x != nil {
+		return x.xxx_hidden_Meta
+	}
+	return nil
+}
+
+func (x *UpdateMetaRequest) GetVersion() int64 {
+	if x != nil {
+		return x.xxx_hidden_Version
+	}
+	return 0
+}
+
+func (x *UpdateMetaRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 3)
+}
+
+func (x *UpdateMetaRequest) SetMeta(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Meta = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 3)
+}
+
+func (x *UpdateMetaRequest) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 3)
+}
+
+func (x *UpdateMetaRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *UpdateMetaRequest) HasMeta() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *UpdateMetaRequest) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *UpdateMetaRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *UpdateMetaRequest) ClearMeta() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Meta = nil
+}
+
+func (x *UpdateMetaRequest) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Version = 0
+}
+
+type UpdateMetaRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id      *string
+	Meta    []byte
+	Version *int64
+}
+
+func (b0 UpdateMetaRequest_builder) Build() *UpdateMetaRequest {
+	m0 := &UpdateMetaRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 3)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Meta != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 3)
+		x.xxx_hidden_Meta = b.Meta
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 3)
+		x.xxx_hidden_Version = *b.Version
+	}
+	return m0
+}
+
+type UpdateMetaResponse struct {
+	state           protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_File *File                  `protobuf:"bytes,1,opt,name=file"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *UpdateMetaResponse) Reset() {
+	*x = UpdateMetaResponse{}
+	mi := &file_file_v1_file_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMetaResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMetaResponse) ProtoMessage() {}
+
+func (x *UpdateMetaResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_file_v1_file_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UpdateMetaResponse) GetFile() *File {
+	if x != nil {
+		return x.xxx_hidden_File
+	}
+	return nil
+}
+
+func (x *UpdateMetaResponse) SetFile(v *File) {
+	x.xxx_hidden_File = v
+}
+
+func (x *UpdateMetaResponse) HasFile() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_File != nil
+}
+
+func (x *UpdateMetaResponse) ClearFile() {
+	x.xxx_hidden_File = nil
+}
+
+type UpdateMetaResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	File *File
+}
+
+func (b0 UpdateMetaResponse_builder) Build() *UpdateMetaResponse {
+	m0 := &UpdateMetaResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_File = b.File
+	return m0
+}
+
 var File_file_v1_file_proto protoreflect.FileDescriptor
 
 const file_file_v1_file_proto_rawDesc = "" +
@@ -1326,14 +1537,22 @@ const file_file_v1_file_proto_rawDesc = "" +
 	"\x05files\x18\x01 \x03(\v2\r.file.v1.FileR\x05files\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x10\n" +
-	"\x0eDeleteResponse2\xfd\x01\n" +
+	"\x0eDeleteResponse\"Q\n" +
+	"\x11UpdateMetaRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04meta\x18\x02 \x01(\fR\x04meta\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\"7\n" +
+	"\x12UpdateMetaResponse\x12!\n" +
+	"\x04file\x18\x01 \x01(\v2\r.file.v1.FileR\x04file2\xc4\x02\n" +
 	"\vFileService\x12;\n" +
 	"\x06Upload\x12\x16.file.v1.UploadRequest\x1a\x17.file.v1.UploadResponse(\x01\x12A\n" +
 	"\bDownload\x12\x18.file.v1.DownloadRequest\x1a\x19.file.v1.DownloadResponse0\x01\x123\n" +
-	"\x04List\x12\x14.file.v1.ListRequest\x1a\x15.file.v1.ListResponse\x129\n" +
+	"\x04List\x12\x14.file.v1.ListRequest\x1a\x15.file.v1.ListResponse\x12E\n" +
+	"\n" +
+	"UpdateMeta\x12\x1a.file.v1.UpdateMetaRequest\x1a\x1b.file.v1.UpdateMetaResponse\x129\n" +
 	"\x06Delete\x12\x16.file.v1.DeleteRequest\x1a\x17.file.v1.DeleteResponseB1Z/gophkeeper/internal/shared/proto/file/v1;filev1b\beditionsp\xe8\a"
 
-var file_file_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_file_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_file_v1_file_proto_goTypes = []any{
 	(*File)(nil),                  // 0: file.v1.File
 	(*FileHeader)(nil),            // 1: file.v1.FileHeader
@@ -1346,28 +1565,33 @@ var file_file_v1_file_proto_goTypes = []any{
 	(*ListResponse)(nil),          // 8: file.v1.ListResponse
 	(*DeleteRequest)(nil),         // 9: file.v1.DeleteRequest
 	(*DeleteResponse)(nil),        // 10: file.v1.DeleteResponse
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*UpdateMetaRequest)(nil),     // 11: file.v1.UpdateMetaRequest
+	(*UpdateMetaResponse)(nil),    // 12: file.v1.UpdateMetaResponse
+	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
 }
 var file_file_v1_file_proto_depIdxs = []int32{
-	11, // 0: file.v1.File.created_at:type_name -> google.protobuf.Timestamp
-	11, // 1: file.v1.File.updated_at:type_name -> google.protobuf.Timestamp
+	13, // 0: file.v1.File.created_at:type_name -> google.protobuf.Timestamp
+	13, // 1: file.v1.File.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 2: file.v1.UploadRequest.header:type_name -> file.v1.FileHeader
 	2,  // 3: file.v1.UploadRequest.chunk:type_name -> file.v1.FileChunk
 	2,  // 4: file.v1.DownloadResponse.chunk:type_name -> file.v1.FileChunk
 	0,  // 5: file.v1.ListResponse.files:type_name -> file.v1.File
-	3,  // 6: file.v1.FileService.Upload:input_type -> file.v1.UploadRequest
-	5,  // 7: file.v1.FileService.Download:input_type -> file.v1.DownloadRequest
-	7,  // 8: file.v1.FileService.List:input_type -> file.v1.ListRequest
-	9,  // 9: file.v1.FileService.Delete:input_type -> file.v1.DeleteRequest
-	4,  // 10: file.v1.FileService.Upload:output_type -> file.v1.UploadResponse
-	6,  // 11: file.v1.FileService.Download:output_type -> file.v1.DownloadResponse
-	8,  // 12: file.v1.FileService.List:output_type -> file.v1.ListResponse
-	10, // 13: file.v1.FileService.Delete:output_type -> file.v1.DeleteResponse
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	0,  // 6: file.v1.UpdateMetaResponse.file:type_name -> file.v1.File
+	3,  // 7: file.v1.FileService.Upload:input_type -> file.v1.UploadRequest
+	5,  // 8: file.v1.FileService.Download:input_type -> file.v1.DownloadRequest
+	7,  // 9: file.v1.FileService.List:input_type -> file.v1.ListRequest
+	11, // 10: file.v1.FileService.UpdateMeta:input_type -> file.v1.UpdateMetaRequest
+	9,  // 11: file.v1.FileService.Delete:input_type -> file.v1.DeleteRequest
+	4,  // 12: file.v1.FileService.Upload:output_type -> file.v1.UploadResponse
+	6,  // 13: file.v1.FileService.Download:output_type -> file.v1.DownloadResponse
+	8,  // 14: file.v1.FileService.List:output_type -> file.v1.ListResponse
+	12, // 15: file.v1.FileService.UpdateMeta:output_type -> file.v1.UpdateMetaResponse
+	10, // 16: file.v1.FileService.Delete:output_type -> file.v1.DeleteResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_file_v1_file_proto_init() }
@@ -1389,7 +1613,7 @@ func file_file_v1_file_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_file_v1_file_proto_rawDesc), len(file_file_v1_file_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1,5 +1,5 @@
 // Package add is the screen for adding a password.
-package add
+package passwordadd
 
 import (
 	"context"

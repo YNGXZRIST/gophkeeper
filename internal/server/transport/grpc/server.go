@@ -42,7 +42,10 @@ func New(d Deps) (*Server, error) {
 		return nil, fmt.Errorf("listen %q: %w", d.Address, err)
 	}
 
-	grpcSrv := grpc.NewServer(grpc.ChainUnaryInterceptor(AuthUnaryInterceptor(d.TokenParser)))
+	grpcSrv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(AuthUnaryInterceptor(d.TokenParser)),
+		grpc.ChainStreamInterceptor(AuthStreamInterceptor(d.TokenParser)),
+	)
 	pbU.RegisterUserServiceServer(grpcSrv, handler.NewUserServer(handler.UserServerProp{
 		Service: d.Services.User,
 		Logger:  d.Logger,

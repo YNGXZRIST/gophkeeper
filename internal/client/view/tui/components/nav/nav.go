@@ -16,6 +16,8 @@ const (
 	PasswordAdd
 	Notes
 	NoteAdd
+	Files
+	FileUpload
 )
 
 type PushMsg struct {

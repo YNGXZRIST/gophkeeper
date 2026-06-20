@@ -9,14 +9,17 @@ import (
 	"gophkeeper/internal/client/view/tui/views/auth/register"
 	"gophkeeper/internal/client/view/tui/views/auth/unlock"
 	"gophkeeper/internal/client/view/tui/views/auth/welcome"
-	"gophkeeper/internal/client/view/tui/views/cards/add"
-	"gophkeeper/internal/client/view/tui/views/cards/list"
+	"gophkeeper/internal/client/view/tui/views/cards/cardadd"
+	"gophkeeper/internal/client/view/tui/views/cards/cardlist"
+	fileslist "gophkeeper/internal/client/view/tui/views/files/filelist"
+	filesupload "gophkeeper/internal/client/view/tui/views/files/fileupload"
 	"gophkeeper/internal/client/view/tui/views/home"
-	noteadd "gophkeeper/internal/client/view/tui/views/notes/add"
-	notelist "gophkeeper/internal/client/view/tui/views/notes/list"
-	passwordadd "gophkeeper/internal/client/view/tui/views/passwords/add"
-	passwordlist "gophkeeper/internal/client/view/tui/views/passwords/list"
+	noteadd "gophkeeper/internal/client/view/tui/views/notes/noteadd"
+	notelist "gophkeeper/internal/client/view/tui/views/notes/notelist"
+	passwordadd "gophkeeper/internal/client/view/tui/views/passwords/passwordadd"
+	passwordlist "gophkeeper/internal/client/view/tui/views/passwords/passwordlist"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	filev1 "gophkeeper/internal/shared/proto/file/v1"
 	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
@@ -43,6 +46,7 @@ type Deps struct {
 	CardClient     cardv1.CardServiceClient
 	PasswordClient passwordv1.PasswordServiceClient
 	NoteClient     notev1.NoteServiceClient
+	FileClient     filev1.FileServiceClient
 	Vault          *vault.Vault
 	SessionStore
 }
@@ -69,9 +73,9 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 	case nav.Home:
 		return home.New()
 	case nav.Cards:
-		return list.New(list.Prop{Vault: deps.Vault, Client: deps.CardClient})
+		return cardlist.New(cardlist.Prop{Vault: deps.Vault, Client: deps.CardClient})
 	case nav.CardAdd:
-		return add.New(add.Prop{Vault: deps.Vault, Client: deps.CardClient})
+		return cardadd.New(cardadd.Prop{Vault: deps.Vault, Client: deps.CardClient})
 	case nav.Passwords:
 		return passwordlist.New(passwordlist.Prop{Vault: deps.Vault, Client: deps.PasswordClient})
 	case nav.PasswordAdd:
@@ -80,6 +84,10 @@ func build(deps Deps, id nav.ScreenID) tea.Model {
 		return notelist.New(notelist.Prop{Vault: deps.Vault, Client: deps.NoteClient})
 	case nav.NoteAdd:
 		return noteadd.New(noteadd.Prop{Vault: deps.Vault, Client: deps.NoteClient})
+	case nav.Files:
+		return fileslist.New(fileslist.Prop{Vault: deps.Vault, Client: deps.FileClient})
+	case nav.FileUpload:
+		return filesupload.New(filesupload.Prop{Vault: deps.Vault, Client: deps.FileClient})
 	default:
 		return welcome.New()
 	}

@@ -15,6 +15,7 @@ type fileRepository interface {
 	GetByUser(ctx context.Context, user *model.User, lastID string, limit, offset int) ([]*model.File, error)
 	GetMeta(ctx context.Context, user *model.User, id string) (*model.File, error)
 	StreamChunks(ctx context.Context, fileID string, fn func(idx int, data []byte) error) error
+	UpdateMeta(ctx context.Context, user *model.User, id string, meta []byte, version int64) (*model.File, error)
 	Delete(ctx context.Context, user *model.User, id string) error
 }
 
@@ -77,6 +78,11 @@ func (s *FileService) Download(ctx context.Context, userID, id string, sendMeta 
 		return err
 	}
 	return s.repo.StreamChunks(ctx, file.ID, sendChunk)
+}
+
+// UpdateMeta overwrites a file's encrypted metadata.
+func (s *FileService) UpdateMeta(ctx context.Context, userID, id string, meta []byte, version int64) (*model.File, error) {
+	return s.repo.UpdateMeta(ctx, &model.User{ID: userID}, id, meta, version)
 }
 
 // Delete removes a file owned by the user.

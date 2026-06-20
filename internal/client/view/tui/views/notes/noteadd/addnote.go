@@ -1,5 +1,5 @@
-// Package edit is the screen for updating an existing note.
-package edit
+// Package add is the screen for adding a note.
+package noteadd
 
 import (
 	"context"
@@ -14,16 +14,13 @@ import (
 type Prop struct {
 	Vault  *vault.Vault
 	Client notev1.NoteServiceClient
-	Note   clientmodel.Note
 }
 
 func New(p Prop) tea.Model {
-	return noteform.New(p.Vault, "Edit note", p.Note.Data, func(ciphertext []byte) error {
-		req := &notev1.UpdateRequest{}
-		req.SetId(p.Note.ID)
+	return noteform.New(p.Vault, "Note", clientmodel.NoteData{}, func(ciphertext []byte) error {
+		req := &notev1.AddRequest{}
 		req.SetData(ciphertext)
-		req.SetVersion(p.Note.Version)
-		_, err := p.Client.Update(context.Background(), req)
+		_, err := p.Client.Add(context.Background(), req)
 		return err
 	})
 }

@@ -1,4 +1,4 @@
-package list
+package cardlist
 
 import (
 	"encoding/json"

@@ -1,5 +1,5 @@
-// Package edit is the screen for updating an existing card.
-package edit
+// Package editcard is the screen for updating an existing card.
+package cardedit
 
 import (
 	"context"
@@ -17,8 +17,10 @@ type Prop struct {
 	Card   clientmodel.Card
 }
 
+const label = "Edit Card"
+
 func New(p Prop) tea.Model {
-	return cardform.New(p.Vault, "Edit card", p.Card.Data, func(ciphertext []byte) error {
+	return cardform.New(p.Vault, label, p.Card.Data, func(ciphertext []byte) error {
 		req := &cardv1.UpdateRequest{}
 		req.SetId(p.Card.ID)
 		req.SetData(ciphertext)

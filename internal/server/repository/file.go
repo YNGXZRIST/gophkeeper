@@ -36,6 +36,25 @@ const FileChunksByFileQuery = `SELECT idx, data FROM file_chunks WHERE file_id =
 
 const FileDeleteQuery = `DELETE FROM files WHERE id = $1 AND user_id = $2`
 
+const FileUpdateMetaQuery = `UPDATE files
+SET meta = $1, version = version + 1, updated_at = now()
+WHERE id = $2 AND user_id = $3 AND version = $4
+RETURNING id, user_id, meta, chunk_count, version, created_at, updated_at`
+
+// UpdateMeta overwrites a file's encrypted metadata using optimistic versioning.
+func (r FileRepo) UpdateMeta(ctx context.Context, user *model.User, id string, meta []byte, version int64) (*model.File, error) {
+	var file model.File
+	err := r.q(ctx).QueryRowContext(ctx, FileUpdateMetaQuery, meta, id, user.ID, version).
+		Scan(&file.ID, &file.UserID, &file.Meta, &file.ChunkCount, &file.Version, &file.CreatedAt, &file.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, model.ErrVersionConflict
+		}
+		return nil, labelerrors.NewLabelError(labelRepository+".File.UpdateMeta", err)
+	}
+	return &file, nil
+}
+
 // CreateFile inserts the file metadata row; chunks are inserted separately
 // within the same transaction.
 func (r FileRepo) CreateFile(ctx context.Context, user *model.User, meta []byte, chunkCount int) (*model.File, error) {

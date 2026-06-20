@@ -34,6 +34,43 @@ func UnaryAuthInterceptor(sessions SessionStore) grpc.UnaryClientInterceptor {
 	}
 }
 
+// StreamAuthInterceptor attaches the access token from the session as an
+// "authorization: Bearer <token>" header on every outgoing streaming call.
+func StreamAuthInterceptor(sessions SessionStore) grpc.StreamClientInterceptor {
+	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+		if session, err := sessions.Get(ctx); err == nil && session != nil {
+			ctx = metadata.AppendToOutgoingContext(ctx, authHeader, "Bearer "+session.Access.Raw)
+		}
+		return streamer(ctx, desc, cc, method, opts...)
+	}
+}
+
+// StreamRefreshInterceptor refreshes the access token via the refresh token when
+// it is close to expiry, before the outgoing streaming call is opened.
+func StreamRefreshInterceptor(sessions SessionStore, log *zap.Logger) grpc.StreamClientInterceptor {
+	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+		if session, err := sessions.Get(ctx); err == nil && session != nil && session.Refresh.Raw != "" {
+			if time.Until(session.Access.ExpiresAt) <= refreshMinutes*time.Minute {
+				in := &userv1.RefreshRequest{}
+				in.SetRefreshToken(session.Refresh.Raw)
+				resp, err := userv1.NewUserServiceClient(cc).Refresh(ctx, in)
+				if err != nil {
+					log.Error("refresh access token", zap.Error(err))
+				} else if _, err := sessions.Save(ctx, auth.Credentials{
+					Login:        session.Login,
+					AccessToken:  resp.GetAccessToken(),
+					RefreshToken: resp.GetRefreshToken(),
+					EncSalt:      session.EncSalt,
+					WrappedDek:   session.WrappedDek,
+				}); err != nil {
+					log.Error("save refreshed session", zap.Error(err))
+				}
+			}
+		}
+		return streamer(ctx, desc, cc, method, opts...)
+	}
+}
+
 // UnaryRefreshInterceptor refreshes the access token via the refresh token when
 // it is close to expiry, before the outgoing unary call is sent.
 func UnaryRefreshInterceptor(sessions SessionStore, log *zap.Logger) grpc.UnaryClientInterceptor {

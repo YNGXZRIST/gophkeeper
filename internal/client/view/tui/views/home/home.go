@@ -8,12 +8,19 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
+const title = "Gophkeeper"
+const LabelCards = "Cards"
+const LabelFiles = "Files"
+const LabelPasswords = "Passwords"
+const LabelNotes = "Notes"
+const LabelLogout = "Logout"
+
 func New() tea.Model {
-	return picker.New("Gophkeeper", []picker.Item{
-		{Label: "Cards", Action: nav.Push(nav.Cards)},
-		{Label: "Files"},
-		{Label: "Passwords", Action: nav.Push(nav.Passwords)},
-		{Label: "Notes", Action: nav.Push(nav.Notes)},
-		{Label: "Logout", Action: nav.Logout()},
+	return picker.New(title, []picker.Item{
+		{Label: LabelCards, Action: nav.Push(nav.Cards)},
+		{Label: LabelFiles, Action: nav.Push(nav.Files)},
+		{Label: LabelPasswords, Action: nav.Push(nav.Passwords)},
+		{Label: LabelNotes, Action: nav.Push(nav.Notes)},
+		{Label: LabelLogout, Action: nav.Logout()},
 	})
 }

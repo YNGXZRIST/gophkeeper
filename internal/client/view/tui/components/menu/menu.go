@@ -2,6 +2,7 @@ package menu
 
 import (
 	"gophkeeper/internal/client/view/tui/components/button"
+	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/theme"
 	"strings"
@@ -40,21 +41,21 @@ func (m Model) Update(msg tea.Msg) (Model, Action) {
 		return m, None
 	}
 	switch key.String() {
-	case "q", "ctrl+c":
+	case keys.Q, keys.CTRL_C:
 		return m, Quit
-	case "esc":
+	case keys.ESC:
 		return m, Back
-	case "up":
+	case keys.UP:
 		m.cursor--
 		if m.cursor < 0 {
 			m.cursor = len(m.buttons) - 1
 		}
-	case "down":
+	case keys.DOWN:
 		m.cursor++
 		if m.cursor >= len(m.buttons) {
 			m.cursor = 0
 		}
-	case "enter":
+	case keys.ENTER:
 		return m, Selected
 	}
 	return m, None

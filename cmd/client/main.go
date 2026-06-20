@@ -12,6 +12,7 @@ import (
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
+	filev1 "gophkeeper/internal/shared/proto/file/v1"
 	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
@@ -74,6 +75,10 @@ func main() {
 			interceptor.UnaryRefreshInterceptor(sessionRepo, lg),
 			interceptor.UnaryAuthInterceptor(sessionRepo),
 		),
+		grpc.WithChainStreamInterceptor(
+			interceptor.StreamRefreshInterceptor(sessionRepo, lg),
+			interceptor.StreamAuthInterceptor(sessionRepo),
+		),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -83,8 +88,9 @@ func main() {
 	cardClient := cardv1.NewCardServiceClient(grpcConn)
 	passwordClient := passwordv1.NewPasswordServiceClient(grpcConn)
 	noteClient := notev1.NewNoteServiceClient(grpcConn)
+	fileClient := filev1.NewFileServiceClient(grpcConn)
 
-	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, PasswordClient: passwordClient, NoteClient: noteClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
+	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, PasswordClient: passwordClient, NoteClient: noteClient, FileClient: fileClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
 		log.Fatal("could not start program:\n", err)
 	}
 	_ = session

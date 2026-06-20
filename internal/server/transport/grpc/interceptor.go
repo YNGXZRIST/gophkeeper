@@ -43,6 +43,32 @@ func AuthUnaryInterceptor(parser TokenParser) grpc.UnaryServerInterceptor {
 	}
 }
 
+// AuthStreamInterceptor authenticates each streaming RPC and puts the user ID
+// into the stream's context.
+func AuthStreamInterceptor(parser TokenParser) grpc.StreamServerInterceptor {
+	return func(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		if publicMethods[info.FullMethod] {
+			return handler(srv, ss)
+		}
+		token, err := bearerToken(ss.Context())
+		if err != nil {
+			return err
+		}
+		userID, err := parser.Parse(token)
+		if err != nil {
+			return status.Error(codes.Unauthenticated, "invalid access token")
+		}
+		return handler(srv, &authStream{ServerStream: ss, ctx: authctx.ContextWithUserID(ss.Context(), userID)})
+	}
+}
+
+type authStream struct {
+	grpc.ServerStream
+	ctx context.Context
+}
+
+func (s *authStream) Context() context.Context { return s.ctx }
+
 func bearerToken(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

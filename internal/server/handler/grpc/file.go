@@ -119,6 +119,27 @@ func (f *FileServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListResp
 	return resp, nil
 }
 
+func (f *FileServer) UpdateMeta(ctx context.Context, in *pb.UpdateMetaRequest) (*pb.UpdateMetaResponse, error) {
+	userID, ok := authctx.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "missing user identity")
+	}
+	file, err := f.Service.UpdateMeta(ctx, userID, in.GetId(), in.GetMeta(), in.GetVersion())
+	if err != nil {
+		if errors.Is(err, model.ErrVersionConflict) {
+			return nil, status.Error(codes.Aborted, "file version conflict")
+		}
+		if errors.Is(err, model.ErrFileNotFound) {
+			return nil, status.Error(codes.NotFound, "file not found")
+		}
+		f.Logger.Error("file update meta failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	resp := &pb.UpdateMetaResponse{}
+	resp.SetFile(toPbFile(file))
+	return resp, nil
+}
+
 func (f *FileServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
 	userID, ok := authctx.UserIDFromContext(ctx)
 	if !ok {

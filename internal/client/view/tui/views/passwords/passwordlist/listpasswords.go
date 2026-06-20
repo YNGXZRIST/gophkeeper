@@ -1,5 +1,5 @@
 // Package list shows the passwords list.
-package list
+package passwordlist
 
 import (
 	"context"
@@ -9,7 +9,8 @@ import (
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/paginatedlist"
 	"gophkeeper/internal/client/view/tui/components/theme"
-	"gophkeeper/internal/client/view/tui/views/passwords/edit"
+	"gophkeeper/internal/client/view/tui/views/home"
+	"gophkeeper/internal/client/view/tui/views/passwords/passwordedit"
 	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	"strings"
 
@@ -22,6 +23,8 @@ const (
 	colPassword = 12
 )
 
+const noun = "password"
+
 type Prop struct {
 	Vault  *vault.Vault
 	Client passwordv1.PasswordServiceClient
@@ -29,8 +32,8 @@ type Prop struct {
 
 func New(p Prop) tea.Model {
 	return paginatedlist.New(paginatedlist.Config[clientmodel.Password]{
-		Title:     "Passwords",
-		Noun:      "password",
+		Title:     home.LabelPasswords,
+		Noun:      noun,
 		Header:    fmt.Sprintf("  %-*s%-*s%s", colLogin, "LOGIN", colPassword, "PASSWORD", "META"),
 		AddScreen: nav.PasswordAdd,
 		Fetch: paginatedlist.Fetcher(p.list,
@@ -43,7 +46,7 @@ func New(p Prop) tea.Model {
 		RenderDetail: renderDetail,
 		Remove:       p.remove,
 		NewEdit: func(pw clientmodel.Password) tea.Model {
-			return edit.New(edit.Prop{Vault: p.Vault, Client: p.Client, Password: pw})
+			return passwordedit.New(passwordedit.Prop{Vault: p.Vault, Client: p.Client, Password: pw})
 		},
 	})
 }

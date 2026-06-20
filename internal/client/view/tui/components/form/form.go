@@ -3,6 +3,7 @@ package form
 import (
 	"fmt"
 	"gophkeeper/internal/client/view/tui/components/button"
+	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/theme"
 	"strings"
 
@@ -76,13 +77,13 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, Action, tea.Cmd) {
 	if key, ok := msg.(tea.KeyPressMsg); ok {
 		switch key.String() {
-		case "up":
+		case keys.UP:
 			cmd := m.moveFocus(-1)
 			return m, None, cmd
-		case "down":
+		case keys.DOWN:
 			cmd := m.moveFocus(1)
 			return m, None, cmd
-		case "enter":
+		case keys.ENTER:
 			if m.focusIndex == len(m.inputs) {
 				if !m.allFilled() {
 					return m, None, nil

@@ -1,5 +1,5 @@
 // Package list shows the card list.
-package list
+package cardlist
 
 import (
 	"context"
@@ -9,7 +9,8 @@ import (
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/paginatedlist"
 	"gophkeeper/internal/client/view/tui/components/theme"
-	"gophkeeper/internal/client/view/tui/views/cards/edit"
+	"gophkeeper/internal/client/view/tui/views/cards/cardedit"
+	"gophkeeper/internal/client/view/tui/views/home"
 	cardv1 "gophkeeper/internal/shared/proto/card/v1"
 	"strings"
 
@@ -23,6 +24,8 @@ const (
 	colHolder = 18
 )
 
+const noun = "card"
+
 type Prop struct {
 	Vault  *vault.Vault
 	Client cardv1.CardServiceClient
@@ -30,8 +33,8 @@ type Prop struct {
 
 func New(p Prop) tea.Model {
 	return paginatedlist.New(paginatedlist.Config[clientmodel.Card]{
-		Title:     "Cards",
-		Noun:      "card",
+		Title:     home.LabelCards,
+		Noun:      noun,
 		Header:    fmt.Sprintf("  %-*s%-*s%-*s%s", colNumber, "NUMBER", colExpiry, "EXPIRY", colHolder, "HOLDER", "META"),
 		AddScreen: nav.CardAdd,
 		Fetch: paginatedlist.Fetcher(p.list,
@@ -44,7 +47,7 @@ func New(p Prop) tea.Model {
 		RenderDetail: renderDetail,
 		Remove:       p.remove,
 		NewEdit: func(c clientmodel.Card) tea.Model {
-			return edit.New(edit.Prop{Vault: p.Vault, Client: p.Client, Card: c})
+			return cardedit.New(cardedit.Prop{Vault: p.Vault, Client: p.Client, Card: c})
 		},
 	})
 }

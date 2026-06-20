@@ -70,9 +70,21 @@ message DeleteRequest {
 }
 message DeleteResponse {}
 
+// UpdateMetaRequest changes only the encrypted metadata of a file; the chunk
+// bodies are left untouched.
+message UpdateMetaRequest {
+  string id = 1;
+  bytes meta = 2;
+  int64 version = 3;
+}
+message UpdateMetaResponse {
+  File file = 1;
+}
+
 service FileService {
   rpc Upload(stream UploadRequest) returns (UploadResponse);
   rpc Download(DownloadRequest) returns (stream DownloadResponse);
   rpc List(ListRequest) returns (ListResponse);
+  rpc UpdateMeta(UpdateMetaRequest) returns (UpdateMetaResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
 }

@@ -5,6 +5,7 @@ import (
 	"gophkeeper/internal/client/auth"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/components/form"
+	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/theme"
 
@@ -37,9 +38,9 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if key, ok := msg.(tea.KeyPressMsg); ok {
 		switch key.String() {
-		case "ctrl+c":
+		case keys.CTRL_C:
 			return m, tea.Quit
-		case "esc":
+		case keys.ESC:
 			return m, nav.Logout()
 		}
 	}

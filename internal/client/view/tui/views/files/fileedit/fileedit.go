@@ -1,7 +1,8 @@
-// Package noteform is the shared note form screen for adding and editing notes.
-package noteform
+// Package fileedit is the screen for editing a stored file's metadata.
+package fileedit
 
 import (
+	"context"
 	"encoding/json"
 	clientmodel "gophkeeper/internal/client/model"
 	"gophkeeper/internal/client/vault"
@@ -9,42 +10,47 @@ import (
 	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/nav"
+	filev1 "gophkeeper/internal/shared/proto/file/v1"
 
 	tea "charm.land/bubbletea/v2"
 )
 
 const titleOffset = 2
 
+const label = "Edit file"
+
 type savedMsg struct{ err error }
 
-// SaveFunc persists the encrypted note payload (Add or Update).
-type SaveFunc func(ciphertext []byte) error
+type Prop struct {
+	Vault  *vault.Vault
+	Client filev1.FileServiceClient
+	File   clientmodel.File
+}
 
-type Model struct {
+type model struct {
 	form   form.Model
 	vault  *vault.Vault
-	title  string
-	save   SaveFunc
+	client filev1.FileServiceClient
+	file   clientmodel.File
 	errMsg string
 }
 
-func New(vlt *vault.Vault, title string, d clientmodel.NoteData, save SaveFunc) Model {
-	return Model{
-		vault: vlt,
-		title: title,
-		save:  save,
+func New(p Prop) tea.Model {
+	return model{
+		vault:  p.Vault,
+		client: p.Client,
+		file:   p.File,
 		form: form.New("save", []form.Field{
-			{Placeholder: "Text", Value: d.Text, CharLimit: 4096, Width: 256},
-			{Placeholder: "Meta", Value: d.Meta, CharLimit: 256, Width: 256},
+			{Placeholder: "Meta", Value: p.File.Meta.Meta, CharLimit: 256, Width: 256},
 		}),
 	}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	return m.form.Init()
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
@@ -70,10 +76,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m Model) submit() tea.Cmd {
-	data := m.GetNoteData()
+func (m model) submit() tea.Cmd {
+	data := clientmodel.FileMeta{
+		Name: m.file.Meta.Name,
+		Size: m.file.Meta.Size,
+		Meta: m.form.Values()[0],
+	}
 	vlt := m.vault
-	save := m.save
+	client := m.client
+	file := m.file
 	return func() tea.Msg {
 		raw, err := json.Marshal(data)
 		if err != nil {
@@ -83,30 +94,24 @@ func (m Model) submit() tea.Cmd {
 		if err != nil {
 			return savedMsg{err: err}
 		}
-		if err := save(ciphertext); err != nil {
+		req := &filev1.UpdateMetaRequest{}
+		req.SetId(file.ID)
+		req.SetMeta(ciphertext)
+		req.SetVersion(file.Version)
+		if _, err := client.UpdateMeta(context.Background(), req); err != nil {
 			return savedMsg{err: err}
 		}
 		return savedMsg{}
 	}
 }
 
-func (m Model) View() tea.View {
+func (m model) View() tea.View {
 	body, c := m.form.View(titleOffset)
-	content := layout.Page(m.title, body, form.Hint)
+	content := layout.Page(label, body, form.Hint)
 	if m.errMsg != "" {
 		content += "\n" + m.errMsg
 	}
 	v := tea.NewView(content)
 	v.Cursor = c
 	return v
-}
-
-func (m Model) GetText() string { return m.form.Values()[0] }
-func (m Model) GetMeta() string { return m.form.Values()[1] }
-
-func (m Model) GetNoteData() clientmodel.NoteData {
-	return clientmodel.NoteData{
-		Text: m.GetText(),
-		Meta: m.GetMeta(),
-	}
 }

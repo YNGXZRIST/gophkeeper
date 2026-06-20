@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FileService_Upload_FullMethodName   = "/file.v1.FileService/Upload"
-	FileService_Download_FullMethodName = "/file.v1.FileService/Download"
-	FileService_List_FullMethodName     = "/file.v1.FileService/List"
-	FileService_Delete_FullMethodName   = "/file.v1.FileService/Delete"
+	FileService_Upload_FullMethodName     = "/file.v1.FileService/Upload"
+	FileService_Download_FullMethodName   = "/file.v1.FileService/Download"
+	FileService_List_FullMethodName       = "/file.v1.FileService/List"
+	FileService_UpdateMeta_FullMethodName = "/file.v1.FileService/UpdateMeta"
+	FileService_Delete_FullMethodName     = "/file.v1.FileService/Delete"
 )
 
 // FileServiceClient is the client API for FileService service.
@@ -32,6 +33,7 @@ type FileServiceClient interface {
 	Upload(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadRequest, UploadResponse], error)
 	Download(ctx context.Context, in *DownloadRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[DownloadResponse], error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	UpdateMeta(ctx context.Context, in *UpdateMetaRequest, opts ...grpc.CallOption) (*UpdateMetaResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
@@ -85,6 +87,16 @@ func (c *fileServiceClient) List(ctx context.Context, in *ListRequest, opts ...g
 	return out, nil
 }
 
+func (c *fileServiceClient) UpdateMeta(ctx context.Context, in *UpdateMetaRequest, opts ...grpc.CallOption) (*UpdateMetaResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMetaResponse)
+	err := c.cc.Invoke(ctx, FileService_UpdateMeta_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *fileServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteResponse)
@@ -102,6 +114,7 @@ type FileServiceServer interface {
 	Upload(grpc.ClientStreamingServer[UploadRequest, UploadResponse]) error
 	Download(*DownloadRequest, grpc.ServerStreamingServer[DownloadResponse]) error
 	List(context.Context, *ListRequest) (*ListResponse, error)
+	UpdateMeta(context.Context, *UpdateMetaRequest) (*UpdateMetaResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
 	mustEmbedUnimplementedFileServiceServer()
 }
@@ -121,6 +134,9 @@ func (UnimplementedFileServiceServer) Download(*DownloadRequest, grpc.ServerStre
 }
 func (UnimplementedFileServiceServer) List(context.Context, *ListRequest) (*ListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedFileServiceServer) UpdateMeta(context.Context, *UpdateMetaRequest) (*UpdateMetaResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMeta not implemented")
 }
 func (UnimplementedFileServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
@@ -182,6 +198,24 @@ func _FileService_List_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FileService_UpdateMeta_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMetaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).UpdateMeta(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileService_UpdateMeta_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).UpdateMeta(ctx, req.(*UpdateMetaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FileService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteRequest)
 	if err := dec(in); err != nil {
@@ -210,6 +244,10 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "List",
 			Handler:    _FileService_List_Handler,
+		},
+		{
+			MethodName: "UpdateMeta",
+			Handler:    _FileService_UpdateMeta_Handler,
 		},
 		{
 			MethodName: "Delete",

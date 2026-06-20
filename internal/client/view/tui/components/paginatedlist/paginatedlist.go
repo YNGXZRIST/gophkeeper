@@ -4,6 +4,7 @@
 package paginatedlist
 
 import (
+	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/theme"
@@ -42,6 +43,9 @@ type Config[T any] struct {
 	Remove func(id string) error
 	// NewEdit builds the edit screen for the given item.
 	NewEdit func(T) tea.Model
+	// NewDownload builds the download screen for the given item; when set, the
+	// list offers a "save" action.
+	NewDownload func(T) tea.Model
 }
 
 type loadedMsg[T any] struct {
@@ -159,39 +163,43 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateConfirm(msg)
 		}
 		switch msg.String() {
-		case "esc":
+		case keys.ESC:
 			return m, nav.Back()
-		case "up":
+		case keys.UP:
 			if m.selected > 0 {
 				m.selected--
 				m.revealed = false
 			}
-		case "down":
+		case keys.DOWN:
 			if m.selected < len(m.items)-1 {
 				m.selected++
 				m.revealed = false
 			}
-		case "enter":
+		case keys.ENTER:
 			if m.canReveal() {
 				m.revealed = !m.revealed
 			}
-		case "a":
+		case keys.A:
 			return m, nav.Push(m.cfg.AddScreen)
-		case "e":
+		case keys.E:
 			if m.canDelete() && m.cfg.NewEdit != nil {
 				return m, nav.PushModel(m.cfg.NewEdit(m.items[m.selected]))
 			}
-		case "d":
+		case keys.S:
+			if m.canDelete() && m.cfg.NewDownload != nil {
+				return m, nav.PushModel(m.cfg.NewDownload(m.items[m.selected]))
+			}
+		case keys.D:
 			if m.canDelete() && m.cfg.Remove != nil {
 				m.confirming = true
 			}
-		case "right", "l":
+		case keys.RIGHT, keys.L:
 			if m.hasNext {
 				m.history = append(m.history, m.cursor)
 				m.loading = true
 				return m, tea.Batch(m.fetch(m.next), m.spinner.Tick)
 			}
-		case "left", "h":
+		case keys.LEFT, keys.H:
 			if n := len(m.history); n > 0 {
 				prev := m.history[n-1]
 				m.history = m.history[:n-1]
@@ -205,7 +213,7 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model[T]) updateConfirm(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
-	case "y":
+	case keys.Y:
 		m.confirming = false
 		if m.cfg.ID == nil {
 			return m, nil
@@ -279,6 +287,9 @@ func (m model[T]) View() tea.View {
 		b.WriteString("\n" + m.errMsg)
 	}
 	hint := listHint
+	if m.cfg.NewDownload != nil {
+		hint += " · s — download"
+	}
 	if m.confirming {
 		hint = "delete selected " + m.cfg.Noun + "? y — yes · n — no"
 	}

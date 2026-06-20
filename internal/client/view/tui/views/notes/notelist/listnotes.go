@@ -1,5 +1,5 @@
 // Package list shows the notes list.
-package list
+package notelist
 
 import (
 	"context"
@@ -9,7 +9,8 @@ import (
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/paginatedlist"
 	"gophkeeper/internal/client/view/tui/components/theme"
-	"gophkeeper/internal/client/view/tui/views/notes/edit"
+	"gophkeeper/internal/client/view/tui/views/home"
+	"gophkeeper/internal/client/view/tui/views/notes/noteedit"
 	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	"strings"
 
@@ -19,6 +20,8 @@ import (
 // Column width for the note list, in display runes.
 const colText = 40
 
+const noun = "note"
+
 type Prop struct {
 	Vault  *vault.Vault
 	Client notev1.NoteServiceClient
@@ -26,8 +29,8 @@ type Prop struct {
 
 func New(p Prop) tea.Model {
 	return paginatedlist.New(paginatedlist.Config[clientmodel.Note]{
-		Title:     "Notes",
-		Noun:      "note",
+		Title:     home.LabelNotes,
+		Noun:      noun,
 		Header:    fmt.Sprintf("  %-*s%s", colText, "TEXT", "META"),
 		AddScreen: nav.NoteAdd,
 		Fetch: paginatedlist.Fetcher(p.list,
@@ -40,7 +43,7 @@ func New(p Prop) tea.Model {
 		RenderDetail: renderDetail,
 		Remove:       p.remove,
 		NewEdit: func(n clientmodel.Note) tea.Model {
-			return edit.New(edit.Prop{Vault: p.Vault, Client: p.Client, Note: n})
+			return noteedit.New(noteedit.Prop{Vault: p.Vault, Client: p.Client, Note: n})
 		},
 	})
 }

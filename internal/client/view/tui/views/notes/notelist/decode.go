@@ -1,4 +1,4 @@
-package list
+package notelist
 
 import (
 	"encoding/json"

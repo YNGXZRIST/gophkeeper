@@ -1,4 +1,4 @@
-package list
+package passwordlist
 
 import (
 	"encoding/json"
