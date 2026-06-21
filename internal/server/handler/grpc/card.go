@@ -33,7 +33,7 @@ func (c *CardServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRespons
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "missing user identity")
 	}
-	card, err := c.Service.Add(ctx, userID, in.GetData())
+	card, err := c.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
 		c.Logger.Error("card add failed", zap.Error(err))
 		return nil, status.Error(codes.Internal, "internal error")
@@ -111,6 +111,35 @@ func (c *CardServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &pb.DeleteResponse{}, nil
+}
+
+func (c *CardServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.ChangesResponse, error) {
+	userID, ok := authctx.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "missing user identity")
+	}
+	changes, err := c.Service.Changes(ctx, userID, in.GetSince())
+	if err != nil {
+		c.Logger.Error("card changes failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	pbChanges := make([]*pb.CardChange, 0, len(changes))
+	for _, ch := range changes {
+		pbChanges = append(pbChanges, toPbCardChange(ch))
+	}
+	resp := &pb.ChangesResponse{}
+	resp.SetChanges(pbChanges)
+	return resp, nil
+}
+
+func toPbCardChange(ch *model.CardChange) *pb.CardChange {
+	pbChange := &pb.CardChange{}
+	pbChange.SetId(ch.ID)
+	pbChange.SetData(ch.Data)
+	pbChange.SetVersion(ch.Version)
+	pbChange.SetDeleted(ch.Deleted)
+	pbChange.SetUpdatedAt(timestamppb.New(ch.UpdatedAt))
+	return pbChange
 }
 
 func toPBCard(card *model.Card) *pb.Card {

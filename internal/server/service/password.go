@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"gophkeeper/internal/server/model"
+	"time"
 )
 
 type passwordRepository interface {
@@ -11,6 +12,7 @@ type passwordRepository interface {
 	Create(ctx context.Context, user *model.User, pass *model.Password) (*model.Password, error)
 	Update(ctx context.Context, user *model.User, pass *model.Password) (*model.Password, error)
 	Delete(ctx context.Context, user *model.User, id string) error
+	Changes(ctx context.Context, user *model.User, since time.Time) ([]*model.PasswordChange, error)
 }
 
 type PasswordService struct {
@@ -22,8 +24,8 @@ func NewPasswordService(repo passwordRepository) *PasswordService {
 }
 
 // Add stores a new password for the user.
-func (s *PasswordService) Add(ctx context.Context, userID string, data []byte) (*model.Password, error) {
-	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Password{Data: data})
+func (s *PasswordService) Add(ctx context.Context, userID, id string, data []byte) (*model.Password, error) {
+	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Password{ID: id, Data: data})
 }
 
 // List returns a chunk of the user's passwords.
@@ -44,4 +46,17 @@ func (s *PasswordService) Update(ctx context.Context, userID, id string, data []
 // Delete removes a password owned by the user.
 func (s *PasswordService) Delete(ctx context.Context, userID, id string) error {
 	return s.repo.Delete(ctx, &model.User{ID: userID}, id)
+}
+
+// Changes returns the user's passwords changed since the given cursor (RFC3339, empty = all).
+func (s *PasswordService) Changes(ctx context.Context, userID, since string) ([]*model.PasswordChange, error) {
+	var t time.Time
+	if since != "" {
+		parsed, err := time.Parse(time.RFC3339Nano, since)
+		if err != nil {
+			return nil, err
+		}
+		t = parsed
+	}
+	return s.repo.Changes(ctx, &model.User{ID: userID}, t)
 }

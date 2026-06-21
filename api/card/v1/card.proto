@@ -17,6 +17,7 @@ message Card {
 
 message AddRequest {
   bytes data = 1;
+  string id = 2;
 }
 message AddResponse {
   Card card = 1;
@@ -53,10 +54,25 @@ message DeleteRequest {
 }
 message DeleteResponse {}
 
+message ChangesRequest {
+  string since = 1;
+}
+message CardChange {
+  string id = 1;
+  bytes data = 2;
+  int64 version = 3;
+  bool deleted = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+message ChangesResponse {
+  repeated CardChange changes = 1;
+}
+
 service CardService {
   rpc Add(AddRequest) returns (AddResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc List(ListRequest) returns (ListResponse);
   rpc Update(UpdateRequest) returns (UpdateResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Changes(ChangesRequest) returns (ChangesResponse);
 }

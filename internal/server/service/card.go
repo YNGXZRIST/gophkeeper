@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"gophkeeper/internal/server/model"
+	"time"
 )
 
 type cardRepository interface {
@@ -11,6 +12,7 @@ type cardRepository interface {
 	Create(ctx context.Context, user *model.User, card *model.Card) (*model.Card, error)
 	Update(ctx context.Context, user *model.User, card *model.Card) (*model.Card, error)
 	Delete(ctx context.Context, user *model.User, id string) error
+	Changes(ctx context.Context, user *model.User, since time.Time) ([]*model.CardChange, error)
 }
 type CardService struct {
 	repo cardRepository
@@ -21,8 +23,8 @@ func NewCardService(repo cardRepository) *CardService {
 }
 
 // Add stores a new card for the user.
-func (s *CardService) Add(ctx context.Context, userID string, data []byte) (*model.Card, error) {
-	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Card{Data: data})
+func (s *CardService) Add(ctx context.Context, userID, id string, data []byte) (*model.Card, error) {
+	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Card{ID: id, Data: data})
 }
 
 // List returns a chunk of the user's cards.
@@ -43,4 +45,17 @@ func (s *CardService) Update(ctx context.Context, userID, id string, data []byte
 // Delete removes a card owned by the user.
 func (s *CardService) Delete(ctx context.Context, userID, id string) error {
 	return s.repo.Delete(ctx, &model.User{ID: userID}, id)
+}
+
+// Changes returns the user's cards changed since the given cursor (RFC3339, empty = all).
+func (s *CardService) Changes(ctx context.Context, userID, since string) ([]*model.CardChange, error) {
+	var t time.Time
+	if since != "" {
+		parsed, err := time.Parse(time.RFC3339Nano, since)
+		if err != nil {
+			return nil, err
+		}
+		t = parsed
+	}
+	return s.repo.Changes(ctx, &model.User{ID: userID}, t)
 }

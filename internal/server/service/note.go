@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"gophkeeper/internal/server/model"
+	"time"
 )
 
 type noteRepository interface {
@@ -11,6 +12,7 @@ type noteRepository interface {
 	Create(ctx context.Context, user *model.User, note *model.Note) (*model.Note, error)
 	Update(ctx context.Context, user *model.User, note *model.Note) (*model.Note, error)
 	Delete(ctx context.Context, user *model.User, id string) error
+	Changes(ctx context.Context, user *model.User, since time.Time) ([]*model.NoteChange, error)
 }
 type NoteService struct {
 	repo noteRepository
@@ -21,8 +23,8 @@ func NewNoteService(repo noteRepository) *NoteService {
 }
 
 // Add stores a new note for the user.
-func (s *NoteService) Add(ctx context.Context, userID string, data []byte) (*model.Note, error) {
-	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Note{Data: data})
+func (s *NoteService) Add(ctx context.Context, userID, id string, data []byte) (*model.Note, error) {
+	return s.repo.Create(ctx, &model.User{ID: userID}, &model.Note{ID: id, Data: data})
 }
 
 // List returns a chunk of the user's notes.
@@ -43,4 +45,17 @@ func (s *NoteService) Update(ctx context.Context, userID, id string, data []byte
 // Delete removes a note owned by the user.
 func (s *NoteService) Delete(ctx context.Context, userID, id string) error {
 	return s.repo.Delete(ctx, &model.User{ID: userID}, id)
+}
+
+// Changes returns the user's notes changed since the given cursor (RFC3339, empty = all).
+func (s *NoteService) Changes(ctx context.Context, userID, since string) ([]*model.NoteChange, error) {
+	var t time.Time
+	if since != "" {
+		parsed, err := time.Parse(time.RFC3339Nano, since)
+		if err != nil {
+			return nil, err
+		}
+		t = parsed
+	}
+	return s.repo.Changes(ctx, &model.User{ID: userID}, t)
 }

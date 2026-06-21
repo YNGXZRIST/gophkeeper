@@ -18,6 +18,10 @@ const (
 	NoteAdd
 	Files
 	FileUpload
+	Sync
+	CardSync
+	PasswordSync
+	FileSync
 )
 
 type PushMsg struct {
@@ -37,6 +41,8 @@ type BackMsg struct{}
 type LogoutMsg struct{}
 
 type ReloadMsg struct{}
+
+type SyncNowMsg struct{}
 
 func Push(id ScreenID) tea.Cmd {
 	return func() tea.Msg { return PushMsg{ID: id} }
@@ -60,4 +66,8 @@ func Logout() tea.Cmd {
 
 func Reload() tea.Cmd {
 	return func() tea.Msg { return ReloadMsg{} }
+}
+
+func SyncNow() tea.Cmd {
+	return func() tea.Msg { return SyncNowMsg{} }
 }

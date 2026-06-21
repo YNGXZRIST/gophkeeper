@@ -17,4 +17,6 @@ const (
 	D      = "d"
 	Y      = "y"
 	S      = "s"
+	M      = "m"
+	C      = "c"
 )

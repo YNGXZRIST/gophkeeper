@@ -10,3 +10,11 @@ type Note struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type NoteChange struct {
+	ID        string
+	Data      []byte
+	Version   int64
+	Deleted   bool
+	UpdatedAt time.Time
+}

@@ -1,26 +1,28 @@
-// Package add is the screen for adding a password.
+// Package passwordadd is the screen for adding a password.
 package passwordadd
 
 import (
 	"context"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/views/passwords/internal/passform"
-	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 
 	tea "charm.land/bubbletea/v2"
 )
 
+type Repo interface {
+	Create(ctx context.Context, data []byte) (repository.PasswordRow, error)
+}
+
 type Prop struct {
-	Vault  *vault.Vault
-	Client passwordv1.PasswordServiceClient
+	Vault *vault.Vault
+	Repo  Repo
 }
 
 func New(p Prop) tea.Model {
 	return passform.New(p.Vault, "Password", clientmodel.PasswordData{}, func(ciphertext []byte) error {
-		req := &passwordv1.AddRequest{}
-		req.SetData(ciphertext)
-		_, err := p.Client.Add(context.Background(), req)
+		_, err := p.Repo.Create(context.Background(), ciphertext)
 		return err
 	})
 }

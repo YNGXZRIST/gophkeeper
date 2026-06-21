@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"gophkeeper/internal/server/auth/authctx"
 	"gophkeeper/internal/server/model"
@@ -20,6 +21,14 @@ type cardRepoStub struct {
 	create    func(context.Context, *model.User, *model.Card) (*model.Card, error)
 	update    func(context.Context, *model.User, *model.Card) (*model.Card, error)
 	del       func(context.Context, *model.User, string) error
+	changes   func(context.Context, *model.User, time.Time) ([]*model.CardChange, error)
+}
+
+func (s cardRepoStub) Changes(ctx context.Context, u *model.User, since time.Time) ([]*model.CardChange, error) {
+	if s.changes == nil {
+		return nil, nil
+	}
+	return s.changes(ctx, u, since)
 }
 
 func (s cardRepoStub) GetByUser(ctx context.Context, u *model.User, lastID string, limit, offset int) ([]*model.Card, error) {

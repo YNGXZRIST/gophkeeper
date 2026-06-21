@@ -216,6 +216,7 @@ func (b0 Note_builder) Build() *Note {
 type AddRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Data        []byte                 `protobuf:"bytes,1,opt,name=data"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,2,opt,name=id"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -254,12 +255,27 @@ func (x *AddRequest) GetData() []byte {
 	return nil
 }
 
+func (x *AddRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AddRequest) SetData(v []byte) {
 	if v == nil {
 		v = []byte{}
 	}
 	x.xxx_hidden_Data = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *AddRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
 }
 
 func (x *AddRequest) HasData() bool {
@@ -269,15 +285,28 @@ func (x *AddRequest) HasData() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
+func (x *AddRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
 func (x *AddRequest) ClearData() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Data = nil
+}
+
+func (x *AddRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Id = nil
 }
 
 type AddRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Data []byte
+	Id   *string
 }
 
 func (b0 AddRequest_builder) Build() *AddRequest {
@@ -285,8 +314,12 @@ func (b0 AddRequest_builder) Build() *AddRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Data != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
 		x.xxx_hidden_Data = b.Data
+	}
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Id = b.Id
 	}
 	return m0
 }
@@ -1033,6 +1066,339 @@ func (b0 DeleteResponse_builder) Build() *DeleteResponse {
 	return m0
 }
 
+type ChangesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Since       *string                `protobuf:"bytes,1,opt,name=since"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ChangesRequest) Reset() {
+	*x = ChangesRequest{}
+	mi := &file_note_v1_note_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesRequest) ProtoMessage() {}
+
+func (x *ChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_note_v1_note_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesRequest) GetSince() string {
+	if x != nil {
+		if x.xxx_hidden_Since != nil {
+			return *x.xxx_hidden_Since
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ChangesRequest) SetSince(v string) {
+	x.xxx_hidden_Since = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ChangesRequest) HasSince() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ChangesRequest) ClearSince() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Since = nil
+}
+
+type ChangesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Since *string
+}
+
+func (b0 ChangesRequest_builder) Build() *ChangesRequest {
+	m0 := &ChangesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Since != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Since = b.Since
+	}
+	return m0
+}
+
+type NoteChange struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Data        []byte                 `protobuf:"bytes,2,opt,name=data"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	xxx_hidden_Deleted     bool                   `protobuf:"varint,4,opt,name=deleted"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *NoteChange) Reset() {
+	*x = NoteChange{}
+	mi := &file_note_v1_note_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NoteChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NoteChange) ProtoMessage() {}
+
+func (x *NoteChange) ProtoReflect() protoreflect.Message {
+	mi := &file_note_v1_note_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *NoteChange) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *NoteChange) GetData() []byte {
+	if x != nil {
+		return x.xxx_hidden_Data
+	}
+	return nil
+}
+
+func (x *NoteChange) GetVersion() int64 {
+	if x != nil {
+		return x.xxx_hidden_Version
+	}
+	return 0
+}
+
+func (x *NoteChange) GetDeleted() bool {
+	if x != nil {
+		return x.xxx_hidden_Deleted
+	}
+	return false
+}
+
+func (x *NoteChange) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
+func (x *NoteChange) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *NoteChange) SetData(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Data = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *NoteChange) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *NoteChange) SetDeleted(v bool) {
+	x.xxx_hidden_Deleted = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *NoteChange) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
+}
+
+func (x *NoteChange) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *NoteChange) HasData() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *NoteChange) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *NoteChange) HasDeleted() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *NoteChange) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
+func (x *NoteChange) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *NoteChange) ClearData() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Data = nil
+}
+
+func (x *NoteChange) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Version = 0
+}
+
+func (x *NoteChange) ClearDeleted() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Deleted = false
+}
+
+func (x *NoteChange) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
+type NoteChange_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id        *string
+	Data      []byte
+	Version   *int64
+	Deleted   *bool
+	UpdatedAt *timestamppb.Timestamp
+}
+
+func (b0 NoteChange_builder) Build() *NoteChange {
+	m0 := &NoteChange{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Data != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Data = b.Data
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Version = *b.Version
+	}
+	if b.Deleted != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Deleted = *b.Deleted
+	}
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
+	return m0
+}
+
+type ChangesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Changes *[]*NoteChange         `protobuf:"bytes,1,rep,name=changes"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ChangesResponse) Reset() {
+	*x = ChangesResponse{}
+	mi := &file_note_v1_note_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesResponse) ProtoMessage() {}
+
+func (x *ChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_note_v1_note_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesResponse) GetChanges() []*NoteChange {
+	if x != nil {
+		if x.xxx_hidden_Changes != nil {
+			return *x.xxx_hidden_Changes
+		}
+	}
+	return nil
+}
+
+func (x *ChangesResponse) SetChanges(v []*NoteChange) {
+	x.xxx_hidden_Changes = &v
+}
+
+type ChangesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Changes []*NoteChange
+}
+
+func (b0 ChangesResponse_builder) Build() *ChangesResponse {
+	m0 := &ChangesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Changes = &b.Changes
+	return m0
+}
+
 var File_note_v1_note_proto protoreflect.FileDescriptor
 
 const file_note_v1_note_proto_rawDesc = "" +
@@ -1045,10 +1411,11 @@ const file_note_v1_note_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\" \n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"0\n" +
 	"\n" +
 	"AddRequest\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\"0\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\"0\n" +
 	"\vAddResponse\x12!\n" +
 	"\x04note\x18\x01 \x01(\v2\r.note.v1.NoteR\x04note\"\x1c\n" +
 	"\n" +
@@ -1070,15 +1437,28 @@ const file_note_v1_note_proto_rawDesc = "" +
 	"\x04note\x18\x01 \x01(\v2\r.note.v1.NoteR\x04note\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x10\n" +
-	"\x0eDeleteResponse2\x9c\x02\n" +
+	"\x0eDeleteResponse\"&\n" +
+	"\x0eChangesRequest\x12\x14\n" +
+	"\x05since\x18\x01 \x01(\tR\x05since\"\x9f\x01\n" +
+	"\n" +
+	"NoteChange\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\x12\x18\n" +
+	"\adeleted\x18\x04 \x01(\bR\adeleted\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"@\n" +
+	"\x0fChangesResponse\x12-\n" +
+	"\achanges\x18\x01 \x03(\v2\x13.note.v1.NoteChangeR\achanges2\xda\x02\n" +
 	"\vNoteService\x120\n" +
 	"\x03Add\x12\x13.note.v1.AddRequest\x1a\x14.note.v1.AddResponse\x120\n" +
 	"\x03Get\x12\x13.note.v1.GetRequest\x1a\x14.note.v1.GetResponse\x123\n" +
 	"\x04List\x12\x14.note.v1.ListRequest\x1a\x15.note.v1.ListResponse\x129\n" +
 	"\x06Update\x12\x16.note.v1.UpdateRequest\x1a\x17.note.v1.UpdateResponse\x129\n" +
-	"\x06Delete\x12\x16.note.v1.DeleteRequest\x1a\x17.note.v1.DeleteResponseB1Z/gophkeeper/internal/shared/proto/note/v1;notev1b\beditionsp\xe8\a"
+	"\x06Delete\x12\x16.note.v1.DeleteRequest\x1a\x17.note.v1.DeleteResponse\x12<\n" +
+	"\aChanges\x12\x17.note.v1.ChangesRequest\x1a\x18.note.v1.ChangesResponseB1Z/gophkeeper/internal/shared/proto/note/v1;notev1b\beditionsp\xe8\a"
 
-var file_note_v1_note_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_note_v1_note_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_note_v1_note_proto_goTypes = []any{
 	(*Note)(nil),                  // 0: note.v1.Note
 	(*AddRequest)(nil),            // 1: note.v1.AddRequest
@@ -1091,30 +1471,37 @@ var file_note_v1_note_proto_goTypes = []any{
 	(*UpdateResponse)(nil),        // 8: note.v1.UpdateResponse
 	(*DeleteRequest)(nil),         // 9: note.v1.DeleteRequest
 	(*DeleteResponse)(nil),        // 10: note.v1.DeleteResponse
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*ChangesRequest)(nil),        // 11: note.v1.ChangesRequest
+	(*NoteChange)(nil),            // 12: note.v1.NoteChange
+	(*ChangesResponse)(nil),       // 13: note.v1.ChangesResponse
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
 var file_note_v1_note_proto_depIdxs = []int32{
-	11, // 0: note.v1.Note.created_at:type_name -> google.protobuf.Timestamp
-	11, // 1: note.v1.Note.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: note.v1.Note.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: note.v1.Note.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: note.v1.AddResponse.note:type_name -> note.v1.Note
 	0,  // 3: note.v1.GetResponse.note:type_name -> note.v1.Note
 	0,  // 4: note.v1.ListResponse.notes:type_name -> note.v1.Note
 	0,  // 5: note.v1.UpdateResponse.note:type_name -> note.v1.Note
-	1,  // 6: note.v1.NoteService.Add:input_type -> note.v1.AddRequest
-	3,  // 7: note.v1.NoteService.Get:input_type -> note.v1.GetRequest
-	5,  // 8: note.v1.NoteService.List:input_type -> note.v1.ListRequest
-	7,  // 9: note.v1.NoteService.Update:input_type -> note.v1.UpdateRequest
-	9,  // 10: note.v1.NoteService.Delete:input_type -> note.v1.DeleteRequest
-	2,  // 11: note.v1.NoteService.Add:output_type -> note.v1.AddResponse
-	4,  // 12: note.v1.NoteService.Get:output_type -> note.v1.GetResponse
-	6,  // 13: note.v1.NoteService.List:output_type -> note.v1.ListResponse
-	8,  // 14: note.v1.NoteService.Update:output_type -> note.v1.UpdateResponse
-	10, // 15: note.v1.NoteService.Delete:output_type -> note.v1.DeleteResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	14, // 6: note.v1.NoteChange.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 7: note.v1.ChangesResponse.changes:type_name -> note.v1.NoteChange
+	1,  // 8: note.v1.NoteService.Add:input_type -> note.v1.AddRequest
+	3,  // 9: note.v1.NoteService.Get:input_type -> note.v1.GetRequest
+	5,  // 10: note.v1.NoteService.List:input_type -> note.v1.ListRequest
+	7,  // 11: note.v1.NoteService.Update:input_type -> note.v1.UpdateRequest
+	9,  // 12: note.v1.NoteService.Delete:input_type -> note.v1.DeleteRequest
+	11, // 13: note.v1.NoteService.Changes:input_type -> note.v1.ChangesRequest
+	2,  // 14: note.v1.NoteService.Add:output_type -> note.v1.AddResponse
+	4,  // 15: note.v1.NoteService.Get:output_type -> note.v1.GetResponse
+	6,  // 16: note.v1.NoteService.List:output_type -> note.v1.ListResponse
+	8,  // 17: note.v1.NoteService.Update:output_type -> note.v1.UpdateResponse
+	10, // 18: note.v1.NoteService.Delete:output_type -> note.v1.DeleteResponse
+	13, // 19: note.v1.NoteService.Changes:output_type -> note.v1.ChangesResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_note_v1_note_proto_init() }
@@ -1128,7 +1515,7 @@ func file_note_v1_note_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_note_v1_note_proto_rawDesc), len(file_note_v1_note_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

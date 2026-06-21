@@ -1,10 +1,11 @@
-// Package list shows the files list.
+// Package filelist shows the files list.
 package filelist
 
 import (
 	"context"
 	"fmt"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/paginatedlist"
@@ -18,7 +19,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-// Column widths for the file list, in display runes.
 const (
 	colName = 28
 	colSize = 12
@@ -26,51 +26,49 @@ const (
 
 const noun = "file"
 
+type Repo interface {
+	List(ctx context.Context, lastID string, limit int) ([]repository.FileRow, error)
+	UpdateMeta(ctx context.Context, id string, meta []byte) error
+	Delete(ctx context.Context, id string) error
+}
+
 type Prop struct {
 	Vault  *vault.Vault
+	Repo   Repo
 	Client filev1.FileServiceClient
 }
 
 func New(p Prop) tea.Model {
+	repo := p.Repo
+	vlt := p.Vault
+	client := p.Client
 	return paginatedlist.New(paginatedlist.Config[clientmodel.File]{
-		Title:     home.LabelFiles,
-		Noun:      noun,
-		Header:    fmt.Sprintf("  %-*s%-*s%s", colName, "NAME", colSize, "SIZE", "META"),
-		AddScreen: nav.FileUpload,
-		Fetch: paginatedlist.Fetcher(p.list,
-			func(pb *filev1.File) (clientmodel.File, error) { return decodeFile(p.Vault, pb) },
-			func(pb *filev1.File) clientmodel.File { return clientmodel.File{ID: pb.GetId()} },
+		Title:          home.LabelFiles,
+		Noun:           noun,
+		Header:         fmt.Sprintf("  %-*s%-*s%s", colName, "NAME", colSize, "SIZE", "META"),
+		AddScreen:      nav.FileUpload,
+		ConflictScreen: nav.FileSync,
+		Fetch: paginatedlist.Fetcher(
+			func(cursor string, limit int) ([]repository.FileRow, error) {
+				return repo.List(context.Background(), cursor, limit)
+			},
+			func(row repository.FileRow) (clientmodel.File, error) { return decodeFile(vlt, row) },
+			func(row repository.FileRow) clientmodel.File { return clientmodel.File{ID: row.ID} },
 		),
 		ID:           func(f clientmodel.File) string { return f.ID },
 		Revealable:   func(f clientmodel.File) bool { return f.Meta != (clientmodel.FileMeta{}) },
 		RenderItem:   renderItem,
 		RenderDetail: renderDetail,
-		Remove:       p.remove,
+		Remove: func(id string) error {
+			return repo.Delete(context.Background(), id)
+		},
 		NewEdit: func(f clientmodel.File) tea.Model {
-			return fileedit.New(fileedit.Prop{Vault: p.Vault, Client: p.Client, File: f})
+			return fileedit.New(fileedit.Prop{Vault: vlt, Repo: repo, File: f})
 		},
 		NewDownload: func(f clientmodel.File) tea.Model {
-			return filedownload.New(filedownload.Prop{Vault: p.Vault, Client: p.Client, File: f})
+			return filedownload.New(filedownload.Prop{Vault: vlt, Client: client, File: f})
 		},
 	})
-}
-
-func (p Prop) list(cursor string, limit int) ([]*filev1.File, error) {
-	req := &filev1.ListRequest{}
-	req.SetLastId(cursor)
-	req.SetLimit(int32(limit))
-	resp, err := p.Client.List(context.Background(), req)
-	if err != nil {
-		return nil, err
-	}
-	return resp.GetFiles(), nil
-}
-
-func (p Prop) remove(id string) error {
-	req := &filev1.DeleteRequest{}
-	req.SetId(id)
-	_, err := p.Client.Delete(context.Background(), req)
-	return err
 }
 
 func renderItem(f clientmodel.File) string {

@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
-	filev1 "gophkeeper/internal/shared/proto/file/v1"
 )
 
-func decodeFile(v *vault.Vault, pb *filev1.File) (clientmodel.File, error) {
-	raw, err := v.Decrypt(pb.GetMeta())
+func decodeFile(v *vault.Vault, row repository.FileRow) (clientmodel.File, error) {
+	raw, err := v.Decrypt(row.Meta)
 	if err != nil {
 		return clientmodel.File{}, err
 	}
@@ -18,12 +18,10 @@ func decodeFile(v *vault.Vault, pb *filev1.File) (clientmodel.File, error) {
 		return clientmodel.File{}, err
 	}
 	return clientmodel.File{
-		ID:         pb.GetId(),
+		ID:         row.ID,
 		Meta:       meta,
-		ChunkCount: int(pb.GetChunkCount()),
-		Version:    pb.GetVersion(),
-		CreatedAt:  pb.GetCreatedAt().AsTime(),
-		UpdatedAt:  pb.GetUpdatedAt().AsTime(),
+		ChunkCount: row.ChunkCount,
+		Version:    row.Version,
 	}, nil
 }
 

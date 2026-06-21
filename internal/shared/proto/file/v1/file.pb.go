@@ -1494,6 +1494,339 @@ func (b0 UpdateMetaResponse_builder) Build() *UpdateMetaResponse {
 	return m0
 }
 
+type ChangesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Since       *string                `protobuf:"bytes,1,opt,name=since"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ChangesRequest) Reset() {
+	*x = ChangesRequest{}
+	mi := &file_file_v1_file_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesRequest) ProtoMessage() {}
+
+func (x *ChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_file_v1_file_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesRequest) GetSince() string {
+	if x != nil {
+		if x.xxx_hidden_Since != nil {
+			return *x.xxx_hidden_Since
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ChangesRequest) SetSince(v string) {
+	x.xxx_hidden_Since = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ChangesRequest) HasSince() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ChangesRequest) ClearSince() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Since = nil
+}
+
+type ChangesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Since *string
+}
+
+func (b0 ChangesRequest_builder) Build() *ChangesRequest {
+	m0 := &ChangesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Since != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Since = b.Since
+	}
+	return m0
+}
+
+type FileChange struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Meta        []byte                 `protobuf:"bytes,2,opt,name=meta"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	xxx_hidden_Deleted     bool                   `protobuf:"varint,4,opt,name=deleted"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *FileChange) Reset() {
+	*x = FileChange{}
+	mi := &file_file_v1_file_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FileChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileChange) ProtoMessage() {}
+
+func (x *FileChange) ProtoReflect() protoreflect.Message {
+	mi := &file_file_v1_file_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *FileChange) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *FileChange) GetMeta() []byte {
+	if x != nil {
+		return x.xxx_hidden_Meta
+	}
+	return nil
+}
+
+func (x *FileChange) GetVersion() int64 {
+	if x != nil {
+		return x.xxx_hidden_Version
+	}
+	return 0
+}
+
+func (x *FileChange) GetDeleted() bool {
+	if x != nil {
+		return x.xxx_hidden_Deleted
+	}
+	return false
+}
+
+func (x *FileChange) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
+func (x *FileChange) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *FileChange) SetMeta(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Meta = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *FileChange) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *FileChange) SetDeleted(v bool) {
+	x.xxx_hidden_Deleted = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *FileChange) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
+}
+
+func (x *FileChange) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *FileChange) HasMeta() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *FileChange) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *FileChange) HasDeleted() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *FileChange) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
+func (x *FileChange) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *FileChange) ClearMeta() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Meta = nil
+}
+
+func (x *FileChange) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Version = 0
+}
+
+func (x *FileChange) ClearDeleted() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Deleted = false
+}
+
+func (x *FileChange) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
+type FileChange_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id        *string
+	Meta      []byte
+	Version   *int64
+	Deleted   *bool
+	UpdatedAt *timestamppb.Timestamp
+}
+
+func (b0 FileChange_builder) Build() *FileChange {
+	m0 := &FileChange{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Meta != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Meta = b.Meta
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Version = *b.Version
+	}
+	if b.Deleted != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Deleted = *b.Deleted
+	}
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
+	return m0
+}
+
+type ChangesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Changes *[]*FileChange         `protobuf:"bytes,1,rep,name=changes"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ChangesResponse) Reset() {
+	*x = ChangesResponse{}
+	mi := &file_file_v1_file_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesResponse) ProtoMessage() {}
+
+func (x *ChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_file_v1_file_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesResponse) GetChanges() []*FileChange {
+	if x != nil {
+		if x.xxx_hidden_Changes != nil {
+			return *x.xxx_hidden_Changes
+		}
+	}
+	return nil
+}
+
+func (x *ChangesResponse) SetChanges(v []*FileChange) {
+	x.xxx_hidden_Changes = &v
+}
+
+type ChangesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Changes []*FileChange
+}
+
+func (b0 ChangesResponse_builder) Build() *ChangesResponse {
+	m0 := &ChangesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Changes = &b.Changes
+	return m0
+}
+
 var File_file_v1_file_proto protoreflect.FileDescriptor
 
 const file_file_v1_file_proto_rawDesc = "" +
@@ -1543,16 +1876,29 @@ const file_file_v1_file_proto_rawDesc = "" +
 	"\x04meta\x18\x02 \x01(\fR\x04meta\x12\x18\n" +
 	"\aversion\x18\x03 \x01(\x03R\aversion\"7\n" +
 	"\x12UpdateMetaResponse\x12!\n" +
-	"\x04file\x18\x01 \x01(\v2\r.file.v1.FileR\x04file2\xc4\x02\n" +
+	"\x04file\x18\x01 \x01(\v2\r.file.v1.FileR\x04file\"&\n" +
+	"\x0eChangesRequest\x12\x14\n" +
+	"\x05since\x18\x01 \x01(\tR\x05since\"\x9f\x01\n" +
+	"\n" +
+	"FileChange\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04meta\x18\x02 \x01(\fR\x04meta\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\x12\x18\n" +
+	"\adeleted\x18\x04 \x01(\bR\adeleted\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"@\n" +
+	"\x0fChangesResponse\x12-\n" +
+	"\achanges\x18\x01 \x03(\v2\x13.file.v1.FileChangeR\achanges2\x82\x03\n" +
 	"\vFileService\x12;\n" +
 	"\x06Upload\x12\x16.file.v1.UploadRequest\x1a\x17.file.v1.UploadResponse(\x01\x12A\n" +
 	"\bDownload\x12\x18.file.v1.DownloadRequest\x1a\x19.file.v1.DownloadResponse0\x01\x123\n" +
 	"\x04List\x12\x14.file.v1.ListRequest\x1a\x15.file.v1.ListResponse\x12E\n" +
 	"\n" +
 	"UpdateMeta\x12\x1a.file.v1.UpdateMetaRequest\x1a\x1b.file.v1.UpdateMetaResponse\x129\n" +
-	"\x06Delete\x12\x16.file.v1.DeleteRequest\x1a\x17.file.v1.DeleteResponseB1Z/gophkeeper/internal/shared/proto/file/v1;filev1b\beditionsp\xe8\a"
+	"\x06Delete\x12\x16.file.v1.DeleteRequest\x1a\x17.file.v1.DeleteResponse\x12<\n" +
+	"\aChanges\x12\x17.file.v1.ChangesRequest\x1a\x18.file.v1.ChangesResponseB1Z/gophkeeper/internal/shared/proto/file/v1;filev1b\beditionsp\xe8\a"
 
-var file_file_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_file_v1_file_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_file_v1_file_proto_goTypes = []any{
 	(*File)(nil),                  // 0: file.v1.File
 	(*FileHeader)(nil),            // 1: file.v1.FileHeader
@@ -1567,31 +1913,38 @@ var file_file_v1_file_proto_goTypes = []any{
 	(*DeleteResponse)(nil),        // 10: file.v1.DeleteResponse
 	(*UpdateMetaRequest)(nil),     // 11: file.v1.UpdateMetaRequest
 	(*UpdateMetaResponse)(nil),    // 12: file.v1.UpdateMetaResponse
-	(*timestamppb.Timestamp)(nil), // 13: google.protobuf.Timestamp
+	(*ChangesRequest)(nil),        // 13: file.v1.ChangesRequest
+	(*FileChange)(nil),            // 14: file.v1.FileChange
+	(*ChangesResponse)(nil),       // 15: file.v1.ChangesResponse
+	(*timestamppb.Timestamp)(nil), // 16: google.protobuf.Timestamp
 }
 var file_file_v1_file_proto_depIdxs = []int32{
-	13, // 0: file.v1.File.created_at:type_name -> google.protobuf.Timestamp
-	13, // 1: file.v1.File.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 0: file.v1.File.created_at:type_name -> google.protobuf.Timestamp
+	16, // 1: file.v1.File.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 2: file.v1.UploadRequest.header:type_name -> file.v1.FileHeader
 	2,  // 3: file.v1.UploadRequest.chunk:type_name -> file.v1.FileChunk
 	2,  // 4: file.v1.DownloadResponse.chunk:type_name -> file.v1.FileChunk
 	0,  // 5: file.v1.ListResponse.files:type_name -> file.v1.File
 	0,  // 6: file.v1.UpdateMetaResponse.file:type_name -> file.v1.File
-	3,  // 7: file.v1.FileService.Upload:input_type -> file.v1.UploadRequest
-	5,  // 8: file.v1.FileService.Download:input_type -> file.v1.DownloadRequest
-	7,  // 9: file.v1.FileService.List:input_type -> file.v1.ListRequest
-	11, // 10: file.v1.FileService.UpdateMeta:input_type -> file.v1.UpdateMetaRequest
-	9,  // 11: file.v1.FileService.Delete:input_type -> file.v1.DeleteRequest
-	4,  // 12: file.v1.FileService.Upload:output_type -> file.v1.UploadResponse
-	6,  // 13: file.v1.FileService.Download:output_type -> file.v1.DownloadResponse
-	8,  // 14: file.v1.FileService.List:output_type -> file.v1.ListResponse
-	12, // 15: file.v1.FileService.UpdateMeta:output_type -> file.v1.UpdateMetaResponse
-	10, // 16: file.v1.FileService.Delete:output_type -> file.v1.DeleteResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	16, // 7: file.v1.FileChange.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 8: file.v1.ChangesResponse.changes:type_name -> file.v1.FileChange
+	3,  // 9: file.v1.FileService.Upload:input_type -> file.v1.UploadRequest
+	5,  // 10: file.v1.FileService.Download:input_type -> file.v1.DownloadRequest
+	7,  // 11: file.v1.FileService.List:input_type -> file.v1.ListRequest
+	11, // 12: file.v1.FileService.UpdateMeta:input_type -> file.v1.UpdateMetaRequest
+	9,  // 13: file.v1.FileService.Delete:input_type -> file.v1.DeleteRequest
+	13, // 14: file.v1.FileService.Changes:input_type -> file.v1.ChangesRequest
+	4,  // 15: file.v1.FileService.Upload:output_type -> file.v1.UploadResponse
+	6,  // 16: file.v1.FileService.Download:output_type -> file.v1.DownloadResponse
+	8,  // 17: file.v1.FileService.List:output_type -> file.v1.ListResponse
+	12, // 18: file.v1.FileService.UpdateMeta:output_type -> file.v1.UpdateMetaResponse
+	10, // 19: file.v1.FileService.Delete:output_type -> file.v1.DeleteResponse
+	15, // 20: file.v1.FileService.Changes:output_type -> file.v1.ChangesResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_file_v1_file_proto_init() }
@@ -1613,7 +1966,7 @@ func file_file_v1_file_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_file_v1_file_proto_rawDesc), len(file_file_v1_file_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

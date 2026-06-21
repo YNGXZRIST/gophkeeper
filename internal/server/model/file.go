@@ -17,3 +17,11 @@ type FileChunk struct {
 	Idx    int
 	Data   []byte
 }
+
+type FileChange struct {
+	ID        string
+	Meta      []byte
+	Version   int64
+	Deleted   bool
+	UpdatedAt time.Time
+}

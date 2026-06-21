@@ -8,6 +8,12 @@ import (
 	"gophkeeper/internal/client/db"
 	"gophkeeper/internal/client/interceptor"
 	"gophkeeper/internal/client/repository"
+	"gophkeeper/internal/client/sync/synccards"
+	"gophkeeper/internal/client/sync/syncclient"
+	"gophkeeper/internal/client/sync/syncer"
+	"gophkeeper/internal/client/sync/syncfiles"
+	"gophkeeper/internal/client/sync/syncnotes"
+	"gophkeeper/internal/client/sync/syncpasswords"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
@@ -49,9 +55,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer func() { _ = lg.Sync() }()
-
+	notesRepo := repository.NewNotesRepo(conn)
+	passwordsRepo := repository.NewPasswordsRepo(conn)
+	cardsRepo := repository.NewCardsRepo(conn)
+	filesRepo := repository.NewFilesRepo(conn)
 	sessionRepo := repository.NewSessionRepo(conn)
-	session, err := sessionRepo.Get(context.Background())
+	_, err = sessionRepo.Get(context.Background())
 	if err != nil {
 		switch true {
 		case errors.Is(err, sql.ErrNoRows):
@@ -89,10 +98,24 @@ func main() {
 	passwordClient := passwordv1.NewPasswordServiceClient(grpcConn)
 	noteClient := notev1.NewNoteServiceClient(grpcConn)
 	fileClient := filev1.NewFileServiceClient(grpcConn)
-
-	if _, err = tea.NewProgram(root.New(root.Deps{UserClient: userClient, CardClient: cardClient, PasswordClient: passwordClient, NoteClient: noteClient, FileClient: fileClient, SessionStore: sessionRepo, Vault: vault.New()})).Run(); err != nil {
+	syncStateRepo := repository.NewSyncStateRepo(conn)
+	notesSyncer := syncer.New(syncnotes.NewRepo(notesRepo, syncStateRepo), syncnotes.NewClient(noteClient))
+	cardsSyncer := syncer.New(synccards.NewRepo(cardsRepo, syncStateRepo), synccards.NewClient(cardClient))
+	passwordsSyncer := syncer.New(syncpasswords.NewRepo(passwordsRepo, syncStateRepo), syncpasswords.NewClient(passwordClient))
+	filesSyncer := syncer.New(syncfiles.NewRepo(filesRepo, syncStateRepo), syncfiles.NewClient(fileClient))
+	pool := syncclient.New(notesSyncer, cardsSyncer, passwordsSyncer, filesSyncer)
+	if _, err = tea.NewProgram(root.New(root.Deps{
+		UserClient:    userClient,
+		NotesRepo:     notesRepo,
+		CardsRepo:     cardsRepo,
+		FileClient:    fileClient,
+		FilesRepo:     filesRepo,
+		PasswordsRepo: passwordsRepo,
+		Sync:          pool,
+		Logger:        lg,
+		SessionStore:  sessionRepo,
+		Vault:         vault.New()})).Run(); err != nil {
 		log.Fatal("could not start program:\n", err)
 	}
-	_ = session
 
 }

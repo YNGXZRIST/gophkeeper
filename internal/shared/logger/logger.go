@@ -34,14 +34,15 @@ type Config struct {
 	// Dir is the directory where log files are stored.
 	Dir string
 	// Prefix identifies the component in log file names.
-	Prefix string
+	Prefix  string
+	Console bool
 }
 
 // Initialize builds a ready-to-use logger for the configured run mode.
 // Development mode logs human-readable output to the console; production mode
-// records structured logs to files and stdout, keeping errors separate from
-// informational records. The returned logger should be flushed with Sync
-// before the program exits.
+// records structured logs to files, keeping errors separate from informational
+// records, and mirrors them to stdout only when Config.Console is set. The
+// returned logger should be flushed with Sync before the program exits.
 func Initialize(c *Config) (*zap.Logger, error) {
 	var (
 		log *zap.Logger
@@ -73,7 +74,7 @@ func newDevelopment() (*zap.Logger, error) {
 }
 
 // newProduction builds a logger for production, routing informational records
-// and errors to separate files while also mirroring them to stdout.
+// and errors to separate files, optionally mirroring them to stdout.
 func newProduction(c *Config) (*zap.Logger, error) {
 	if err := os.MkdirAll(c.Dir, dirPerm); err != nil {
 		return nil, fmt.Errorf("could not create log directory %q: %w", c.Dir, err)
@@ -84,13 +85,15 @@ func newProduction(c *Config) (*zap.Logger, error) {
 	encoder := zapcore.NewJSONEncoder(encCfg)
 	infoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool { return l < zapcore.ErrorLevel })
 	errLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool { return l >= zapcore.ErrorLevel })
-	core := zapcore.NewTee(
+	cores := []zapcore.Core{
 		zapcore.NewCore(encoder, zapcore.AddSync(newLogWriter(c, "info")), infoLevel),
 		zapcore.NewCore(encoder, zapcore.AddSync(newLogWriter(c, "errors")), errLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zap.InfoLevel),
-	)
+	}
+	if c.Console {
+		cores = append(cores, zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zap.InfoLevel))
+	}
 
-	return zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)), nil
+	return zap.New(zapcore.NewTee(cores...), zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)), nil
 }
 
 // newLogWriter builds a rotating log writer for the given record kind, bounding

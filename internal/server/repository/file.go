@@ -7,6 +7,7 @@ import (
 	"gophkeeper/internal/server/db/conn"
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	"time"
 )
 
 type FileRepo struct {
@@ -19,13 +20,13 @@ func NewFileRepo(db *conn.DB) *FileRepo {
 
 const FileListByUserQuery = `SELECT id, user_id, meta, chunk_count, version, created_at, updated_at
 FROM files
-WHERE user_id = $1 AND ($2::uuid IS NULL OR id > $2::uuid)
+WHERE user_id = $1 AND deleted_at IS NULL AND ($2::uuid IS NULL OR id > $2::uuid)
 ORDER BY id
 LIMIT $3 OFFSET $4`
 
 const FileGetMetaQuery = `SELECT id, user_id, meta, chunk_count, version, created_at, updated_at
 FROM files
-WHERE id = $1 AND user_id = $2`
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`
 
 const FileCreateQuery = `INSERT INTO files(user_id, meta, chunk_count) VALUES ($1, $2, $3)
 RETURNING id, user_id, meta, chunk_count, version, created_at, updated_at`
@@ -34,12 +35,19 @@ const FileChunkInsertQuery = `INSERT INTO file_chunks(file_id, idx, data) VALUES
 
 const FileChunksByFileQuery = `SELECT idx, data FROM file_chunks WHERE file_id = $1 ORDER BY idx`
 
-const FileDeleteQuery = `DELETE FROM files WHERE id = $1 AND user_id = $2`
+const FileDeleteQuery = `UPDATE files
+SET deleted_at = now(), version = version + 1, updated_at = now()
+WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`
 
 const FileUpdateMetaQuery = `UPDATE files
 SET meta = $1, version = version + 1, updated_at = now()
 WHERE id = $2 AND user_id = $3 AND version = $4
 RETURNING id, user_id, meta, chunk_count, version, created_at, updated_at`
+
+const FileChangesQuery = `SELECT id, meta, version, deleted_at IS NOT NULL, updated_at
+FROM files
+WHERE user_id = $1 AND ($2::timestamptz IS NULL OR updated_at > $2::timestamptz)
+ORDER BY updated_at`
 
 // UpdateMeta overwrites a file's encrypted metadata using optimistic versioning.
 func (r FileRepo) UpdateMeta(ctx context.Context, user *model.User, id string, meta []byte, version int64) (*model.File, error) {
@@ -145,7 +153,7 @@ func (r FileRepo) StreamChunks(ctx context.Context, fileID string, fn func(idx i
 	return nil
 }
 
-// Delete removes a file owned by the user; its chunks go with it by cascade.
+// Delete soft-deletes a file owned by the user by marking it as a tombstone.
 func (r FileRepo) Delete(ctx context.Context, user *model.User, id string) error {
 	res, err := r.q(ctx).ExecContext(ctx, FileDeleteQuery, id, user.ID)
 	if err != nil {
@@ -159,4 +167,31 @@ func (r FileRepo) Delete(ctx context.Context, user *model.User, id string) error
 		return model.ErrFileNotFound
 	}
 	return nil
+}
+
+// Changes returns all the user's file metadata (including tombstones) updated after since.
+func (r FileRepo) Changes(ctx context.Context, user *model.User, since time.Time) ([]*model.FileChange, error) {
+	var cursor any
+	if !since.IsZero() {
+		cursor = since
+	}
+
+	rows, err := r.q(ctx).QueryContext(ctx, FileChangesQuery, user.ID, cursor)
+	if err != nil {
+		return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Query", err)
+	}
+	defer rows.Close()
+
+	var changes []*model.FileChange
+	for rows.Next() {
+		var ch model.FileChange
+		if err := rows.Scan(&ch.ID, &ch.Meta, &ch.Version, &ch.Deleted, &ch.UpdatedAt); err != nil {
+			return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Scan", err)
+		}
+		changes = append(changes, &ch)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Rows", err)
+	}
+	return changes, nil
 }

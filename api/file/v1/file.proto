@@ -81,10 +81,25 @@ message UpdateMetaResponse {
   File file = 1;
 }
 
+message ChangesRequest {
+  string since = 1;
+}
+message FileChange {
+  string id = 1;
+  bytes meta = 2;
+  int64 version = 3;
+  bool deleted = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+message ChangesResponse {
+  repeated FileChange changes = 1;
+}
+
 service FileService {
   rpc Upload(stream UploadRequest) returns (UploadResponse);
   rpc Download(DownloadRequest) returns (stream DownloadResponse);
   rpc List(ListRequest) returns (ListResponse);
   rpc UpdateMeta(UpdateMetaRequest) returns (UpdateMetaResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc Changes(ChangesRequest) returns (ChangesResponse);
 }

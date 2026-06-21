@@ -155,6 +155,35 @@ func (f *FileServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 	return &pb.DeleteResponse{}, nil
 }
 
+func (f *FileServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.ChangesResponse, error) {
+	userID, ok := authctx.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "missing user identity")
+	}
+	changes, err := f.Service.Changes(ctx, userID, in.GetSince())
+	if err != nil {
+		f.Logger.Error("file changes failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	pbChanges := make([]*pb.FileChange, 0, len(changes))
+	for _, ch := range changes {
+		pbChanges = append(pbChanges, toPbFileChange(ch))
+	}
+	resp := &pb.ChangesResponse{}
+	resp.SetChanges(pbChanges)
+	return resp, nil
+}
+
+func toPbFileChange(ch *model.FileChange) *pb.FileChange {
+	pbChange := &pb.FileChange{}
+	pbChange.SetId(ch.ID)
+	pbChange.SetMeta(ch.Meta)
+	pbChange.SetVersion(ch.Version)
+	pbChange.SetDeleted(ch.Deleted)
+	pbChange.SetUpdatedAt(timestamppb.New(ch.UpdatedAt))
+	return pbChange
+}
+
 func toPbFile(file *model.File) *pb.File {
 	pbFile := &pb.File{}
 	pbFile.SetId(file.ID)

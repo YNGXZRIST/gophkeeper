@@ -35,9 +35,10 @@ func Bootstrap(args []string) (_ *App, err error) {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
 	log, err := logger.Initialize(&logger.Config{
-		Mode:   opt.AppMode,
-		Dir:    opt.LogDir,
-		Prefix: "server",
+		Mode:    opt.AppMode,
+		Dir:     opt.LogDir,
+		Prefix:  "server",
+		Console: true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("init logger: %w", err)

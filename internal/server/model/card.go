@@ -10,3 +10,11 @@ type Card struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type CardChange struct {
+	ID        string
+	Data      []byte
+	Version   int64
+	Deleted   bool
+	UpdatedAt time.Time
+}

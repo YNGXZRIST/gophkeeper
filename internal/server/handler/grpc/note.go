@@ -33,7 +33,7 @@ func (n *NoteServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRespons
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "missing user identity")
 	}
-	note, err := n.Service.Add(ctx, userID, in.GetData())
+	note, err := n.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
 		n.Logger.Error("note add failed", zap.Error(err))
 	}
@@ -113,6 +113,35 @@ func (n *NoteServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 	return &pb.DeleteResponse{}, nil
 
 }
+func (n *NoteServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.ChangesResponse, error) {
+	userID, ok := authctx.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "missing user identity")
+	}
+	changes, err := n.Service.Changes(ctx, userID, in.GetSince())
+	if err != nil {
+		n.Logger.Error("note changes failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	pbChanges := make([]*pb.NoteChange, 0, len(changes))
+	for _, ch := range changes {
+		pbChanges = append(pbChanges, toPbNoteChange(ch))
+	}
+	resp := &pb.ChangesResponse{}
+	resp.SetChanges(pbChanges)
+	return resp, nil
+}
+
+func toPbNoteChange(ch *model.NoteChange) *pb.NoteChange {
+	pbChange := &pb.NoteChange{}
+	pbChange.SetId(ch.ID)
+	pbChange.SetData(ch.Data)
+	pbChange.SetVersion(ch.Version)
+	pbChange.SetDeleted(ch.Deleted)
+	pbChange.SetUpdatedAt(timestamppb.New(ch.UpdatedAt))
+	return pbChange
+}
+
 func toPbNote(note *model.Note) *pb.Note {
 	pbNote := &pb.Note{}
 	pbNote.SetId(note.ID)

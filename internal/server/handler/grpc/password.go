@@ -33,7 +33,7 @@ func (p *PasswordServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRes
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "missing user identity")
 	}
-	pass, err := p.Service.Add(ctx, userID, in.GetData())
+	pass, err := p.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
 		p.Logger.Error("password add failed", zap.Error(err))
 		return nil, status.Error(codes.Internal, "internal error")
@@ -111,6 +111,35 @@ func (p *PasswordServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &pb.DeleteResponse{}, nil
+}
+
+func (p *PasswordServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.ChangesResponse, error) {
+	userID, ok := authctx.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "missing user identity")
+	}
+	changes, err := p.Service.Changes(ctx, userID, in.GetSince())
+	if err != nil {
+		p.Logger.Error("password changes failed", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+	pbChanges := make([]*pb.PasswordChange, 0, len(changes))
+	for _, ch := range changes {
+		pbChanges = append(pbChanges, toPBPasswordChange(ch))
+	}
+	resp := &pb.ChangesResponse{}
+	resp.SetChanges(pbChanges)
+	return resp, nil
+}
+
+func toPBPasswordChange(ch *model.PasswordChange) *pb.PasswordChange {
+	pbChange := &pb.PasswordChange{}
+	pbChange.SetId(ch.ID)
+	pbChange.SetData(ch.Data)
+	pbChange.SetVersion(ch.Version)
+	pbChange.SetDeleted(ch.Deleted)
+	pbChange.SetUpdatedAt(timestamppb.New(ch.UpdatedAt))
+	return pbChange
 }
 
 func toPBPassword(pass *model.Password) *pb.Password {

@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PasswordService_Add_FullMethodName    = "/password.v1.PasswordService/Add"
-	PasswordService_Get_FullMethodName    = "/password.v1.PasswordService/Get"
-	PasswordService_List_FullMethodName   = "/password.v1.PasswordService/List"
-	PasswordService_Update_FullMethodName = "/password.v1.PasswordService/Update"
-	PasswordService_Delete_FullMethodName = "/password.v1.PasswordService/Delete"
+	PasswordService_Add_FullMethodName     = "/password.v1.PasswordService/Add"
+	PasswordService_Get_FullMethodName     = "/password.v1.PasswordService/Get"
+	PasswordService_List_FullMethodName    = "/password.v1.PasswordService/List"
+	PasswordService_Update_FullMethodName  = "/password.v1.PasswordService/Update"
+	PasswordService_Delete_FullMethodName  = "/password.v1.PasswordService/Delete"
+	PasswordService_Changes_FullMethodName = "/password.v1.PasswordService/Changes"
 )
 
 // PasswordServiceClient is the client API for PasswordService service.
@@ -35,6 +36,7 @@ type PasswordServiceClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Changes(ctx context.Context, in *ChangesRequest, opts ...grpc.CallOption) (*ChangesResponse, error)
 }
 
 type passwordServiceClient struct {
@@ -95,6 +97,16 @@ func (c *passwordServiceClient) Delete(ctx context.Context, in *DeleteRequest, o
 	return out, nil
 }
 
+func (c *passwordServiceClient) Changes(ctx context.Context, in *ChangesRequest, opts ...grpc.CallOption) (*ChangesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChangesResponse)
+	err := c.cc.Invoke(ctx, PasswordService_Changes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PasswordServiceServer is the server API for PasswordService service.
 // All implementations must embed UnimplementedPasswordServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type PasswordServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	Changes(context.Context, *ChangesRequest) (*ChangesResponse, error)
 	mustEmbedUnimplementedPasswordServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedPasswordServiceServer) Update(context.Context, *UpdateRequest
 }
 func (UnimplementedPasswordServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedPasswordServiceServer) Changes(context.Context, *ChangesRequest) (*ChangesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Changes not implemented")
 }
 func (UnimplementedPasswordServiceServer) mustEmbedUnimplementedPasswordServiceServer() {}
 func (UnimplementedPasswordServiceServer) testEmbeddedByValue()                         {}
@@ -240,6 +256,24 @@ func _PasswordService_Delete_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PasswordService_Changes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PasswordServiceServer).Changes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PasswordService_Changes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PasswordServiceServer).Changes(ctx, req.(*ChangesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PasswordService_ServiceDesc is the grpc.ServiceDesc for PasswordService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var PasswordService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _PasswordService_Delete_Handler,
+		},
+		{
+			MethodName: "Changes",
+			Handler:    _PasswordService_Changes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

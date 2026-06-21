@@ -3,12 +3,12 @@ package passwordlist
 import (
 	"encoding/json"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
-	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 )
 
-func decodePassword(v *vault.Vault, pb *passwordv1.Password) (clientmodel.Password, error) {
-	raw, err := v.Decrypt(pb.GetData())
+func decodePassword(v *vault.Vault, row repository.PasswordRow) (clientmodel.Password, error) {
+	raw, err := v.Decrypt(row.Data)
 	if err != nil {
 		return clientmodel.Password{}, err
 	}
@@ -17,11 +17,9 @@ func decodePassword(v *vault.Vault, pb *passwordv1.Password) (clientmodel.Passwo
 		return clientmodel.Password{}, err
 	}
 	return clientmodel.Password{
-		ID:        pb.GetId(),
-		Data:      data,
-		Version:   pb.GetVersion(),
-		CreatedAt: pb.GetCreatedAt().AsTime(),
-		UpdatedAt: pb.GetUpdatedAt().AsTime(),
+		ID:      row.ID,
+		Data:    data,
+		Version: row.Version,
 	}, nil
 }
 

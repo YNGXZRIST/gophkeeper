@@ -10,3 +10,11 @@ type Password struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type PasswordChange struct {
+	ID        string
+	Data      []byte
+	Version   int64
+	Deleted   bool
+	UpdatedAt time.Time
+}

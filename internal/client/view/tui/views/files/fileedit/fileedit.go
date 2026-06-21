@@ -10,7 +10,6 @@ import (
 	"gophkeeper/internal/client/view/tui/components/keys"
 	"gophkeeper/internal/client/view/tui/components/layout"
 	"gophkeeper/internal/client/view/tui/components/nav"
-	filev1 "gophkeeper/internal/shared/proto/file/v1"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -21,25 +20,29 @@ const label = "Edit file"
 
 type savedMsg struct{ err error }
 
+type Repo interface {
+	UpdateMeta(ctx context.Context, id string, meta []byte) error
+}
+
 type Prop struct {
-	Vault  *vault.Vault
-	Client filev1.FileServiceClient
-	File   clientmodel.File
+	Vault *vault.Vault
+	Repo  Repo
+	File  clientmodel.File
 }
 
 type model struct {
 	form   form.Model
 	vault  *vault.Vault
-	client filev1.FileServiceClient
+	repo   Repo
 	file   clientmodel.File
 	errMsg string
 }
 
 func New(p Prop) tea.Model {
 	return model{
-		vault:  p.Vault,
-		client: p.Client,
-		file:   p.File,
+		vault: p.Vault,
+		repo:  p.Repo,
+		file:  p.File,
 		form: form.New("save", []form.Field{
 			{Placeholder: "Meta", Value: p.File.Meta.Meta, CharLimit: 256, Width: 256},
 		}),
@@ -83,7 +86,7 @@ func (m model) submit() tea.Cmd {
 		Meta: m.form.Values()[0],
 	}
 	vlt := m.vault
-	client := m.client
+	repo := m.repo
 	file := m.file
 	return func() tea.Msg {
 		raw, err := json.Marshal(data)
@@ -94,11 +97,7 @@ func (m model) submit() tea.Cmd {
 		if err != nil {
 			return savedMsg{err: err}
 		}
-		req := &filev1.UpdateMetaRequest{}
-		req.SetId(file.ID)
-		req.SetMeta(ciphertext)
-		req.SetVersion(file.Version)
-		if _, err := client.UpdateMeta(context.Background(), req); err != nil {
+		if err := repo.UpdateMeta(context.Background(), file.ID, ciphertext); err != nil {
 			return savedMsg{err: err}
 		}
 		return savedMsg{}

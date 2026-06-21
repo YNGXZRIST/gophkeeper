@@ -59,7 +59,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.errMsg = "Save failed. " + msg.err.Error()
 			return m, nil
 		}
-		return m, tea.Sequence(nav.Back(), nav.Reload())
+		return m, tea.Sequence(nav.Back(), nav.Reload(), nav.SyncNow())
 	}
 
 	var act form.Action

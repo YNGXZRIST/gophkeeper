@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NoteService_Add_FullMethodName    = "/note.v1.NoteService/Add"
-	NoteService_Get_FullMethodName    = "/note.v1.NoteService/Get"
-	NoteService_List_FullMethodName   = "/note.v1.NoteService/List"
-	NoteService_Update_FullMethodName = "/note.v1.NoteService/Update"
-	NoteService_Delete_FullMethodName = "/note.v1.NoteService/Delete"
+	NoteService_Add_FullMethodName     = "/note.v1.NoteService/Add"
+	NoteService_Get_FullMethodName     = "/note.v1.NoteService/Get"
+	NoteService_List_FullMethodName    = "/note.v1.NoteService/List"
+	NoteService_Update_FullMethodName  = "/note.v1.NoteService/Update"
+	NoteService_Delete_FullMethodName  = "/note.v1.NoteService/Delete"
+	NoteService_Changes_FullMethodName = "/note.v1.NoteService/Changes"
 )
 
 // NoteServiceClient is the client API for NoteService service.
@@ -35,6 +36,7 @@ type NoteServiceClient interface {
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	Changes(ctx context.Context, in *ChangesRequest, opts ...grpc.CallOption) (*ChangesResponse, error)
 }
 
 type noteServiceClient struct {
@@ -95,6 +97,16 @@ func (c *noteServiceClient) Delete(ctx context.Context, in *DeleteRequest, opts 
 	return out, nil
 }
 
+func (c *noteServiceClient) Changes(ctx context.Context, in *ChangesRequest, opts ...grpc.CallOption) (*ChangesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChangesResponse)
+	err := c.cc.Invoke(ctx, NoteService_Changes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NoteServiceServer is the server API for NoteService service.
 // All implementations must embed UnimplementedNoteServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type NoteServiceServer interface {
 	List(context.Context, *ListRequest) (*ListResponse, error)
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	Changes(context.Context, *ChangesRequest) (*ChangesResponse, error)
 	mustEmbedUnimplementedNoteServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedNoteServiceServer) Update(context.Context, *UpdateRequest) (*
 }
 func (UnimplementedNoteServiceServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedNoteServiceServer) Changes(context.Context, *ChangesRequest) (*ChangesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Changes not implemented")
 }
 func (UnimplementedNoteServiceServer) mustEmbedUnimplementedNoteServiceServer() {}
 func (UnimplementedNoteServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _NoteService_Delete_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NoteService_Changes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NoteServiceServer).Changes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NoteService_Changes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NoteServiceServer).Changes(ctx, req.(*ChangesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NoteService_ServiceDesc is the grpc.ServiceDesc for NoteService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var NoteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _NoteService_Delete_Handler,
+		},
+		{
+			MethodName: "Changes",
+			Handler:    _NoteService_Changes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

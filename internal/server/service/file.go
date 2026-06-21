@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"gophkeeper/internal/server/model"
 	"io"
+	"time"
 )
 
 type fileRepository interface {
@@ -17,6 +18,7 @@ type fileRepository interface {
 	StreamChunks(ctx context.Context, fileID string, fn func(idx int, data []byte) error) error
 	UpdateMeta(ctx context.Context, user *model.User, id string, meta []byte, version int64) (*model.File, error)
 	Delete(ctx context.Context, user *model.User, id string) error
+	Changes(ctx context.Context, user *model.User, since time.Time) ([]*model.FileChange, error)
 }
 
 type txRunner interface {
@@ -88,4 +90,17 @@ func (s *FileService) UpdateMeta(ctx context.Context, userID, id string, meta []
 // Delete removes a file owned by the user.
 func (s *FileService) Delete(ctx context.Context, userID, id string) error {
 	return s.repo.Delete(ctx, &model.User{ID: userID}, id)
+}
+
+// Changes returns the user's file metadata changed since the given cursor (RFC3339, empty = all).
+func (s *FileService) Changes(ctx context.Context, userID, since string) ([]*model.FileChange, error) {
+	var t time.Time
+	if since != "" {
+		parsed, err := time.Parse(time.RFC3339Nano, since)
+		if err != nil {
+			return nil, err
+		}
+		t = parsed
+	}
+	return s.repo.Changes(ctx, &model.User{ID: userID}, t)
 }

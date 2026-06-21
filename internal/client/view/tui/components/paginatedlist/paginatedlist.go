@@ -16,7 +16,7 @@ import (
 
 const pageSize = 10
 
-const listHint = "↑/↓ — move · enter — reveal · a — add · e — edit · d — delete · ←/→ — page · esc — back"
+const listHint = "↑/↓ — move · enter — reveal · a — add · e — edit · d — delete · c — conflicts · ←/→ — page · esc — back"
 
 // Config wires a concrete secret type T into the generic list screen. Every
 // callback is optional; a nil one disables the action it would drive.
@@ -45,7 +45,8 @@ type Config[T any] struct {
 	NewEdit func(T) tea.Model
 	// NewDownload builds the download screen for the given item; when set, the
 	// list offers a "save" action.
-	NewDownload func(T) tea.Model
+	NewDownload    func(T) tea.Model
+	ConflictScreen nav.ScreenID
 }
 
 type loadedMsg[T any] struct {
@@ -147,7 +148,7 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.errMsg = "Delete failed."
 			return m, nil
 		}
-		return m, m.fetch(m.cursor)
+		return m, tea.Batch(m.fetch(m.cursor), nav.SyncNow())
 	case nav.ReloadMsg:
 		m.loading = true
 		return m, tea.Batch(m.fetch(m.cursor), m.spinner.Tick)
@@ -181,6 +182,10 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case keys.A:
 			return m, nav.Push(m.cfg.AddScreen)
+		case keys.C:
+			if m.cfg.ConflictScreen != 0 {
+				return m, nav.Push(m.cfg.ConflictScreen)
+			}
 		case keys.E:
 			if m.canDelete() && m.cfg.NewEdit != nil {
 				return m, nav.PushModel(m.cfg.NewEdit(m.items[m.selected]))

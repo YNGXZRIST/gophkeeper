@@ -3,13 +3,13 @@ package notelist
 import (
 	"encoding/json"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
-	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	"strings"
 )
 
-func decodeNote(v *vault.Vault, pb *notev1.Note) (clientmodel.Note, error) {
-	raw, err := v.Decrypt(pb.GetData())
+func decodeNote(v *vault.Vault, row repository.NoteRow) (clientmodel.Note, error) {
+	raw, err := v.Decrypt(row.Data)
 	if err != nil {
 		return clientmodel.Note{}, err
 	}
@@ -17,13 +17,7 @@ func decodeNote(v *vault.Vault, pb *notev1.Note) (clientmodel.Note, error) {
 	if err := json.Unmarshal(raw, &data); err != nil {
 		return clientmodel.Note{}, err
 	}
-	return clientmodel.Note{
-		ID:        pb.GetId(),
-		Data:      data,
-		Version:   pb.GetVersion(),
-		CreatedAt: pb.GetCreatedAt().AsTime(),
-		UpdatedAt: pb.GetUpdatedAt().AsTime(),
-	}, nil
+	return clientmodel.Note{ID: row.ID, Data: data, Version: row.Version}, nil
 }
 
 func snippet(s string) string {

@@ -1,0 +1,1 @@
+ALTER TABLE passwords ADD COLUMN deleted_at TIMESTAMPTZ;

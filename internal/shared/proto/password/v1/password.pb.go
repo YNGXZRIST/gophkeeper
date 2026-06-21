@@ -216,6 +216,7 @@ func (b0 Password_builder) Build() *Password {
 type AddRequest struct {
 	state                  protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Data        []byte                 `protobuf:"bytes,1,opt,name=data"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,2,opt,name=id"`
 	XXX_raceDetectHookData protoimpl.RaceDetectHookData
 	XXX_presence           [1]uint32
 	unknownFields          protoimpl.UnknownFields
@@ -254,12 +255,27 @@ func (x *AddRequest) GetData() []byte {
 	return nil
 }
 
+func (x *AddRequest) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AddRequest) SetData(v []byte) {
 	if v == nil {
 		v = []byte{}
 	}
 	x.xxx_hidden_Data = v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 2)
+}
+
+func (x *AddRequest) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
 }
 
 func (x *AddRequest) HasData() bool {
@@ -269,15 +285,28 @@ func (x *AddRequest) HasData() bool {
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
 }
 
+func (x *AddRequest) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
 func (x *AddRequest) ClearData() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
 	x.xxx_hidden_Data = nil
+}
+
+func (x *AddRequest) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Id = nil
 }
 
 type AddRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Data []byte
+	Id   *string
 }
 
 func (b0 AddRequest_builder) Build() *AddRequest {
@@ -285,8 +314,12 @@ func (b0 AddRequest_builder) Build() *AddRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	if b.Data != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 2)
 		x.xxx_hidden_Data = b.Data
+	}
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		x.xxx_hidden_Id = b.Id
 	}
 	return m0
 }
@@ -1033,6 +1066,339 @@ func (b0 DeleteResponse_builder) Build() *DeleteResponse {
 	return m0
 }
 
+type ChangesRequest struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Since       *string                `protobuf:"bytes,1,opt,name=since"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *ChangesRequest) Reset() {
+	*x = ChangesRequest{}
+	mi := &file_password_v1_password_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesRequest) ProtoMessage() {}
+
+func (x *ChangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_password_v1_password_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesRequest) GetSince() string {
+	if x != nil {
+		if x.xxx_hidden_Since != nil {
+			return *x.xxx_hidden_Since
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *ChangesRequest) SetSince(v string) {
+	x.xxx_hidden_Since = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 1)
+}
+
+func (x *ChangesRequest) HasSince() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *ChangesRequest) ClearSince() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Since = nil
+}
+
+type ChangesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Since *string
+}
+
+func (b0 ChangesRequest_builder) Build() *ChangesRequest {
+	m0 := &ChangesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Since != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 1)
+		x.xxx_hidden_Since = b.Since
+	}
+	return m0
+}
+
+type PasswordChange struct {
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Id          *string                `protobuf:"bytes,1,opt,name=id"`
+	xxx_hidden_Data        []byte                 `protobuf:"bytes,2,opt,name=data"`
+	xxx_hidden_Version     int64                  `protobuf:"varint,3,opt,name=version"`
+	xxx_hidden_Deleted     bool                   `protobuf:"varint,4,opt,name=deleted"`
+	xxx_hidden_UpdatedAt   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt"`
+	XXX_raceDetectHookData protoimpl.RaceDetectHookData
+	XXX_presence           [1]uint32
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *PasswordChange) Reset() {
+	*x = PasswordChange{}
+	mi := &file_password_v1_password_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PasswordChange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PasswordChange) ProtoMessage() {}
+
+func (x *PasswordChange) ProtoReflect() protoreflect.Message {
+	mi := &file_password_v1_password_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *PasswordChange) GetId() string {
+	if x != nil {
+		if x.xxx_hidden_Id != nil {
+			return *x.xxx_hidden_Id
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *PasswordChange) GetData() []byte {
+	if x != nil {
+		return x.xxx_hidden_Data
+	}
+	return nil
+}
+
+func (x *PasswordChange) GetVersion() int64 {
+	if x != nil {
+		return x.xxx_hidden_Version
+	}
+	return 0
+}
+
+func (x *PasswordChange) GetDeleted() bool {
+	if x != nil {
+		return x.xxx_hidden_Deleted
+	}
+	return false
+}
+
+func (x *PasswordChange) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.xxx_hidden_UpdatedAt
+	}
+	return nil
+}
+
+func (x *PasswordChange) SetId(v string) {
+	x.xxx_hidden_Id = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 0, 5)
+}
+
+func (x *PasswordChange) SetData(v []byte) {
+	if v == nil {
+		v = []byte{}
+	}
+	x.xxx_hidden_Data = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 5)
+}
+
+func (x *PasswordChange) SetVersion(v int64) {
+	x.xxx_hidden_Version = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 5)
+}
+
+func (x *PasswordChange) SetDeleted(v bool) {
+	x.xxx_hidden_Deleted = v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 5)
+}
+
+func (x *PasswordChange) SetUpdatedAt(v *timestamppb.Timestamp) {
+	x.xxx_hidden_UpdatedAt = v
+}
+
+func (x *PasswordChange) HasId() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 0)
+}
+
+func (x *PasswordChange) HasData() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
+}
+
+func (x *PasswordChange) HasVersion() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *PasswordChange) HasDeleted() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *PasswordChange) HasUpdatedAt() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_UpdatedAt != nil
+}
+
+func (x *PasswordChange) ClearId() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 0)
+	x.xxx_hidden_Id = nil
+}
+
+func (x *PasswordChange) ClearData() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_Data = nil
+}
+
+func (x *PasswordChange) ClearVersion() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
+	x.xxx_hidden_Version = 0
+}
+
+func (x *PasswordChange) ClearDeleted() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_Deleted = false
+}
+
+func (x *PasswordChange) ClearUpdatedAt() {
+	x.xxx_hidden_UpdatedAt = nil
+}
+
+type PasswordChange_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Id        *string
+	Data      []byte
+	Version   *int64
+	Deleted   *bool
+	UpdatedAt *timestamppb.Timestamp
+}
+
+func (b0 PasswordChange_builder) Build() *PasswordChange {
+	m0 := &PasswordChange{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.Id != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 0, 5)
+		x.xxx_hidden_Id = b.Id
+	}
+	if b.Data != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 5)
+		x.xxx_hidden_Data = b.Data
+	}
+	if b.Version != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 5)
+		x.xxx_hidden_Version = *b.Version
+	}
+	if b.Deleted != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 5)
+		x.xxx_hidden_Deleted = *b.Deleted
+	}
+	x.xxx_hidden_UpdatedAt = b.UpdatedAt
+	return m0
+}
+
+type ChangesResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Changes *[]*PasswordChange     `protobuf:"bytes,1,rep,name=changes"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ChangesResponse) Reset() {
+	*x = ChangesResponse{}
+	mi := &file_password_v1_password_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangesResponse) ProtoMessage() {}
+
+func (x *ChangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_password_v1_password_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ChangesResponse) GetChanges() []*PasswordChange {
+	if x != nil {
+		if x.xxx_hidden_Changes != nil {
+			return *x.xxx_hidden_Changes
+		}
+	}
+	return nil
+}
+
+func (x *ChangesResponse) SetChanges(v []*PasswordChange) {
+	x.xxx_hidden_Changes = &v
+}
+
+type ChangesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Changes []*PasswordChange
+}
+
+func (b0 ChangesResponse_builder) Build() *ChangesResponse {
+	m0 := &ChangesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Changes = &b.Changes
+	return m0
+}
+
 var File_password_v1_password_proto protoreflect.FileDescriptor
 
 const file_password_v1_password_proto_rawDesc = "" +
@@ -1045,10 +1411,11 @@ const file_password_v1_password_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\" \n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"0\n" +
 	"\n" +
 	"AddRequest\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04data\"@\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\"@\n" +
 	"\vAddResponse\x121\n" +
 	"\bpassword\x18\x01 \x01(\v2\x15.password.v1.PasswordR\bpassword\"\x1c\n" +
 	"\n" +
@@ -1070,15 +1437,27 @@ const file_password_v1_password_proto_rawDesc = "" +
 	"\bpassword\x18\x01 \x01(\v2\x15.password.v1.PasswordR\bpassword\"\x1f\n" +
 	"\rDeleteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x10\n" +
-	"\x0eDeleteResponse2\xc8\x02\n" +
+	"\x0eDeleteResponse\"&\n" +
+	"\x0eChangesRequest\x12\x14\n" +
+	"\x05since\x18\x01 \x01(\tR\x05since\"\xa3\x01\n" +
+	"\x0ePasswordChange\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04data\x18\x02 \x01(\fR\x04data\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x03R\aversion\x12\x18\n" +
+	"\adeleted\x18\x04 \x01(\bR\adeleted\x129\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"H\n" +
+	"\x0fChangesResponse\x125\n" +
+	"\achanges\x18\x01 \x03(\v2\x1b.password.v1.PasswordChangeR\achanges2\x8e\x03\n" +
 	"\x0fPasswordService\x128\n" +
 	"\x03Add\x12\x17.password.v1.AddRequest\x1a\x18.password.v1.AddResponse\x128\n" +
 	"\x03Get\x12\x17.password.v1.GetRequest\x1a\x18.password.v1.GetResponse\x12;\n" +
 	"\x04List\x12\x18.password.v1.ListRequest\x1a\x19.password.v1.ListResponse\x12A\n" +
 	"\x06Update\x12\x1a.password.v1.UpdateRequest\x1a\x1b.password.v1.UpdateResponse\x12A\n" +
-	"\x06Delete\x12\x1a.password.v1.DeleteRequest\x1a\x1b.password.v1.DeleteResponseB9Z7gophkeeper/internal/shared/proto/password/v1;passwordv1b\beditionsp\xe8\a"
+	"\x06Delete\x12\x1a.password.v1.DeleteRequest\x1a\x1b.password.v1.DeleteResponse\x12D\n" +
+	"\aChanges\x12\x1b.password.v1.ChangesRequest\x1a\x1c.password.v1.ChangesResponseB9Z7gophkeeper/internal/shared/proto/password/v1;passwordv1b\beditionsp\xe8\a"
 
-var file_password_v1_password_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_password_v1_password_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_password_v1_password_proto_goTypes = []any{
 	(*Password)(nil),              // 0: password.v1.Password
 	(*AddRequest)(nil),            // 1: password.v1.AddRequest
@@ -1091,30 +1470,37 @@ var file_password_v1_password_proto_goTypes = []any{
 	(*UpdateResponse)(nil),        // 8: password.v1.UpdateResponse
 	(*DeleteRequest)(nil),         // 9: password.v1.DeleteRequest
 	(*DeleteResponse)(nil),        // 10: password.v1.DeleteResponse
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*ChangesRequest)(nil),        // 11: password.v1.ChangesRequest
+	(*PasswordChange)(nil),        // 12: password.v1.PasswordChange
+	(*ChangesResponse)(nil),       // 13: password.v1.ChangesResponse
+	(*timestamppb.Timestamp)(nil), // 14: google.protobuf.Timestamp
 }
 var file_password_v1_password_proto_depIdxs = []int32{
-	11, // 0: password.v1.Password.created_at:type_name -> google.protobuf.Timestamp
-	11, // 1: password.v1.Password.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: password.v1.Password.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: password.v1.Password.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: password.v1.AddResponse.password:type_name -> password.v1.Password
 	0,  // 3: password.v1.GetResponse.password:type_name -> password.v1.Password
 	0,  // 4: password.v1.ListResponse.passwords:type_name -> password.v1.Password
 	0,  // 5: password.v1.UpdateResponse.password:type_name -> password.v1.Password
-	1,  // 6: password.v1.PasswordService.Add:input_type -> password.v1.AddRequest
-	3,  // 7: password.v1.PasswordService.Get:input_type -> password.v1.GetRequest
-	5,  // 8: password.v1.PasswordService.List:input_type -> password.v1.ListRequest
-	7,  // 9: password.v1.PasswordService.Update:input_type -> password.v1.UpdateRequest
-	9,  // 10: password.v1.PasswordService.Delete:input_type -> password.v1.DeleteRequest
-	2,  // 11: password.v1.PasswordService.Add:output_type -> password.v1.AddResponse
-	4,  // 12: password.v1.PasswordService.Get:output_type -> password.v1.GetResponse
-	6,  // 13: password.v1.PasswordService.List:output_type -> password.v1.ListResponse
-	8,  // 14: password.v1.PasswordService.Update:output_type -> password.v1.UpdateResponse
-	10, // 15: password.v1.PasswordService.Delete:output_type -> password.v1.DeleteResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	14, // 6: password.v1.PasswordChange.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 7: password.v1.ChangesResponse.changes:type_name -> password.v1.PasswordChange
+	1,  // 8: password.v1.PasswordService.Add:input_type -> password.v1.AddRequest
+	3,  // 9: password.v1.PasswordService.Get:input_type -> password.v1.GetRequest
+	5,  // 10: password.v1.PasswordService.List:input_type -> password.v1.ListRequest
+	7,  // 11: password.v1.PasswordService.Update:input_type -> password.v1.UpdateRequest
+	9,  // 12: password.v1.PasswordService.Delete:input_type -> password.v1.DeleteRequest
+	11, // 13: password.v1.PasswordService.Changes:input_type -> password.v1.ChangesRequest
+	2,  // 14: password.v1.PasswordService.Add:output_type -> password.v1.AddResponse
+	4,  // 15: password.v1.PasswordService.Get:output_type -> password.v1.GetResponse
+	6,  // 16: password.v1.PasswordService.List:output_type -> password.v1.ListResponse
+	8,  // 17: password.v1.PasswordService.Update:output_type -> password.v1.UpdateResponse
+	10, // 18: password.v1.PasswordService.Delete:output_type -> password.v1.DeleteResponse
+	13, // 19: password.v1.PasswordService.Changes:output_type -> password.v1.ChangesResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_password_v1_password_proto_init() }
@@ -1128,7 +1514,7 @@ func file_password_v1_password_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_password_v1_password_proto_rawDesc), len(file_password_v1_password_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -44,14 +44,20 @@ type doneMsg struct {
 	err error
 }
 
+type Repo interface {
+	Insert(ctx context.Context, id string, meta []byte, chunkCount int, version int64) error
+}
+
 type Prop struct {
 	Vault  *vault.Vault
 	Client filev1.FileServiceClient
+	Repo   Repo
 }
 
 type model struct {
 	vault  *vault.Vault
 	client filev1.FileServiceClient
+	repo   Repo
 	picker tea.Model
 	phase  phase
 	bar    progress.Model
@@ -62,7 +68,7 @@ type model struct {
 }
 
 func New(p Prop) tea.Model {
-	m := model{vault: p.Vault, client: p.Client, bar: progress.New()}
+	m := model{vault: p.Vault, client: p.Client, repo: p.Repo, bar: progress.New()}
 	m.picker = filepick.New(filepick.Prop{
 		Title: label,
 		OnSelect: func(path string) tea.Cmd {
@@ -234,7 +240,11 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 	if err != nil {
 		return "", err
 	}
-	return resp.GetId(), nil
+	id := resp.GetId()
+	if err := m.repo.Insert(context.Background(), id, metaCt, total, 1); err != nil {
+		return "", err
+	}
+	return id, nil
 }
 
 func (m model) listen() tea.Cmd {

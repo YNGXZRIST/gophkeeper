@@ -3,15 +3,11 @@ package cardlist
 import (
 	"encoding/json"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
-	cardv1 "gophkeeper/internal/shared/proto/card/v1"
 	"testing"
-	"time"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// testVault returns an unlocked vault using a fixed 32-byte data key.
 func testVault(t *testing.T) *vault.Vault {
 	t.Helper()
 	v := vault.New()
@@ -42,14 +38,9 @@ func TestDecodeCardRoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("encrypt: %v", err)
 	}
-	pb := &cardv1.Card{}
-	pb.SetId("card-1")
-	pb.SetVersion(7)
-	pb.SetData(blob)
-	pb.SetCreatedAt(timestamppb.New(time.Unix(1000, 0)))
-	pb.SetUpdatedAt(timestamppb.New(time.Unix(2000, 0)))
+	row := repository.CardRow{ID: "card-1", Data: blob, Version: 7}
 
-	got, err := decodeCard(v, pb)
+	got, err := decodeCard(v, row)
 	if err != nil {
 		t.Fatalf("decodeCard: %v", err)
 	}
@@ -66,11 +57,9 @@ func TestDecodeCardRoundTrip(t *testing.T) {
 
 func TestDecodeCardCorrupt(t *testing.T) {
 	v := testVault(t)
-	pb := &cardv1.Card{}
-	pb.SetId("card-2")
-	pb.SetData([]byte("not a valid ciphertext"))
+	row := repository.CardRow{ID: "card-2", Data: []byte("not a valid ciphertext")}
 
-	if _, err := decodeCard(v, pb); err == nil {
+	if _, err := decodeCard(v, row); err == nil {
 		t.Fatal("decodeCard: expected error for corrupt data, got nil")
 	}
 }

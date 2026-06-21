@@ -1,69 +1,64 @@
-// Package list shows the notes list.
+// Package notelist shows the notes list.
 package notelist
 
 import (
 	"context"
 	"fmt"
 	clientmodel "gophkeeper/internal/client/model"
+	"gophkeeper/internal/client/repository"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/components/nav"
 	"gophkeeper/internal/client/view/tui/components/paginatedlist"
 	"gophkeeper/internal/client/view/tui/components/theme"
 	"gophkeeper/internal/client/view/tui/views/home"
 	"gophkeeper/internal/client/view/tui/views/notes/noteedit"
-	notev1 "gophkeeper/internal/shared/proto/note/v1"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
 )
 
-// Column width for the note list, in display runes.
 const colText = 40
 
 const noun = "note"
 
+type Repo interface {
+	List(ctx context.Context, lastID string, limit int) ([]repository.NoteRow, error)
+	Update(ctx context.Context, id string, data []byte) error
+	Delete(ctx context.Context, id string) error
+}
+
 type Prop struct {
-	Vault  *vault.Vault
-	Client notev1.NoteServiceClient
+	Vault *vault.Vault
+	Repo  Repo
 }
 
 func New(p Prop) tea.Model {
+	repo := p.Repo
+	vlt := p.Vault
 	return paginatedlist.New(paginatedlist.Config[clientmodel.Note]{
-		Title:     home.LabelNotes,
-		Noun:      noun,
-		Header:    fmt.Sprintf("  %-*s%s", colText, "TEXT", "META"),
-		AddScreen: nav.NoteAdd,
-		Fetch: paginatedlist.Fetcher(p.list,
-			func(pb *notev1.Note) (clientmodel.Note, error) { return decodeNote(p.Vault, pb) },
-			func(pb *notev1.Note) clientmodel.Note { return clientmodel.Note{ID: pb.GetId()} },
+		Title:          home.LabelNotes,
+		Noun:           noun,
+		Header:         fmt.Sprintf("  %-*s%s", colText, "TEXT", "META"),
+		AddScreen:      nav.NoteAdd,
+		ConflictScreen: nav.Sync,
+		Fetch: paginatedlist.Fetcher(
+			func(cursor string, limit int) ([]repository.NoteRow, error) {
+				return repo.List(context.Background(), cursor, limit)
+			},
+			func(row repository.NoteRow) (clientmodel.Note, error) { return decodeNote(vlt, row) },
+			func(row repository.NoteRow) clientmodel.Note { return clientmodel.Note{ID: row.ID} },
 		),
 		ID:           func(n clientmodel.Note) string { return n.ID },
 		Revealable:   func(n clientmodel.Note) bool { return n.Data != (clientmodel.NoteData{}) },
 		RenderItem:   renderItem,
 		RenderDetail: renderDetail,
-		Remove:       p.remove,
+		Remove: func(id string) error {
+			return repo.Delete(context.Background(), id)
+		},
 		NewEdit: func(n clientmodel.Note) tea.Model {
-			return noteedit.New(noteedit.Prop{Vault: p.Vault, Client: p.Client, Note: n})
+			return noteedit.New(noteedit.Prop{Vault: vlt, Repo: repo, Note: n})
 		},
 	})
-}
-
-func (p Prop) list(cursor string, limit int) ([]*notev1.Note, error) {
-	req := &notev1.ListRequest{}
-	req.SetLastId(cursor)
-	req.SetLimit(int32(limit))
-	resp, err := p.Client.List(context.Background(), req)
-	if err != nil {
-		return nil, err
-	}
-	return resp.GetNotes(), nil
-}
-
-func (p Prop) remove(id string) error {
-	req := &notev1.DeleteRequest{}
-	req.SetId(id)
-	_, err := p.Client.Delete(context.Background(), req)
-	return err
 }
 
 func renderItem(n clientmodel.Note) string {
