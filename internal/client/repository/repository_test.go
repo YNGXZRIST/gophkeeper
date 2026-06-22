@@ -9,7 +9,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,7 +78,7 @@ func newTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 	name := strings.ReplaceAll(t.Name(), "/", "_")
 	dsn := "file:" + name + "_" + itoa(dbCounter.Add(1)) + "?mode=memory&cache=shared"
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	require.NoError(t, err)
 
 	db.SetMaxOpenConns(1)

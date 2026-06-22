@@ -37,8 +37,8 @@ func TestOpen(t *testing.T) {
 }
 
 func TestConstants(t *testing.T) {
-	if Sqlite3 != "sqlite3" {
-		t.Fatalf("Sqlite3 = %q", Sqlite3)
+	if Driver != "sqlite" {
+		t.Fatalf("Driver = %q", Driver)
 	}
 	if PathDB == "" {
 		t.Fatal("PathDB empty")

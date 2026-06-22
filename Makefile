@@ -6,9 +6,13 @@ COVER_EXCLUDE ?= internal/shared/proto|/cmd/|/db/conn/mock|/migrations|/internal
 
 BIN_DIR ?= bin
 GRPC_ADDR ?= localhost:8080
-LDFLAGS := -X main.grpcServerAddr=$(GRPC_ADDR)
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+LDFLAGS := -X main.grpcServerAddr=$(GRPC_ADDR) -X main.buildVersion=$(VERSION) -X main.buildDate=$(BUILD_DATE)
 
-.PHONY: help proto certs build build-server build-client run-server test test-integration test-coverpkg test-short coverage coverage-percent coverage-packages fmt fmt-check vet check clean
+COMPOSE := docker compose -f docker/docker-compose.yml
+
+.PHONY: help proto certs build build-server build-client build-client-all run-server run-client db-up db-down test test-integration test-coverpkg test-short coverage coverage-percent coverage-packages fmt fmt-check vet check clean
 
 help: ## Показать справку
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -31,8 +35,23 @@ build-server: certs ## Собрать бинарь сервера
 build-client: certs ## Собрать бинарь клиента (серт встраивается через go:embed)
 	go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/client ./cmd/client
 
-run-server: certs ## Запустить сервер (секреты задаются через config.json или env)
+build-client-all: certs ## Кросс-собрать клиент под windows/linux/macOS (без CGO, чистый Go-драйвер SQLite)
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/client-windows-amd64.exe ./cmd/client
+	CGO_ENABLED=0 GOOS=linux   GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/client-linux-amd64 ./cmd/client
+	CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/client-darwin-amd64 ./cmd/client
+	CGO_ENABLED=0 GOOS=darwin  GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(BIN_DIR)/client-darwin-arm64 ./cmd/client
+
+run-server: certs db-up ## Запустить сервер локально (секреты — через config.json или env)
 	go run ./cmd/server
+
+run-client: ## Запустить клиентский TUI локально
+	go run ./cmd/client
+
+db-up: ## Поднять только Postgres в Docker (зависимость сервера)
+	$(COMPOSE) up -d db
+
+db-down: ## Остановить Postgres
+	$(COMPOSE) down
 
 test: certs ## Запустить все тесты (без integration) и собрать покрытие
 	@echo "$(GREEN)Running tests...$(NC)"

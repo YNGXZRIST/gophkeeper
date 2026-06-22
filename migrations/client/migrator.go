@@ -6,7 +6,7 @@ import (
 	conn "gophkeeper/internal/client/db"
 	"gophkeeper/internal/shared/migrator"
 
-	"github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
 )
 
 //go:embed *sql
@@ -20,11 +20,11 @@ func Migrate() error {
 	if err != nil {
 		return err
 	}
-	dbDriver, err := sqlite3.WithInstance(db, &sqlite3.Config{})
+	dbDriver, err := sqlite.WithInstance(db, &sqlite.Config{})
 	if err != nil {
-		return fmt.Errorf("sqlite3 driver: %w", err)
+		return fmt.Errorf("sqlite driver: %w", err)
 	}
 	defer dbDriver.Close()
 
-	return migrator.Run(FS, dbDriver, conn.Sqlite3)
+	return migrator.Run(FS, dbDriver, conn.Driver)
 }

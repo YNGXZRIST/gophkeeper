@@ -7,22 +7,22 @@ import (
 	"testing/fstest"
 
 	"github.com/golang-migrate/migrate/v4/database"
-	sqlite3driver "github.com/golang-migrate/migrate/v4/database/sqlite3"
-	_ "github.com/mattn/go-sqlite3"
+	sqlitedriver "github.com/golang-migrate/migrate/v4/database/sqlite"
+	_ "modernc.org/sqlite"
 )
 
 func runMigrations(t *testing.T, dbPath string, fsys fstest.MapFS) error {
 	t.Helper()
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
 	var drv database.Driver
-	drv, err = sqlite3driver.WithInstance(db, &sqlite3driver.Config{})
+	drv, err = sqlitedriver.WithInstance(db, &sqlitedriver.Config{})
 	if err != nil {
 		t.Fatalf("sqlite driver: %v", err)
 	}
-	return Run(fsys, drv, "sqlite3")
+	return Run(fsys, drv, "sqlite")
 }
 
 func TestRun_AppliesMigrations(t *testing.T) {
@@ -35,7 +35,7 @@ func TestRun_AppliesMigrations(t *testing.T) {
 		t.Fatalf("Run: %v", err)
 	}
 
-	verify, err := sql.Open("sqlite3", dbPath)
+	verify, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		t.Fatalf("open verify: %v", err)
 	}

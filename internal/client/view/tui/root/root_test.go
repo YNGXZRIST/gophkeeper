@@ -18,11 +18,11 @@ import (
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
 	tea "charm.land/bubbletea/v2"
-	_ "github.com/mattn/go-sqlite3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	_ "modernc.org/sqlite"
 )
 
 func testVault(t *testing.T) *vault.Vault {
@@ -44,7 +44,7 @@ func newTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 	name := strings.ReplaceAll(t.Name(), "/", "_")
 	dsn := "file:roottest_" + name + "_" + itoa(dbCounter.Add(1)) + "?mode=memory&cache=shared"
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		t.Fatal(err)
 	}

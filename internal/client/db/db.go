@@ -4,17 +4,20 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 const (
-	Sqlite3 = "sqlite3"
+	// Driver is the database/sql driver name of the pure-Go SQLite implementation.
+	Driver = "sqlite"
 
+	// PathDB is the on-disk location of the client SQLite database.
 	PathDB = "./app.db"
 )
 
+// Open opens the client SQLite database at PathDB.
 func Open() (*sql.DB, error) {
-	db, err := sql.Open(Sqlite3, PathDB)
+	db, err := sql.Open(Driver, PathDB)
 	if err != nil {
 		return nil, fmt.Errorf("open db: %w", err)
 	}
