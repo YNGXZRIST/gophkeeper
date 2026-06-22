@@ -47,9 +47,9 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if key, ok := msg.(tea.KeyPressMsg); ok {
 		switch key.String() {
-		case keys.CTRL_C:
+		case keys.CtrlC:
 			return m, tea.Quit
-		case keys.ESC:
+		case keys.Esc:
 			return m, nav.Back()
 		}
 	}

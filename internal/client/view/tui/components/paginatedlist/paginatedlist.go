@@ -164,19 +164,19 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateConfirm(msg)
 		}
 		switch msg.String() {
-		case keys.ESC:
+		case keys.Esc:
 			return m, nav.Back()
-		case keys.UP:
+		case keys.Up:
 			if m.selected > 0 {
 				m.selected--
 				m.revealed = false
 			}
-		case keys.DOWN:
+		case keys.Down:
 			if m.selected < len(m.items)-1 {
 				m.selected++
 				m.revealed = false
 			}
-		case keys.ENTER:
+		case keys.Enter:
 			if m.canReveal() {
 				m.revealed = !m.revealed
 			}
@@ -198,13 +198,13 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.canDelete() && m.cfg.Remove != nil {
 				m.confirming = true
 			}
-		case keys.RIGHT, keys.L:
+		case keys.Right, keys.L:
 			if m.hasNext {
 				m.history = append(m.history, m.cursor)
 				m.loading = true
 				return m, tea.Batch(m.fetch(m.next), m.spinner.Tick)
 			}
-		case keys.LEFT, keys.H:
+		case keys.Left, keys.H:
 			if n := len(m.history); n > 0 {
 				prev := m.history[n-1]
 				m.history = m.history[:n-1]

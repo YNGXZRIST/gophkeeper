@@ -61,7 +61,7 @@ func Bootstrap(addr string) (*App, error) {
 		return nil, fmt.Errorf("open db: %w", err)
 	}
 
-	if err := mg.Migrate(); err != nil {
+	if err = mg.Migrate(); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
 	lg, err := logger.Initialize(&logger.Config{
@@ -74,7 +74,7 @@ func Bootstrap(addr string) (*App, error) {
 	}
 
 	r := buildRepos(dbConn)
-	if err := checkSession(r.session, lg); err != nil {
+	if err = checkSession(r.session, lg); err != nil {
 		return nil, fmt.Errorf("check session: %w", err)
 	}
 

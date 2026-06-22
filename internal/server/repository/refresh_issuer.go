@@ -62,7 +62,7 @@ func (i *RefreshIssuer) Rotate(ctx context.Context, plain string) (string, strin
 	if time.Now().After(rt.ExpiresAt) {
 		return "", "", model.ErrInvalidRefreshToken
 	}
-	if err := i.tokens.DeleteByHash(ctx, hash); err != nil {
+	if err = i.tokens.DeleteByHash(ctx, hash); err != nil {
 		return "", "", err
 	}
 	newPlain, err := i.Issue(ctx, rt.UserID)

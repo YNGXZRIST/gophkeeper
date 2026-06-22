@@ -47,9 +47,9 @@ func (f *FileServer) Upload(stream pb.FileService_UploadServer) error {
 		return status.Error(codes.InvalidArgument, "first message must be a header")
 	}
 	next := func() ([]byte, error) {
-		req, err := stream.Recv()
-		if err != nil {
-			return nil, err
+		req, recvErr := stream.Recv()
+		if recvErr != nil {
+			return nil, recvErr
 		}
 		chunk := req.GetChunk()
 		if chunk == nil {

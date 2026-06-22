@@ -230,14 +230,14 @@ func TestNavigateAndReveal(t *testing.T) {
 	m := loadedModel(t, repo, v)
 
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
-	if !strings.Contains(m.View().Content, "Text:") {
-
+	if !strings.Contains(m.View().Content, "Text") {
+		t.Errorf("expected detail view to contain %q, got %q", "Text", m.View().Content)
 	}
 
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyUp})
 
-	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyUp})
+	_, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyUp})
 }
 
 func TestDeleteFlow(t *testing.T) {

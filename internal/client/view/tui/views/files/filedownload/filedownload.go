@@ -98,12 +98,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case keys.CTRL_C:
+		case keys.CtrlC:
 			if m.cancel != nil {
 				m.cancel()
 			}
 			return m, tea.Quit
-		case keys.ESC:
+		case keys.Esc:
 			if m.cancel != nil {
 				m.cancel()
 			}

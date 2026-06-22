@@ -82,7 +82,7 @@ func TestUpdateSubmitSuccess(t *testing.T) {
 	v := vault.New()
 	m := New(v, sessionFor(t, "correct"))
 	m = typePassword(t, m, "correct")
-	m, cmd := submit(t, m)
+	_, cmd := submit(t, m)
 	if cmd == nil {
 		t.Fatal("expected reset cmd")
 	}

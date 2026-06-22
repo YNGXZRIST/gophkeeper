@@ -70,7 +70,7 @@ func (s *UserService) Login(ctx context.Context, login, password string) (*model
 		}
 		return nil, Tokens{}, fmt.Errorf("get user by login: %w", err)
 	}
-	if err := hasher.Compare(user.Pass, password); err != nil {
+	if err = hasher.Compare(user.Pass, password); err != nil {
 		return nil, Tokens{}, model.ErrInvalidCredentials
 	}
 	refresh, err := s.auth.IssueRefresh(ctx, user.ID)

@@ -83,7 +83,7 @@ func TestRepoDelegates(t *testing.T) {
 		t.Fatalf("dirty = %+v", dirty)
 	}
 
-	if err := r.MarkSynced(ctx, created.ID, 7); err != nil {
+	if err = r.MarkSynced(ctx, created.ID, 7); err != nil {
 		t.Fatalf("mark synced: %v", err)
 	}
 	row, _, err = r.Get(ctx, created.ID)
@@ -94,11 +94,11 @@ func TestRepoDelegates(t *testing.T) {
 		t.Fatalf("after synced = %+v", row)
 	}
 
-	if err := r.MarkConflict(ctx, "p1", []byte("srv"), 9); err != nil {
+	if err = r.MarkConflict(ctx, "p1", []byte("srv"), 9); err != nil {
 		t.Fatalf("mark conflict: %v", err)
 	}
 
-	if err := r.HardDelete(ctx, "p1"); err != nil {
+	if err = r.HardDelete(ctx, "p1"); err != nil {
 		t.Fatalf("hard delete: %v", err)
 	}
 	if _, ok, _ := r.Get(ctx, "p1"); ok {
@@ -109,7 +109,7 @@ func TestRepoDelegates(t *testing.T) {
 	if err != nil || cur != "" {
 		t.Fatalf("initial cursor = %q err=%v", cur, err)
 	}
-	if err := r.SetLastSyncedAt(ctx, "2026-01-01T00:00:00Z"); err != nil {
+	if err = r.SetLastSyncedAt(ctx, "2026-01-01T00:00:00Z"); err != nil {
 		t.Fatalf("set cursor: %v", err)
 	}
 	cur, err = r.LastSyncedAt(ctx)

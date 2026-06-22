@@ -12,7 +12,7 @@ func TestOpen(t *testing.T) {
 	if err != nil {
 		t.Fatalf("getwd: %v", err)
 	}
-	if err := os.Chdir(dir); err != nil {
+	if err = os.Chdir(dir); err != nil {
 		t.Fatalf("chdir: %v", err)
 	}
 	t.Cleanup(func() {

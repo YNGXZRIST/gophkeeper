@@ -54,7 +54,7 @@ func TestNavigateUpDown(t *testing.T) {
 	if act != None {
 		t.Errorf("down act = %v, want None", act)
 	}
-	m, act, _ = m.Update(specialKey(tea.KeyUp))
+	_, act, _ = m.Update(specialKey(tea.KeyUp))
 	if act != None {
 		t.Errorf("up act = %v, want None", act)
 	}

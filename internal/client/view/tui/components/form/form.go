@@ -77,13 +77,13 @@ func (m Model) Init() tea.Cmd {
 func (m Model) Update(msg tea.Msg) (Model, Action, tea.Cmd) {
 	if key, ok := msg.(tea.KeyPressMsg); ok {
 		switch key.String() {
-		case keys.UP:
+		case keys.Up:
 			cmd := m.moveFocus(-1)
 			return m, None, cmd
-		case keys.DOWN:
+		case keys.Down:
 			cmd := m.moveFocus(1)
 			return m, None, cmd
-		case keys.ENTER:
+		case keys.Enter:
 			if m.focusIndex == len(m.inputs) {
 				if !m.allFilled() {
 					return m, None, nil

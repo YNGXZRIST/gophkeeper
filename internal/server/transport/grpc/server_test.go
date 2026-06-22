@@ -128,8 +128,10 @@ func TestAuthStreamInterceptor(t *testing.T) {
 	}
 }
 
+type ctxKey struct{}
+
 func TestAuthStreamContext(t *testing.T) {
-	want := context.WithValue(context.Background(), struct{}{}, "v")
+	want := context.WithValue(context.Background(), ctxKey{}, "v")
 	s := &authStream{ctx: want}
 	if s.Context() != want {
 		t.Fatal("authStream.Context() did not return injected context")

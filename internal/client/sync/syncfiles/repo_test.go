@@ -71,10 +71,10 @@ func TestRepoDelegatesMetaMapping(t *testing.T) {
 		t.Fatalf("get missing: ok=%v err=%v", ok, err)
 	}
 
-	if err := files.Insert(ctx, "f2", []byte("m2"), 1, 1); err != nil {
+	if err = files.Insert(ctx, "f2", []byte("m2"), 1, 1); err != nil {
 		t.Fatalf("insert: %v", err)
 	}
-	if err := files.UpdateMeta(ctx, "f2", []byte("m2-updated")); err != nil {
+	if err = files.UpdateMeta(ctx, "f2", []byte("m2-updated")); err != nil {
 		t.Fatalf("update meta: %v", err)
 	}
 	dirty, err := r.ListDirty(ctx)
@@ -85,7 +85,7 @@ func TestRepoDelegatesMetaMapping(t *testing.T) {
 		t.Fatalf("dirty = %+v", dirty)
 	}
 
-	if err := r.MarkSynced(ctx, "f2", 7); err != nil {
+	if err = r.MarkSynced(ctx, "f2", 7); err != nil {
 		t.Fatalf("mark synced: %v", err)
 	}
 	row, _, err = r.Get(ctx, "f2")
@@ -96,11 +96,11 @@ func TestRepoDelegatesMetaMapping(t *testing.T) {
 		t.Fatalf("after synced = %+v", row)
 	}
 
-	if err := r.MarkConflict(ctx, "f1", []byte("srv"), 9); err != nil {
+	if err = r.MarkConflict(ctx, "f1", []byte("srv"), 9); err != nil {
 		t.Fatalf("mark conflict: %v", err)
 	}
 
-	if err := r.HardDelete(ctx, "f1"); err != nil {
+	if err = r.HardDelete(ctx, "f1"); err != nil {
 		t.Fatalf("hard delete: %v", err)
 	}
 	if _, ok, _ := r.Get(ctx, "f1"); ok {
@@ -111,7 +111,7 @@ func TestRepoDelegatesMetaMapping(t *testing.T) {
 	if err != nil || cur != "" {
 		t.Fatalf("initial cursor = %q err=%v", cur, err)
 	}
-	if err := r.SetLastSyncedAt(ctx, "2026-01-01T00:00:00Z"); err != nil {
+	if err = r.SetLastSyncedAt(ctx, "2026-01-01T00:00:00Z"); err != nil {
 		t.Fatalf("set cursor: %v", err)
 	}
 	cur, err = r.LastSyncedAt(ctx)

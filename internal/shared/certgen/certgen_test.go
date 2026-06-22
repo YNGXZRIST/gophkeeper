@@ -103,7 +103,7 @@ func TestWriteFilesAndPermissions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate: %v", err)
 	}
-	if err := WriteFiles(certPath, keyPath, certPEM, keyPEM); err != nil {
+	if err = WriteFiles(certPath, keyPath, certPEM, keyPEM); err != nil {
 		t.Fatalf("WriteFiles: %v", err)
 	}
 
@@ -155,7 +155,7 @@ func TestEnsureFilesCreatesAndDoesNotOverwrite(t *testing.T) {
 	firstSerial := parseCert(t, first).SerialNumber
 
 	// Second call must not overwrite the existing pair.
-	if err := EnsureFiles(certPath, keyPath, DefaultOptions()); err != nil {
+	if err = EnsureFiles(certPath, keyPath, DefaultOptions()); err != nil {
 		t.Fatalf("EnsureFiles (noop): %v", err)
 	}
 	second, err := os.ReadFile(certPath)
@@ -224,7 +224,7 @@ func TestProvisionForceReissues(t *testing.T) {
 	}
 	firstSerial := parseCert(t, first).SerialNumber
 
-	if err := Provision(certPath, keyPath, embedPath, DefaultOptions(), true); err != nil {
+	if err = Provision(certPath, keyPath, embedPath, DefaultOptions(), true); err != nil {
 		t.Fatalf("Provision (force): %v", err)
 	}
 	second, err := os.ReadFile(certPath)

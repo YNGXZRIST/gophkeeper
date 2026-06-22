@@ -138,13 +138,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Batch(m.runSync(), nav.SyncNow())
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case keys.ESC:
+		case keys.Esc:
 			return m, nav.Back()
-		case keys.UP:
+		case keys.Up:
 			if m.selected > 0 {
 				m.selected--
 			}
-		case keys.DOWN:
+		case keys.Down:
 			if m.selected < len(m.items)-1 {
 				m.selected++
 			}

@@ -103,12 +103,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		if m.phase != phasePick {
 			switch msg.String() {
-			case keys.CTRL_C:
+			case keys.CtrlC:
 				if m.cancel != nil {
 					m.cancel()
 				}
 				return m, tea.Quit
-			case keys.ESC:
+			case keys.Esc:
 				if m.cancel != nil {
 					m.cancel()
 				}
@@ -180,7 +180,7 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 	header.SetChunkCount(int32(total))
 	headerReq := &filev1.UploadRequest{}
 	headerReq.SetHeader(header)
-	if err := stream.Send(headerReq); err != nil {
+	if err = stream.Send(headerReq); err != nil {
 		return "", err
 	}
 
@@ -191,7 +191,7 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 		defer close(chunks)
 		buf := make([]byte, chunkSize)
 		for {
-			n, err := f.Read(buf)
+			n, readErr := f.Read(buf)
 			if n > 0 {
 				ct, encErr := m.vault.Encrypt(buf[:n])
 				if encErr != nil {
@@ -203,11 +203,11 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 					return ctx.Err()
 				}
 			}
-			if err == io.EOF {
+			if readErr == io.EOF {
 				return nil
 			}
-			if err != nil {
-				return err
+			if readErr != nil {
+				return readErr
 			}
 		}
 	})
@@ -220,8 +220,8 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 			chunk.SetData(ct)
 			req := &filev1.UploadRequest{}
 			req.SetChunk(chunk)
-			if err := stream.Send(req); err != nil {
-				return err
+			if sendErr := stream.Send(req); sendErr != nil {
+				return sendErr
 			}
 			idx++
 			select {
@@ -233,7 +233,7 @@ func (m model) doUpload(ctx context.Context, f *os.File, meta clientmodel.FileMe
 		return nil
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		return "", err
 	}
 	resp, err := stream.CloseAndRecv()

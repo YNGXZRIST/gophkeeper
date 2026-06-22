@@ -1,14 +1,14 @@
 package keys
 
 const (
-	CTRL_C = "ctrl+c"
-	ESC    = "esc"
-	ENTER  = "enter"
-	TAB    = "tab"
-	UP     = "up"
-	DOWN   = "down"
-	LEFT   = "left"
-	RIGHT  = "right"
+	CtrlC = "ctrl+c"
+	Esc   = "esc"
+	Enter = "enter"
+	Tab   = "tab"
+	Up    = "up"
+	Down  = "down"
+	Left  = "left"
+	Right = "right"
 	Q      = "q"
 	H      = "h"
 	L      = "l"

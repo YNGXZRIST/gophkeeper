@@ -49,9 +49,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
-		case keys.CTRL_C:
+		case keys.CtrlC:
 			return m, tea.Quit
-		case keys.ESC:
+		case keys.Esc:
 			return m, nav.Back()
 		}
 	case savedMsg:

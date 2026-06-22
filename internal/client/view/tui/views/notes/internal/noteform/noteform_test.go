@@ -139,7 +139,7 @@ func TestSubmitSuccess(t *testing.T) {
 	mm, _ = mm.Update(rune1('x'))
 	mm, _ = mm.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	mm, _ = mm.Update(tea.KeyPressMsg{Code: tea.KeyDown})
-	mm, cmd = mm.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, cmd = mm.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	if cmd == nil {
 		t.Fatal("submit produced no cmd")
 	}
@@ -235,4 +235,4 @@ func TestSubmitEncryptError(t *testing.T) {
 	}
 }
 
-var _ = keys.ESC
+var _ = keys.Esc

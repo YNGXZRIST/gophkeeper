@@ -35,11 +35,9 @@ func TestNotesListKeysetPaging(t *testing.T) {
 	repo := NewNotesRepo(db)
 	ctx := context.Background()
 
-	var ids []string
 	for i := 0; i < 3; i++ {
-		n, err := repo.Create(ctx, []byte{byte('a' + i)})
+		_, err := repo.Create(ctx, []byte{byte('a' + i)})
 		require.NoError(t, err)
-		ids = append(ids, n.ID)
 	}
 
 	page1, err := repo.List(ctx, "", 2)

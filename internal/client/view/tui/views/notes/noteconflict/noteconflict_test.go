@@ -222,7 +222,7 @@ func TestNavigationKeys(t *testing.T) {
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyUp})
 
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
-	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
+	_, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 }
 
 func TestKeepMine(t *testing.T) {
@@ -320,7 +320,7 @@ func TestKeysOnEmptyNoSelection(t *testing.T) {
 	m := loaded(t, repo, &fakeSync{}, v)
 
 	m, _ = m.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
-	m, _ = m.Update(tea.KeyPressMsg{Code: 's', Text: "s"})
+	_, _ = m.Update(tea.KeyPressMsg{Code: 's', Text: "s"})
 	if repo.keptID != "" || repo.tookID != "" {
 		t.Error("resolve called with no selection")
 	}

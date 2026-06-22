@@ -67,7 +67,7 @@ func fillForm(t *testing.T, m Model, login, pw, meta string) Model {
 	mm, _ := m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 	m = mm.(Model)
 	for _, r := range pw {
-		mm, _ := m.Update(keyRune(r))
+		mm, _ = m.Update(keyRune(r))
 		m = mm.(Model)
 	}
 	mm, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})

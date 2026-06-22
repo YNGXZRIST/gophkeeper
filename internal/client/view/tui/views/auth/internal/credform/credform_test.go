@@ -52,7 +52,7 @@ func TestUpdateSubmit(t *testing.T) {
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
 
 	var cmd tea.Cmd
-	m, cmd = m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, cmd = m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	if cmd == nil {
 		t.Fatal("expected submit cmd")
 	}

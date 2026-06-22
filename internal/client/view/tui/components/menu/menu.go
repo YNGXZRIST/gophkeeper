@@ -41,21 +41,21 @@ func (m Model) Update(msg tea.Msg) (Model, Action) {
 		return m, None
 	}
 	switch key.String() {
-	case keys.Q, keys.CTRL_C:
+	case keys.Q, keys.CtrlC:
 		return m, Quit
-	case keys.ESC:
+	case keys.Esc:
 		return m, Back
-	case keys.UP:
+	case keys.Up:
 		m.cursor--
 		if m.cursor < 0 {
 			m.cursor = len(m.buttons) - 1
 		}
-	case keys.DOWN:
+	case keys.Down:
 		m.cursor++
 		if m.cursor >= len(m.buttons) {
 			m.cursor = 0
 		}
-	case keys.ENTER:
+	case keys.Enter:
 		return m, Selected
 	}
 	return m, None

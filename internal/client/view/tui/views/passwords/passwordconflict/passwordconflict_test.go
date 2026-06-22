@@ -208,7 +208,7 @@ func TestResolveTakeServer(t *testing.T) {
 	}}
 	m := drive(t, newModel(t, repo, &fakeSyncer{}, vlt))
 	mm, cmd := m.Update(keyRune('s'))
-	m = mm.(model)
+	_ = mm.(model)
 	msg := cmd()
 	if _, ok := msg.(resolvedMsg); !ok {
 		t.Fatalf("expected resolvedMsg, got %T", msg)

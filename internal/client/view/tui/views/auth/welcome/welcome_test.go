@@ -35,7 +35,7 @@ func TestUpdateSelectSignUp(t *testing.T) {
 	m := New()
 
 	m, _ = m.Update(tea.KeyPressMsg{Code: tea.KeyDown})
-	m, cmd := m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	_, cmd := m.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
 	if cmd == nil {
 		t.Fatal("expected nav cmd")
 	}
