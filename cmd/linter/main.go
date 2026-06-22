@@ -35,7 +35,6 @@ import (
 	"golang.org/x/tools/go/analysis/passes/defers"
 	"golang.org/x/tools/go/analysis/passes/directive"
 	"golang.org/x/tools/go/analysis/passes/errorsas"
-	"golang.org/x/tools/go/analysis/passes/fieldalignment"
 	"golang.org/x/tools/go/analysis/passes/findcall"
 	"golang.org/x/tools/go/analysis/passes/framepointer"
 	"golang.org/x/tools/go/analysis/passes/gofix"
@@ -49,7 +48,6 @@ import (
 	"golang.org/x/tools/go/analysis/passes/lostcancel"
 	"golang.org/x/tools/go/analysis/passes/nilfunc"
 	"golang.org/x/tools/go/analysis/passes/nilness"
-	"golang.org/x/tools/go/analysis/passes/pkgfact"
 	"golang.org/x/tools/go/analysis/passes/printf"
 	"golang.org/x/tools/go/analysis/passes/reflectvaluecompare"
 	"golang.org/x/tools/go/analysis/passes/shadow"
@@ -114,8 +112,6 @@ func getAnalyzers() []*analysis.Analyzer {
 		directive.Analyzer,
 		// report passing non-pointer or non-error values to errors.As
 		errorsas.Analyzer,
-		// find structs that would use less memory if fields were reordered
-		fieldalignment.Analyzer,
 		// find calls to a function whose name is set via -findcall.name (demo / tooling)
 		findcall.Analyzer,
 		// report assembly that clobbers the frame pointer before saving it
@@ -142,8 +138,6 @@ func getAnalyzers() []*analysis.Analyzer {
 		nilfunc.Analyzer,
 		// nil pointer dereferences, impossible/tautological nil checks (uses SSA)
 		nilness.Analyzer,
-		// gather name/value pairs from const declarations named _key_; demo of package facts
-		pkgfact.Analyzer,
 		// check consistency of Printf format strings and arguments
 		printf.Analyzer,
 		// check for comparing reflect.Value with == or !=

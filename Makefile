@@ -12,7 +12,7 @@ LDFLAGS := -X main.grpcServerAddr=$(GRPC_ADDR) -X main.buildVersion=$(VERSION) -
 
 COMPOSE := docker compose -f docker/docker-compose.yml
 
-.PHONY: help proto certs build build-server build-client build-client-all run-server run-client db-up db-down test test-integration test-coverpkg test-short coverage coverage-percent coverage-packages fmt fmt-check vet check clean
+.PHONY: help proto certs build build-server build-client build-client-all run-server run-client db-up db-down test test-integration test-coverpkg test-short coverage coverage-percent coverage-packages fmt fmt-check vet statictest linter check clean
 
 help: ## Показать справку
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -91,7 +91,21 @@ fmt-check: ## Проверить форматирование
 vet: certs ## Запустить go vet
 	go vet ./...
 
-check: fmt-check vet test ## Полная проверка: формат + vet + тесты
+statictest: certs ## Запустить statictest (go vet с курсовым multichecker)
+	@if [ ! -f "$(BIN_DIR)/statictest" ]; then \
+		echo "$(GREEN)Building statictest...$(NC)"; \
+		go build -o $(BIN_DIR)/statictest ./cmd/statictest; \
+	fi
+	go vet -vettool=$(BIN_DIR)/statictest ./...
+
+linter: certs ## Запустить собственный multichecker (cmd/linter)
+	@if [ ! -f "$(BIN_DIR)/linter" ]; then \
+		echo "$(GREEN)Building linter...$(NC)"; \
+		go build -o $(BIN_DIR)/linter ./cmd/linter; \
+	fi
+	$(BIN_DIR)/linter ./...
+
+check: fmt-check vet statictest linter test ## Полная проверка: формат + vet + статанализ + тесты
 
 clean: ## Удалить артефакты сборки, покрытия и сгенерированные сертификаты
 	rm -f coverage.out cover.out cover.nogen.out coverage.html
