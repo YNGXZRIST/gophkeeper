@@ -15,6 +15,7 @@ import (
 	"gophkeeper/internal/client/sync/syncfiles"
 	"gophkeeper/internal/client/sync/syncnotes"
 	"gophkeeper/internal/client/sync/syncpasswords"
+	"gophkeeper/internal/client/tlsclient"
 	"gophkeeper/internal/client/vault"
 	"gophkeeper/internal/client/view/tui/root"
 	"gophkeeper/internal/shared/logger"
@@ -28,7 +29,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type App struct {
@@ -148,9 +148,13 @@ func buildDeps(r repos, c clients, pool *syncclient.Pool, lg *zap.Logger) root.D
 }
 
 func dialGRPC(addr string, sessions *repository.SessionRepo, lg *zap.Logger) (*grpc.ClientConn, error) {
+	creds, err := tlsclient.Credentials()
+	if err != nil {
+		return nil, fmt.Errorf("tls credentials: %w", err)
+	}
 	return grpc.NewClient(
 		addr,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(creds),
 		grpc.WithChainUnaryInterceptor(
 			interceptor.UnaryRefreshInterceptor(sessions, lg),
 			interceptor.UnaryAuthInterceptor(sessions),

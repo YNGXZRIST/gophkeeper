@@ -3,11 +3,13 @@ package grpc
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"gophkeeper/internal/server/auth/authctx"
 	"gophkeeper/internal/server/service"
+	"gophkeeper/internal/shared/certgen"
 	pbU "gophkeeper/internal/shared/proto/user/v1"
 
 	"go.uber.org/zap"
@@ -16,6 +18,21 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
+
+func tempCerts(t *testing.T) (string, string) {
+	t.Helper()
+	dir := t.TempDir()
+	certPath := filepath.Join(dir, "server.crt")
+	keyPath := filepath.Join(dir, "server.key")
+	certPEM, keyPEM, err := certgen.Generate(certgen.DefaultOptions())
+	if err != nil {
+		t.Fatalf("generate certs: %v", err)
+	}
+	if err := certgen.WriteFiles(certPath, keyPath, certPEM, keyPEM); err != nil {
+		t.Fatalf("write certs: %v", err)
+	}
+	return certPath, keyPath
+}
 
 type fakeStream struct {
 	grpc.ServerStream
@@ -120,8 +137,11 @@ func TestAuthStreamContext(t *testing.T) {
 }
 
 func TestNewRegistersAndServes(t *testing.T) {
+	cert, key := tempCerts(t)
 	srv, err := New(Deps{
 		Address:     "127.0.0.1:0",
+		CertFile:    cert,
+		KeyFile:     key,
 		Services:    &service.Services{},
 		Logger:      zap.NewNop(),
 		TokenParser: parserStub{fn: func(string) (string, error) { return "", nil }},
@@ -148,8 +168,11 @@ func TestNewRegistersAndServes(t *testing.T) {
 }
 
 func TestNewListenError(t *testing.T) {
+	cert, key := tempCerts(t)
 	_, err := New(Deps{
 		Address:     "256.256.256.256:99999",
+		CertFile:    cert,
+		KeyFile:     key,
 		Services:    &service.Services{},
 		Logger:      zap.NewNop(),
 		TokenParser: parserStub{},

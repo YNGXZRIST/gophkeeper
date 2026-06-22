@@ -17,6 +17,8 @@ const (
 	DefaultTransport = "grpc"
 	DefaultAddress   = ":8080"
 	DefaultAppMode   = logger.ModeDefault
+	DefaultTLSCert   = "./certs/server.crt"
+	DefaultTLSKey    = "./certs/server.key"
 )
 
 // Flags holds server configuration assembled from config file, env and CLI flags.
@@ -28,6 +30,8 @@ type Flags struct {
 	LogDir         string `json:"log_dir"       env:"LOG_DIR"`
 	JWTSecret      string `json:"jwt_secret"     env:"JWT_SECRET"`
 	RefreshSecret  string `json:"refresh_secret" env:"REFRESH_SECRET"`
+	TLSCert        string `json:"tls_cert"       env:"TLS_CERT"`
+	TLSKey         string `json:"tls_key"        env:"TLS_KEY"`
 	ConfigFilePath string `json:"-"`
 }
 
@@ -106,6 +110,8 @@ func (opt *Flags) parseArgs(args []string) error {
 		mode      string
 		logDir    string
 		cfgPath   string
+		tlsCert   string
+		tlsKey    string
 	)
 
 	fs.StringVar(&transport, "t", "", "transport: grpc or http")
@@ -115,6 +121,8 @@ func (opt *Flags) parseArgs(args []string) error {
 	fs.StringVar(&logDir, "l", "", "log directory")
 	fs.StringVar(&cfgPath, "config", "", "config file path")
 	fs.StringVar(&cfgPath, "c", "", "config file path (shorthand)")
+	fs.StringVar(&tlsCert, "tls-cert", "", "path to the TLS certificate")
+	fs.StringVar(&tlsKey, "tls-key", "", "path to the TLS private key")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -140,6 +148,12 @@ func (opt *Flags) parseArgs(args []string) error {
 	}
 	if visited["config"] || visited["c"] {
 		opt.ConfigFilePath = cfgPath
+	}
+	if visited["tls-cert"] {
+		opt.TLSCert = tlsCert
+	}
+	if visited["tls-key"] {
+		opt.TLSKey = tlsKey
 	}
 
 	return nil
@@ -168,6 +182,12 @@ func override(dst, src *Flags) {
 	if src.RefreshSecret != "" {
 		dst.RefreshSecret = src.RefreshSecret
 	}
+	if src.TLSCert != "" {
+		dst.TLSCert = src.TLSCert
+	}
+	if src.TLSKey != "" {
+		dst.TLSKey = src.TLSKey
+	}
 }
 
 // applyDefaults sets defaults for fields left empty by every source.
@@ -183,6 +203,12 @@ func applyDefaults(opt *Flags) {
 	}
 	if opt.LogDir == "" {
 		opt.LogDir = logger.DefaultLogDir
+	}
+	if opt.TLSCert == "" {
+		opt.TLSCert = DefaultTLSCert
+	}
+	if opt.TLSKey == "" {
+		opt.TLSKey = DefaultTLSKey
 	}
 }
 

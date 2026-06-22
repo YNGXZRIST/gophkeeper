@@ -71,7 +71,7 @@ func Bootstrap(args []string) (_ *App, err error) {
 
 	server, err := transport.NewServer(
 		transport.ServerProp{
-			Config:      &transport.Config{Transport: opt.Transport, Address: opt.Address},
+			Config:      &transport.Config{Transport: opt.Transport, Address: opt.Address, CertFile: opt.TLSCert, KeyFile: opt.TLSKey},
 			Services:    services,
 			Logger:      log,
 			TokenParser: issuer,

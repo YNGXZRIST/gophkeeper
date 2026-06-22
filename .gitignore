@@ -5,3 +5,6 @@
 /cover.out
 /cover.nogen.out
 /coverage.html
+/bin/
+/certs/
+/internal/client/tlsclient/cert/

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	handler "gophkeeper/internal/server/handler/grpc"
 	"gophkeeper/internal/server/service"
+	"gophkeeper/internal/server/tlsserver"
 	pbC "gophkeeper/internal/shared/proto/card/v1"
 	pbF "gophkeeper/internal/shared/proto/file/v1"
 	pbN "gophkeeper/internal/shared/proto/note/v1"
@@ -19,6 +20,8 @@ import (
 // Deps are the dependencies the gRPC server needs to register its handlers.
 type Deps struct {
 	Address     string
+	CertFile    string
+	KeyFile     string
 	Services    *service.Services
 	Logger      *zap.Logger
 	TokenParser TokenParser
@@ -37,12 +40,18 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 func New(d Deps) (*Server, error) {
+	creds, err := tlsserver.LoadCredentials(d.CertFile, d.KeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("tls credentials: %w", err)
+	}
+
 	lis, err := net.Listen("tcp", d.Address)
 	if err != nil {
 		return nil, fmt.Errorf("listen %q: %w", d.Address, err)
 	}
 
 	grpcSrv := grpc.NewServer(
+		grpc.Creds(creds),
 		grpc.ChainUnaryInterceptor(AuthUnaryInterceptor(d.TokenParser)),
 		grpc.ChainStreamInterceptor(AuthStreamInterceptor(d.TokenParser)),
 	)

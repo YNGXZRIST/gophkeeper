@@ -23,6 +23,8 @@ type Server interface {
 type Config struct {
 	Transport string
 	Address   string
+	CertFile  string
+	KeyFile   string
 }
 type ServerProp struct {
 	Config      *Config
@@ -36,6 +38,8 @@ func NewServer(prop ServerProp) (Server, error) {
 	case GRPC:
 		return grpcServer.New(grpcServer.Deps{
 			Address:     prop.Config.Address,
+			CertFile:    prop.Config.CertFile,
+			KeyFile:     prop.Config.KeyFile,
 			Services:    prop.Services,
 			Logger:      prop.Logger,
 			TokenParser: prop.TokenParser,
