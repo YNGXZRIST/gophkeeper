@@ -5,12 +5,12 @@ profile: cover.out
 # Сгенерированный и не покрываемый юнит-тестами код не учитываем в проценте.
 exclude:
   paths:
-    - ^gophkeeper/internal/shared/proto
-    - ^gophkeeper/cmd/
-    - ^gophkeeper/migrations
-    - ^gophkeeper/internal/server/db/conn/mock
-    - ^gophkeeper/internal/server/model
-    - ^gophkeeper/internal/client/model
+    - ^internal/shared/proto
+    - ^cmd/
+    - ^migrations
+    - ^internal/server/db/conn/mock
+    - ^internal/server/model
+    - ^internal/client/model
 
 threshold:
   file: 0
