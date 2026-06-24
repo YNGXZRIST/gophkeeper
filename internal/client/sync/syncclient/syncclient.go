@@ -3,7 +3,10 @@ package syncclient
 
 import (
 	"context"
+	"fmt"
 	"gophkeeper/internal/client/sync/syncer"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type Pool struct {
@@ -15,10 +18,18 @@ func New(syncers ...*syncer.Syncer) *Pool {
 }
 
 func (p *Pool) SyncAll(ctx context.Context) error {
+	gr, err := errgroup.WithContext(ctx)
+	if err != nil {
+		return fmt.Errorf("cannot create err group: %w", err)
+	}
 	for _, s := range p.syncers {
-		if err := s.Sync(ctx); err != nil {
-			return err
-		}
+		gr.Go(func() error {
+			return s.Sync(ctx)
+		})
+	}
+	errGr := gr.Wait()
+	if errGr != nil {
+		return fmt.Errorf("sync err: %w", errGr)
 	}
 	return nil
 }
