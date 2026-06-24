@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gophkeeper/internal/server/auth/token"
 	"gophkeeper/internal/server/config"
@@ -10,58 +11,112 @@ import (
 	"gophkeeper/internal/server/repository"
 	"gophkeeper/internal/server/service"
 	"gophkeeper/internal/server/transport"
+	"gophkeeper/internal/shared/deps"
 	"gophkeeper/internal/shared/errors/labelerrors"
 	"gophkeeper/internal/shared/logger"
 	mg "gophkeeper/migrations/server"
+
+	"go.uber.org/zap"
 )
 
 const (
 	labelApp = "APP"
 )
 
-type Options struct {
-}
 type dbCloser interface {
 	Close() error
 }
+
+// appDeps holds the swappable leaf collaborators of Bootstrap. The ordered
+// graph (repos → services → server) is wired from them; tests can override
+// any of them via the With* options.
+type appDeps struct {
+	cfg *config.Flags
+	log *zap.Logger
+	db  *conn.DB
+}
+
+// Option configures Bootstrap. Each option validates at apply time and returns
+// an error instead of failing later in the runtime.
+type Option = deps.Option[appDeps]
+
+// WithArgs loads the configuration from the command-line arguments.
+func WithArgs(args []string) Option {
+	return func(d *appDeps) error {
+		cfg, err := config.Load(args)
+		if err != nil {
+			return fmt.Errorf("load config: %w", err)
+		}
+		d.cfg = cfg
+		return nil
+	}
+}
+
+// WithLogger overrides the logger that Bootstrap would otherwise build.
+func WithLogger(log *zap.Logger) Option {
+	return func(d *appDeps) error {
+		if log == nil {
+			return errors.New("logger is nil")
+		}
+		d.log = log
+		return nil
+	}
+}
+
+// WithDB overrides the database connection that Bootstrap would otherwise open.
+func WithDB(db *conn.DB) Option {
+	return func(d *appDeps) error {
+		if db == nil {
+			return errors.New("db is nil")
+		}
+		d.db = db
+		return nil
+	}
+}
+
 type App struct {
 	db     dbCloser
 	server transport.Server
 }
 
-func Bootstrap(args []string) (_ *App, err error) {
-	opt, err := config.Load(args)
-	if err != nil {
-		return nil, fmt.Errorf("load config: %w", err)
-	}
-	log, err := logger.Initialize(&logger.Config{
-		Mode:    opt.AppMode,
-		Dir:     opt.LogDir,
-		Prefix:  "server",
-		Console: true,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("init logger: %w", err)
+func Bootstrap(opts ...Option) (_ *App, err error) {
+	d := &appDeps{}
+	if err := deps.Apply(d, opts...); err != nil {
+		return nil, err
 	}
 
-	dbConn, err := initDB(opt)
-	if err != nil {
-		return nil, fmt.Errorf("init db: %w", err)
+	if d.cfg == nil {
+		return nil, errors.New("config is required (WithArgs)")
+	}
+	if d.log == nil {
+		if d.log, err = logger.Initialize(&logger.Config{
+			Mode:    d.cfg.AppMode,
+			Dir:     d.cfg.LogDir,
+			Prefix:  "server",
+			Console: true,
+		}); err != nil {
+			return nil, fmt.Errorf("init logger: %w", err)
+		}
+	}
+	if d.db == nil {
+		if d.db, err = initDB(d.cfg); err != nil {
+			return nil, fmt.Errorf("init db: %w", err)
+		}
 	}
 	defer func() {
 		if err != nil {
-			_ = dbConn.Close()
+			_ = d.db.Close()
 		}
 	}()
-	err = mg.Migrate(opt.DSN)
-	if err != nil {
+
+	if err = mg.Migrate(d.cfg.DSN); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
-	mgr := trmanager.NewManager(dbConn)
-	repos := buildRepos(dbConn)
-	refreshIssuer := repository.NewRefreshIssuer(repos.RefreshToken, []byte(opt.RefreshSecret), repository.DefaultRefreshTTL)
+	mgr := trmanager.NewManager(d.db)
+	repos := buildRepos(d.db)
+	refreshIssuer := repository.NewRefreshIssuer(repos.RefreshToken, []byte(d.cfg.RefreshSecret), repository.DefaultRefreshTTL)
 	authWriter := repository.NewAuthWriter(mgr, repos, refreshIssuer)
-	issuer := token.NewIssuer([]byte(opt.JWTSecret), token.DefaultAccessTTL)
+	issuer := token.NewIssuer([]byte(d.cfg.JWTSecret), token.DefaultAccessTTL)
 	services := buildServices(serviceDeps{
 		Repos:   repos,
 		Auth:    authWriter,
@@ -71,9 +126,9 @@ func Bootstrap(args []string) (_ *App, err error) {
 
 	server, err := transport.NewServer(
 		transport.ServerProp{
-			Config:      &transport.Config{Transport: opt.Transport, Address: opt.Address, CertFile: opt.TLSCert, KeyFile: opt.TLSKey},
+			Config:      &transport.Config{Transport: d.cfg.Transport, Address: d.cfg.Address, CertFile: d.cfg.TLSCert, KeyFile: d.cfg.TLSKey},
 			Services:    services,
-			Logger:      log,
+			Logger:      d.log,
 			TokenParser: issuer,
 		})
 	if err != nil {
@@ -81,7 +136,7 @@ func Bootstrap(args []string) (_ *App, err error) {
 	}
 
 	return &App{
-		db:     dbConn,
+		db:     d.db,
 		server: server,
 	}, nil
 }
