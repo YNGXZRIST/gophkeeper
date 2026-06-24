@@ -196,9 +196,9 @@ func baseDeps(t *testing.T) Deps {
 	db := newTestDB(t)
 	return Deps{
 		Vault:         testVault(t),
-		NotesRepo:     repository.NewNotesRepo(db),
-		CardsRepo:     repository.NewCardsRepo(db),
-		PasswordsRepo: repository.NewPasswordsRepo(db),
+		NotesRepo:     repository.NewEntryRepo(db, repository.TableNote),
+		CardsRepo:     repository.NewEntryRepo(db, repository.TableCard),
+		PasswordsRepo: repository.NewEntryRepo(db, repository.TablePassword),
 		FilesRepo:     repository.NewFilesRepo(db),
 		Sync:          &fakeSyncer{},
 		Logger:        &fakeLogger{},

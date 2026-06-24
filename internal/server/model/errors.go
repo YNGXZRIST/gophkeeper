@@ -15,8 +15,8 @@ var ErrInvalidRefreshToken = errors.New("invalid refresh token")
 // ErrCardNotFound is returned when a card is missing or not owned by the user.
 var ErrCardNotFound = errors.New("card not found")
 
-// ErrVersionConflict is returned when an update targets a stale card version.
-var ErrVersionConflict = errors.New("card version conflict")
+// ErrVersionConflict is returned when an update targets a stale version.
+var ErrVersionConflict = errors.New("version conflict")
 
 // ErrPasswordNotFound is returned when a password is missing or not owned by the user.
 var ErrPasswordNotFound = errors.New("password not found")
@@ -26,3 +26,10 @@ var ErrNoteNotFound = errors.New("note not found")
 
 // ErrFileNotFound is returned when a file is missing or not owned by the user.
 var ErrFileNotFound = errors.New("file not found")
+
+// ErrEntryNotFound is returned when an entry is missing or not owned by the
+// user. It is the unified not-found sentinel for the EntryRepo store.
+var ErrEntryNotFound = errors.New("entry not found")
+
+// ErrInternalServerError is returned when server have error
+var ErrInternalServerError = errors.New("internal server error")

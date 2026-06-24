@@ -10,7 +10,7 @@ import (
 
 func TestCardsCRUDAndPaging(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewCardsRepo(db)
+	repo := NewEntryRepo(db, TableCard)
 	ctx := context.Background()
 
 	var ids []string
@@ -44,7 +44,7 @@ func TestCardsCRUDAndPaging(t *testing.T) {
 
 func TestCardsUpdateClearsConflict(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewCardsRepo(db)
+	repo := NewEntryRepo(db, TableCard)
 	ctx := context.Background()
 
 	c, err := repo.Create(ctx, []byte("v1"))
@@ -60,7 +60,7 @@ func TestCardsUpdateClearsConflict(t *testing.T) {
 
 func TestCardsSyncFlow(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewCardsRepo(db)
+	repo := NewEntryRepo(db, TableCard)
 	ctx := context.Background()
 
 	clean, err := repo.Create(ctx, []byte("dirty"))
@@ -99,7 +99,7 @@ func TestCardsSyncFlow(t *testing.T) {
 
 func TestCardsConflictResolution(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewCardsRepo(db)
+	repo := NewEntryRepo(db, TableCard)
 	ctx := context.Background()
 
 	mine, err := repo.Create(ctx, []byte("mine"))

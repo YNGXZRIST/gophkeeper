@@ -74,9 +74,9 @@ type rootModel struct {
 type Deps struct {
 	UserClient    userv1.UserServiceClient
 	Vault         *vault.Vault
-	NotesRepo     *repository.NotesRepo
-	PasswordsRepo *repository.PasswordsRepo
-	CardsRepo     *repository.CardsRepo
+	NotesRepo     *repository.EntryRepo
+	PasswordsRepo *repository.EntryRepo
+	CardsRepo     *repository.EntryRepo
 	FilesRepo     *repository.FilesRepo
 	FileClient    filev1.FileServiceClient
 	Sync          Syncer

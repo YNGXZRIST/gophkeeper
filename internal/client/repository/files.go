@@ -6,11 +6,11 @@ import (
 )
 
 type FilesRepo struct {
-	repoBase
+	syncRepo
 }
 
 func NewFilesRepo(conn *sql.DB) *FilesRepo {
-	return &FilesRepo{repoBase: repoBase{db: conn}}
+	return &FilesRepo{syncRepo: newSyncRepo(conn, "files", "meta")}
 }
 
 type FileRow struct {
@@ -30,25 +30,14 @@ base_version = CASE WHEN conflict = 1 THEN COALESCE(server_version, base_version
 conflict = 0, server_blob = NULL, server_version = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
 const filesDeleteQuery = `UPDATE files SET deleted = 1, dirty = 1, version = version + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
 
-func (r *FilesRepo) List(ctx context.Context, lastID string, limit int) ([]FileRow, error) {
-	rows, err := r.db.QueryContext(ctx, filesListQuery, lastID, lastID, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+func scanFileRow(s scanner) (FileRow, error) {
+	var f FileRow
+	err := s.Scan(&f.ID, &f.Meta, &f.ChunkCount, &f.Version)
+	return f, err
+}
 
-	var out []FileRow
-	for rows.Next() {
-		var f FileRow
-		if err := rows.Scan(&f.ID, &f.Meta, &f.ChunkCount, &f.Version); err != nil {
-			return nil, err
-		}
-		out = append(out, f)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return out, nil
+func (r *FilesRepo) List(ctx context.Context, lastID string, limit int) ([]FileRow, error) {
+	return queryRows(ctx, r.db, filesListQuery, scanFileRow, lastID, lastID, limit)
 }
 
 func (r *FilesRepo) Insert(ctx context.Context, id string, meta []byte, chunkCount int, version int64) error {

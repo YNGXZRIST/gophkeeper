@@ -90,26 +90,15 @@ func (r FileRepo) GetByUser(ctx context.Context, user *model.User, lastID string
 		cursor = lastID
 	}
 
-	rows, err := r.q(ctx).QueryContext(ctx, FileListByUserQuery, user.ID, cursor, limit, offset)
-	if err != nil {
-		return nil, labelerrors.NewLabelError(labelRepository+".File.GetByUser.Query", err)
-	}
-	defer rows.Close()
+	return queryRows(ctx, r.q(ctx), labelRepository+".File.GetByUser", FileListByUserQuery, scanFile, user.ID, cursor, limit, offset)
+}
 
-	var files []*model.File
-	for rows.Next() {
-		var file model.File
-		if err := rows.Scan(
-			&file.ID, &file.UserID, &file.Meta, &file.ChunkCount, &file.Version, &file.CreatedAt, &file.UpdatedAt,
-		); err != nil {
-			return nil, labelerrors.NewLabelError(labelRepository+".File.GetByUser.Scan", err)
-		}
-		files = append(files, &file)
+func scanFile(s scanner) (*model.File, error) {
+	var file model.File
+	if err := s.Scan(&file.ID, &file.UserID, &file.Meta, &file.ChunkCount, &file.Version, &file.CreatedAt, &file.UpdatedAt); err != nil {
+		return nil, err
 	}
-	if err := rows.Err(); err != nil {
-		return nil, labelerrors.NewLabelError(labelRepository+".File.GetByUser.Rows", err)
-	}
-	return files, nil
+	return &file, nil
 }
 
 // GetMeta returns a single file's metadata owned by the user, without chunk bodies.
@@ -176,22 +165,13 @@ func (r FileRepo) Changes(ctx context.Context, user *model.User, since time.Time
 		cursor = since
 	}
 
-	rows, err := r.q(ctx).QueryContext(ctx, FileChangesQuery, user.ID, cursor)
-	if err != nil {
-		return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Query", err)
-	}
-	defer rows.Close()
+	return queryRows(ctx, r.q(ctx), labelRepository+".File.Changes", FileChangesQuery, scanFileChange, user.ID, cursor)
+}
 
-	var changes []*model.FileChange
-	for rows.Next() {
-		var ch model.FileChange
-		if err := rows.Scan(&ch.ID, &ch.Meta, &ch.Version, &ch.Deleted, &ch.UpdatedAt); err != nil {
-			return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Scan", err)
-		}
-		changes = append(changes, &ch)
+func scanFileChange(s scanner) (*model.FileChange, error) {
+	var ch model.FileChange
+	if err := s.Scan(&ch.ID, &ch.Meta, &ch.Version, &ch.Deleted, &ch.UpdatedAt); err != nil {
+		return nil, err
 	}
-	if err := rows.Err(); err != nil {
-		return nil, labelerrors.NewLabelError(labelRepository+".File.Changes.Rows", err)
-	}
-	return changes, nil
+	return &ch, nil
 }

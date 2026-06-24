@@ -51,7 +51,7 @@ func newDB(t *testing.T) *sql.DB {
 func TestRepoDelegates(t *testing.T) {
 	ctx := context.Background()
 	db := newDB(t)
-	passwords := repository.NewPasswordsRepo(db)
+	passwords := repository.NewEntryRepo(db, repository.TablePassword)
 	r := NewRepo(passwords, repository.NewSyncStateRepo(db))
 
 	var _ syncer.Repo = r

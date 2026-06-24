@@ -15,53 +15,54 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type cardRepoStub struct {
-	getByUser func(context.Context, *model.User, string, int, int) ([]*model.Card, error)
-	getByID   func(context.Context, *model.User, string) (*model.Card, error)
-	create    func(context.Context, *model.User, *model.Card) (*model.Card, error)
-	update    func(context.Context, *model.User, *model.Card) (*model.Card, error)
-	del       func(context.Context, *model.User, string) error
-	changes   func(context.Context, *model.User, time.Time) ([]*model.CardChange, error)
+// entryStoreStub is the shared service-store stub: the card, note and password
+// handler tests all build their servers from it via service.NewEntryService.
+type entryStoreStub struct {
+	getByUser func(context.Context, string, string, int, int) ([]*model.Entry, error)
+	getByID   func(context.Context, string, string) (*model.Entry, error)
+	create    func(context.Context, string, *model.Entry) (*model.Entry, error)
+	update    func(context.Context, string, *model.Entry) (*model.Entry, error)
+	del       func(context.Context, string, string) error
+	changes   func(context.Context, string, time.Time) ([]*model.EntryChange, error)
 }
 
-func (s cardRepoStub) Changes(ctx context.Context, u *model.User, since time.Time) ([]*model.CardChange, error) {
+func (s entryStoreStub) GetByUser(ctx context.Context, uid, lastID string, limit, offset int) ([]*model.Entry, error) {
+	return s.getByUser(ctx, uid, lastID, limit, offset)
+}
+func (s entryStoreStub) GetByID(ctx context.Context, uid, id string) (*model.Entry, error) {
+	return s.getByID(ctx, uid, id)
+}
+func (s entryStoreStub) Create(ctx context.Context, uid string, e *model.Entry) (*model.Entry, error) {
+	return s.create(ctx, uid, e)
+}
+func (s entryStoreStub) Update(ctx context.Context, uid string, e *model.Entry) (*model.Entry, error) {
+	return s.update(ctx, uid, e)
+}
+func (s entryStoreStub) Delete(ctx context.Context, uid, id string) error {
+	return s.del(ctx, uid, id)
+}
+func (s entryStoreStub) Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error) {
 	if s.changes == nil {
 		return nil, nil
 	}
-	return s.changes(ctx, u, since)
-}
-
-func (s cardRepoStub) GetByUser(ctx context.Context, u *model.User, lastID string, limit, offset int) ([]*model.Card, error) {
-	return s.getByUser(ctx, u, lastID, limit, offset)
-}
-func (s cardRepoStub) GetByID(ctx context.Context, u *model.User, id string) (*model.Card, error) {
-	return s.getByID(ctx, u, id)
-}
-func (s cardRepoStub) Create(ctx context.Context, u *model.User, c *model.Card) (*model.Card, error) {
-	return s.create(ctx, u, c)
-}
-func (s cardRepoStub) Update(ctx context.Context, u *model.User, c *model.Card) (*model.Card, error) {
-	return s.update(ctx, u, c)
-}
-func (s cardRepoStub) Delete(ctx context.Context, u *model.User, id string) error {
-	return s.del(ctx, u, id)
-}
-
-func newCardServer(repo cardRepoStub) *CardServer {
-	return NewCardServer(CardServerProp{
-		Service: service.NewCardService(repo),
-		Logger:  zap.NewNop(),
-	})
+	return s.changes(ctx, uid, since)
 }
 
 func authed(userID string) context.Context {
 	return authctx.ContextWithUserID(context.Background(), userID)
 }
 
+func newCardServer(repo entryStoreStub) *CardServer {
+	return NewCardServer(CardServerProp{
+		Service: service.NewEntryService(repo),
+		Logger:  zap.NewNop(),
+	})
+}
+
 func TestCardServerAdd(t *testing.T) {
-	srv := newCardServer(cardRepoStub{
-		create: func(_ context.Context, _ *model.User, _ *model.Card) (*model.Card, error) {
-			return &model.Card{ID: "c1", Version: 1}, nil
+	srv := newCardServer(entryStoreStub{
+		create: func(_ context.Context, _ string, _ *model.Entry) (*model.Entry, error) {
+			return &model.Entry{ID: "c1", Version: 1}, nil
 		},
 	})
 
@@ -85,9 +86,9 @@ func TestCardServerAdd(t *testing.T) {
 
 func TestCardServerGet(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
-		srv := newCardServer(cardRepoStub{
-			getByID: func(_ context.Context, _ *model.User, _ string) (*model.Card, error) {
-				return nil, model.ErrCardNotFound
+		srv := newCardServer(entryStoreStub{
+			getByID: func(_ context.Context, _ string, _ string) (*model.Entry, error) {
+				return nil, model.ErrEntryNotFound
 			},
 		})
 		_, err := srv.Get(authed("u1"), &pb.GetRequest{})
@@ -97,9 +98,9 @@ func TestCardServerGet(t *testing.T) {
 	})
 
 	t.Run("success", func(t *testing.T) {
-		srv := newCardServer(cardRepoStub{
-			getByID: func(_ context.Context, _ *model.User, _ string) (*model.Card, error) {
-				return &model.Card{ID: "c1"}, nil
+		srv := newCardServer(entryStoreStub{
+			getByID: func(_ context.Context, _ string, _ string) (*model.Entry, error) {
+				return &model.Entry{ID: "c1"}, nil
 			},
 		})
 		resp, err := srv.Get(authed("u1"), &pb.GetRequest{})
@@ -113,9 +114,9 @@ func TestCardServerGet(t *testing.T) {
 }
 
 func TestCardServerList(t *testing.T) {
-	srv := newCardServer(cardRepoStub{
-		getByUser: func(_ context.Context, _ *model.User, _ string, _, _ int) ([]*model.Card, error) {
-			return []*model.Card{{ID: "c1"}, {ID: "c2"}}, nil
+	srv := newCardServer(entryStoreStub{
+		getByUser: func(_ context.Context, _ string, _ string, _, _ int) ([]*model.Entry, error) {
+			return []*model.Entry{{ID: "c1"}, {ID: "c2"}}, nil
 		},
 	})
 	resp, err := srv.List(authed("u1"), &pb.ListRequest{})
@@ -128,8 +129,8 @@ func TestCardServerList(t *testing.T) {
 }
 
 func TestCardServerUpdate(t *testing.T) {
-	srv := newCardServer(cardRepoStub{
-		update: func(_ context.Context, _ *model.User, _ *model.Card) (*model.Card, error) {
+	srv := newCardServer(entryStoreStub{
+		update: func(_ context.Context, _ string, _ *model.Entry) (*model.Entry, error) {
 			return nil, model.ErrVersionConflict
 		},
 	})
@@ -141,8 +142,8 @@ func TestCardServerUpdate(t *testing.T) {
 
 func TestCardServerDelete(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
-		srv := newCardServer(cardRepoStub{
-			del: func(_ context.Context, _ *model.User, _ string) error { return model.ErrCardNotFound },
+		srv := newCardServer(entryStoreStub{
+			del: func(_ context.Context, _ string, _ string) error { return model.ErrEntryNotFound },
 		})
 		_, err := srv.Delete(authed("u1"), &pb.DeleteRequest{})
 		if status.Code(err) != codes.NotFound {
@@ -151,8 +152,8 @@ func TestCardServerDelete(t *testing.T) {
 	})
 
 	t.Run("success", func(t *testing.T) {
-		srv := newCardServer(cardRepoStub{
-			del: func(_ context.Context, _ *model.User, _ string) error { return nil },
+		srv := newCardServer(entryStoreStub{
+			del: func(_ context.Context, _ string, _ string) error { return nil },
 		})
 		_, err := srv.Delete(authed("u1"), &pb.DeleteRequest{})
 		if err != nil {

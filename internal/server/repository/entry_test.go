@@ -16,9 +16,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var passwordColumns = []string{"id", "user_id", "data", "version", "created_at", "updated_at"}
+const entryTestTable = "entries"
 
-func TestPassRepoGetByUser(t *testing.T) {
+var entryColumns = []string{"id", "user_id", "data", "version", "created_at", "updated_at"}
+
+func newEntryTestRepo(db *sql.DB) *EntryRepo {
+	return NewEntryRepo(&conn.DB{DB: db}, entryTestTable)
+}
+
+func TestEntryRepoGetByUser(t *testing.T) {
+	query := buildListByUserQuery(entryTestTable)
 	tests := []struct {
 		name      string
 		lastID    string
@@ -28,29 +35,31 @@ func TestPassRepoGetByUser(t *testing.T) {
 	}{
 		{
 			name:   "success with cursor",
-			lastID: "p0",
+			lastID: "e0",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("a"), int64(1), time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordListByUserQuery)).
-					WithArgs("u1", "p0", 10, 0).
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("a"), int64(1), time.Now(), time.Now()).
+					AddRow("e2", "u1", []byte("b"), int64(1), time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("u1", "e0", 10, 0).
 					WillReturnRows(rows)
 			},
-			wantCount: 1,
+			wantCount: 2,
 		},
 		{
 			name: "empty cursor",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordListByUserQuery)).
+				rows := sqlmock.NewRows(entryColumns)
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil, 10, 0).
-					WillReturnRows(sqlmock.NewRows(passwordColumns))
+					WillReturnRows(rows)
 			},
 			wantCount: 0,
 		},
 		{
 			name: "query error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordListByUserQuery)).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil, 10, 0).
 					WillReturnError(errors.New("connection refused"))
 			},
@@ -59,9 +68,9 @@ func TestPassRepoGetByUser(t *testing.T) {
 		{
 			name: "scan error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("a"), "bad", time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordListByUserQuery)).
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("a"), "bad", time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil, 10, 0).
 					WillReturnRows(rows)
 			},
@@ -75,21 +84,22 @@ func TestPassRepoGetByUser(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			res, err := repo.GetByUser(context.Background(), &model.User{ID: "u1"}, tt.lastID, 10, 0)
+			repo := newEntryTestRepo(db)
+			entries, err := repo.GetByUser(context.Background(), "u1", tt.lastID, 10, 0)
 
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				assert.Len(t, res, tt.wantCount)
+				assert.Len(t, entries, tt.wantCount)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestPassRepoGetByID(t *testing.T) {
+func TestEntryRepoGetByID(t *testing.T) {
+	query := buildGetByIDQuery(entryTestTable)
 	tests := []struct {
 		name     string
 		mockFn   func(sqlmock.Sqlmock)
@@ -99,28 +109,28 @@ func TestPassRepoGetByID(t *testing.T) {
 		{
 			name: "success",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("data"), int64(1), time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordGetByIDQuery)).
-					WithArgs("p1", "u1").
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("data"), int64(1), time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnRows(rows)
 			},
 		},
 		{
 			name: "not found",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordGetByIDQuery)).
-					WithArgs("p1", "u1").
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnError(sql.ErrNoRows)
 			},
-			sentinel: model.ErrPasswordNotFound,
+			sentinel: model.ErrEntryNotFound,
 			wantErr:  true,
 		},
 		{
 			name: "other db error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordGetByIDQuery)).
-					WithArgs("p1", "u1").
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnError(errors.New("connection refused"))
 			},
 			wantErr: true,
@@ -133,56 +143,58 @@ func TestPassRepoGetByID(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			pass, err := repo.GetByID(context.Background(), &model.User{ID: "u1"}, "p1")
+			repo := newEntryTestRepo(db)
+			entry, err := repo.GetByID(context.Background(), "u1", "e1")
 
 			if tt.wantErr {
 				require.Error(t, err)
-				assert.Nil(t, pass)
+				assert.Nil(t, entry)
 				if tt.sentinel != nil {
 					assert.ErrorIs(t, err, tt.sentinel)
 				}
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, "p1", pass.ID)
-				assert.Equal(t, []byte("data"), pass.Data)
+				assert.Equal(t, "e1", entry.ID)
+				assert.Equal(t, []byte("data"), entry.Data)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestPassRepoCreate(t *testing.T) {
+func TestEntryRepoCreate(t *testing.T) {
+	query := buildCreateQuery(entryTestTable)
 	tests := []struct {
-		name    string
-		mockFn  func(sqlmock.Sqlmock)
-		wantErr bool
+		name     string
+		mockFn   func(sqlmock.Sqlmock)
+		sentinel error
+		wantErr  bool
 	}{
 		{
 			name: "success",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("data"), int64(1), time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordCreateQuery)).
-					WithArgs("p1", "u1", []byte("data")).
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("data"), int64(1), time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1", []byte("data")).
 					WillReturnRows(rows)
 			},
 		},
 		{
 			name: "upsert on conflict",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("data"), int64(2), time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordCreateQuery)).
-					WithArgs("p1", "u1", []byte("data")).
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("data"), int64(2), time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1", []byte("data")).
 					WillReturnRows(rows)
 			},
 		},
 		{
 			name: "no rows",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordCreateQuery)).
-					WithArgs("p1", "u1", []byte("data")).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1", []byte("data")).
 					WillReturnError(sql.ErrNoRows)
 			},
 			wantErr: true,
@@ -190,8 +202,8 @@ func TestPassRepoCreate(t *testing.T) {
 		{
 			name: "db error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordCreateQuery)).
-					WithArgs("p1", "u1", []byte("data")).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1", []byte("data")).
 					WillReturnError(errors.New("connection refused"))
 			},
 			wantErr: true,
@@ -204,22 +216,26 @@ func TestPassRepoCreate(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			pass, err := repo.Create(context.Background(), &model.User{ID: "u1"}, &model.Password{ID: "p1", Data: []byte("data")})
+			repo := newEntryTestRepo(db)
+			entry, err := repo.Create(context.Background(), "u1", &model.Entry{ID: "e1", Data: []byte("data")})
 
 			if tt.wantErr {
 				require.Error(t, err)
-				assert.Nil(t, pass)
+				assert.Nil(t, entry)
+				if tt.sentinel != nil {
+					assert.ErrorIs(t, err, tt.sentinel)
+				}
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, "p1", pass.ID)
+				assert.Equal(t, "e1", entry.ID)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestPassRepoUpdate(t *testing.T) {
+func TestEntryRepoUpdate(t *testing.T) {
+	query := buildUpdateQuery(entryTestTable)
 	tests := []struct {
 		name     string
 		mockFn   func(sqlmock.Sqlmock)
@@ -229,18 +245,18 @@ func TestPassRepoUpdate(t *testing.T) {
 		{
 			name: "success",
 			mockFn: func(m sqlmock.Sqlmock) {
-				rows := sqlmock.NewRows(passwordColumns).
-					AddRow("p1", "u1", []byte("new"), int64(2), time.Now(), time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordUpdateQuery)).
-					WithArgs([]byte("new"), "p1", "u1", int64(1)).
+				rows := sqlmock.NewRows(entryColumns).
+					AddRow("e1", "u1", []byte("new"), int64(2), time.Now(), time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs([]byte("new"), "e1", "u1", int64(1)).
 					WillReturnRows(rows)
 			},
 		},
 		{
 			name: "version conflict",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordUpdateQuery)).
-					WithArgs([]byte("new"), "p1", "u1", int64(1)).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs([]byte("new"), "e1", "u1", int64(1)).
 					WillReturnError(sql.ErrNoRows)
 			},
 			sentinel: model.ErrVersionConflict,
@@ -249,8 +265,8 @@ func TestPassRepoUpdate(t *testing.T) {
 		{
 			name: "other db error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordUpdateQuery)).
-					WithArgs([]byte("new"), "p1", "u1", int64(1)).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
+					WithArgs([]byte("new"), "e1", "u1", int64(1)).
 					WillReturnError(errors.New("connection refused"))
 			},
 			wantErr: true,
@@ -263,25 +279,26 @@ func TestPassRepoUpdate(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			pass, err := repo.Update(context.Background(), &model.User{ID: "u1"}, &model.Password{ID: "p1", Data: []byte("new"), Version: 1})
+			repo := newEntryTestRepo(db)
+			entry, err := repo.Update(context.Background(), "u1", &model.Entry{ID: "e1", Data: []byte("new"), Version: 1})
 
 			if tt.wantErr {
 				require.Error(t, err)
-				assert.Nil(t, pass)
+				assert.Nil(t, entry)
 				if tt.sentinel != nil {
 					assert.ErrorIs(t, err, tt.sentinel)
 				}
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, int64(2), pass.Version)
+				assert.Equal(t, int64(2), entry.Version)
 			}
 			assert.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
 }
 
-func TestPassRepoDelete(t *testing.T) {
+func TestEntryRepoDelete(t *testing.T) {
+	query := buildDeleteQuery(entryTestTable)
 	tests := []struct {
 		name     string
 		mockFn   func(sqlmock.Sqlmock)
@@ -291,26 +308,26 @@ func TestPassRepoDelete(t *testing.T) {
 		{
 			name: "success",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectExec(regexp.QuoteMeta(PasswordDeleteQuery)).
-					WithArgs("p1", "u1").
+				m.ExpectExec(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnResult(sqlmock.NewResult(0, 1))
 			},
 		},
 		{
 			name: "not found",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectExec(regexp.QuoteMeta(PasswordDeleteQuery)).
-					WithArgs("p1", "u1").
+				m.ExpectExec(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnResult(sqlmock.NewResult(0, 0))
 			},
-			sentinel: model.ErrPasswordNotFound,
+			sentinel: model.ErrEntryNotFound,
 			wantErr:  true,
 		},
 		{
 			name: "db error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectExec(regexp.QuoteMeta(PasswordDeleteQuery)).
-					WithArgs("p1", "u1").
+				m.ExpectExec(regexp.QuoteMeta(query)).
+					WithArgs("e1", "u1").
 					WillReturnError(errors.New("connection refused"))
 			},
 			wantErr: true,
@@ -323,8 +340,8 @@ func TestPassRepoDelete(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			err = repo.Delete(context.Background(), &model.User{ID: "u1"}, "p1")
+			repo := newEntryTestRepo(db)
+			err = repo.Delete(context.Background(), "u1", "e1")
 
 			if tt.wantErr {
 				require.Error(t, err)
@@ -339,7 +356,8 @@ func TestPassRepoDelete(t *testing.T) {
 	}
 }
 
-func TestPassRepoChanges(t *testing.T) {
+func TestEntryRepoChanges(t *testing.T) {
+	query := buildChangesQuery(entryTestTable)
 	changeColumns := []string{"id", "data", "version", "deleted", "updated_at"}
 	tests := []struct {
 		name      string
@@ -353,9 +371,9 @@ func TestPassRepoChanges(t *testing.T) {
 			since: time.Time{},
 			mockFn: func(m sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows(changeColumns).
-					AddRow("p1", []byte("a"), int64(1), false, time.Now()).
-					AddRow("p2", []byte("b"), int64(2), true, time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordChangesQuery)).
+					AddRow("e1", []byte("a"), int64(1), false, time.Now()).
+					AddRow("e2", []byte("b"), int64(2), true, time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil).
 					WillReturnRows(rows)
 			},
@@ -366,8 +384,8 @@ func TestPassRepoChanges(t *testing.T) {
 			since: time.Now(),
 			mockFn: func(m sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows(changeColumns).
-					AddRow("p1", []byte("a"), int64(1), false, time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordChangesQuery)).
+					AddRow("e1", []byte("a"), int64(1), false, time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", sqlmock.AnyArg()).
 					WillReturnRows(rows)
 			},
@@ -376,7 +394,7 @@ func TestPassRepoChanges(t *testing.T) {
 		{
 			name: "query error",
 			mockFn: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(regexp.QuoteMeta(PasswordChangesQuery)).
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil).
 					WillReturnError(errors.New("connection refused"))
 			},
@@ -386,8 +404,8 @@ func TestPassRepoChanges(t *testing.T) {
 			name: "scan error",
 			mockFn: func(m sqlmock.Sqlmock) {
 				rows := sqlmock.NewRows(changeColumns).
-					AddRow("p1", []byte("a"), "bad", false, time.Now())
-				m.ExpectQuery(regexp.QuoteMeta(PasswordChangesQuery)).
+					AddRow("e1", []byte("a"), "bad", false, time.Now())
+				m.ExpectQuery(regexp.QuoteMeta(query)).
 					WithArgs("u1", nil).
 					WillReturnRows(rows)
 			},
@@ -401,8 +419,8 @@ func TestPassRepoChanges(t *testing.T) {
 			defer db.Close()
 			tt.mockFn(mock)
 
-			repo := NewPasswordRepo(&conn.DB{DB: db})
-			changes, err := repo.Changes(context.Background(), &model.User{ID: "u1"}, tt.since)
+			repo := newEntryTestRepo(db)
+			changes, err := repo.Changes(context.Background(), "u1", tt.since)
 
 			if tt.wantErr {
 				require.Error(t, err)

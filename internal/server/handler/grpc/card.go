@@ -24,7 +24,7 @@ func NewCardServer(cardServerProp CardServerProp) *CardServer {
 }
 
 type CardServerProp struct {
-	Service *service.CardService
+	Service *service.EntryService
 	Logger  *zap.Logger
 }
 
@@ -36,7 +36,7 @@ func (c *CardServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRespons
 	card, err := c.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
 		c.Logger.Error("card add failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.AddResponse{}
 	resp.SetCard(toPBCard(card))
@@ -50,11 +50,11 @@ func (c *CardServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetRespons
 	}
 	card, err := c.Service.Get(ctx, userID, in.GetId())
 	if err != nil {
-		if errors.Is(err, model.ErrCardNotFound) {
-			return nil, status.Error(codes.NotFound, "card not found")
+		if errors.Is(err, model.ErrEntryNotFound) {
+			return nil, status.Error(codes.NotFound, model.ErrCardNotFound.Error())
 		}
 		c.Logger.Error("card get failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.GetResponse{}
 	resp.SetCard(toPBCard(card))
@@ -69,7 +69,7 @@ func (c *CardServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListResp
 	cards, err := c.Service.List(ctx, userID, in.GetLastId(), int(in.GetLimit()), int(in.GetOffset()))
 	if err != nil {
 		c.Logger.Error("card list failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbCards := make([]*pb.Card, 0, len(cards))
 	for _, card := range cards {
@@ -91,7 +91,7 @@ func (c *CardServer) Update(ctx context.Context, in *pb.UpdateRequest) (*pb.Upda
 			return nil, status.Error(codes.Aborted, "card version conflict")
 		}
 		c.Logger.Error("card update failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.UpdateResponse{}
 	resp.SetCard(toPBCard(card))
@@ -104,11 +104,11 @@ func (c *CardServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		return nil, status.Error(codes.Unauthenticated, "missing user identity")
 	}
 	if err := c.Service.Delete(ctx, userID, in.GetId()); err != nil {
-		if errors.Is(err, model.ErrCardNotFound) {
-			return nil, status.Error(codes.NotFound, "card not found")
+		if errors.Is(err, model.ErrEntryNotFound) {
+			return nil, status.Error(codes.NotFound, model.ErrCardNotFound.Error())
 		}
 		c.Logger.Error("card delete failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	return &pb.DeleteResponse{}, nil
 }
@@ -121,7 +121,7 @@ func (c *CardServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.Ch
 	changes, err := c.Service.Changes(ctx, userID, in.GetSince())
 	if err != nil {
 		c.Logger.Error("card changes failed", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbChanges := make([]*pb.CardChange, 0, len(changes))
 	for _, ch := range changes {
@@ -132,7 +132,7 @@ func (c *CardServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.Ch
 	return resp, nil
 }
 
-func toPbCardChange(ch *model.CardChange) *pb.CardChange {
+func toPbCardChange(ch *model.EntryChange) *pb.CardChange {
 	pbChange := &pb.CardChange{}
 	pbChange.SetId(ch.ID)
 	pbChange.SetData(ch.Data)
@@ -142,7 +142,7 @@ func toPbCardChange(ch *model.CardChange) *pb.CardChange {
 	return pbChange
 }
 
-func toPBCard(card *model.Card) *pb.Card {
+func toPBCard(card *model.Entry) *pb.Card {
 	pbCard := &pb.Card{}
 	pbCard.SetId(card.ID)
 	pbCard.SetData(card.Data)

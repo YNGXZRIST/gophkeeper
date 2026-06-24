@@ -39,9 +39,9 @@ type App struct {
 }
 
 type repos struct {
-	notes     *repository.NotesRepo
-	passwords *repository.PasswordsRepo
-	cards     *repository.CardsRepo
+	notes     *repository.EntryRepo
+	passwords *repository.EntryRepo
+	cards     *repository.EntryRepo
 	files     *repository.FilesRepo
 	session   *repository.SessionRepo
 	syncState *repository.SyncStateRepo
@@ -105,9 +105,9 @@ func (a *App) Shutdown() error {
 
 func buildRepos(dbConn *sql.DB) repos {
 	return repos{
-		notes:     repository.NewNotesRepo(dbConn),
-		passwords: repository.NewPasswordsRepo(dbConn),
-		cards:     repository.NewCardsRepo(dbConn),
+		notes:     repository.NewEntryRepo(dbConn, repository.TableNote),
+		passwords: repository.NewEntryRepo(dbConn, repository.TablePassword),
+		cards:     repository.NewEntryRepo(dbConn, repository.TableCard),
 		files:     repository.NewFilesRepo(dbConn),
 		session:   repository.NewSessionRepo(dbConn),
 		syncState: repository.NewSyncStateRepo(dbConn),
