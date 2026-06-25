@@ -3,18 +3,19 @@ package service
 import (
 	"context"
 	"gophkeeper/internal/server/model"
+	"iter"
 	"time"
 )
 
 // entryStore is the persistence contract EntryService needs: one table's worth
 // of encrypted entries. The bound table is decided by the injected repository.
 type entryStore interface {
-	GetByUser(ctx context.Context, uid, lastID string, limit, offset int) ([]*model.Entry, error)
+	GetByUser(ctx context.Context, uid, lastID string, limit, offset int) iter.Seq2[*model.Entry, error]
 	GetByID(ctx context.Context, uid, id string) (*model.Entry, error)
 	Create(ctx context.Context, uid string, entry *model.Entry) (*model.Entry, error)
 	Update(ctx context.Context, uid string, entry *model.Entry) (*model.Entry, error)
 	Delete(ctx context.Context, uid, id string) error
-	Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error)
+	Changes(ctx context.Context, uid string, since time.Time) iter.Seq2[*model.EntryChange, error]
 }
 
 // EntryService is the business layer for one kind of secret. Notes, passwords
@@ -32,9 +33,17 @@ func (s *EntryService) Add(ctx context.Context, userID, id string, data []byte) 
 	return s.repo.Create(ctx, userID, &model.Entry{ID: id, Data: data})
 }
 
-// List returns a chunk of the user's entries.
+// List returns a chunk of the user's entries, draining the repository's
+// streaming iterator and stopping on the first error it surfaces.
 func (s *EntryService) List(ctx context.Context, userID, lastID string, limit, offset int) ([]*model.Entry, error) {
-	return s.repo.GetByUser(ctx, userID, lastID, limit, offset)
+	var entries []*model.Entry
+	for entry, err := range s.repo.GetByUser(ctx, userID, lastID, limit, offset) {
+		if err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+	return entries, nil
 }
 
 // Get returns a single entry owned by the user.
@@ -62,5 +71,12 @@ func (s *EntryService) Changes(ctx context.Context, userID, since string) ([]*mo
 		}
 		t = parsed
 	}
-	return s.repo.Changes(ctx, userID, t)
+	var changes []*model.EntryChange
+	for ch, err := range s.repo.Changes(ctx, userID, t) {
+		if err != nil {
+			return nil, err
+		}
+		changes = append(changes, ch)
+	}
+	return changes, nil
 }

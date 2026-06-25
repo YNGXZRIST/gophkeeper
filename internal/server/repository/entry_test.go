@@ -85,7 +85,15 @@ func TestEntryRepoGetByUser(t *testing.T) {
 			tt.mockFn(mock)
 
 			repo := newEntryTestRepo(db)
-			entries, err := repo.GetByUser(context.Background(), "u1", tt.lastID, 10, 0)
+
+			var entries []*model.Entry
+			for entry, e := range repo.GetByUser(context.Background(), "u1", tt.lastID, 10, 0) {
+				if e != nil {
+					err = e
+					break
+				}
+				entries = append(entries, entry)
+			}
 
 			if tt.wantErr {
 				require.Error(t, err)
@@ -420,7 +428,15 @@ func TestEntryRepoChanges(t *testing.T) {
 			tt.mockFn(mock)
 
 			repo := newEntryTestRepo(db)
-			changes, err := repo.Changes(context.Background(), "u1", tt.since)
+
+			var changes []*model.EntryChange
+			for ch, e := range repo.Changes(context.Background(), "u1", tt.since) {
+				if e != nil {
+					err = e
+					break
+				}
+				changes = append(changes, ch)
+			}
 
 			if tt.wantErr {
 				require.Error(t, err)

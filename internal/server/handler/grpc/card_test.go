@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"iter"
 	"testing"
 	"time"
 
@@ -26,8 +27,24 @@ type entryStoreStub struct {
 	changes   func(context.Context, string, time.Time) ([]*model.EntryChange, error)
 }
 
-func (s entryStoreStub) GetByUser(ctx context.Context, uid, lastID string, limit, offset int) ([]*model.Entry, error) {
-	return s.getByUser(ctx, uid, lastID, limit, offset)
+func (s entryStoreStub) GetByUser(ctx context.Context, uid, lastID string, limit, offset int) iter.Seq2[*model.Entry, error] {
+	return sliceSeq(s.getByUser(ctx, uid, lastID, limit, offset))
+}
+
+// sliceSeq adapts a slice-or-error result into the streaming iterator the
+// store now returns, so the stub fields stay plain slices.
+func sliceSeq[T any](items []*T, err error) iter.Seq2[*T, error] {
+	return func(yield func(*T, error) bool) {
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		for _, item := range items {
+			if !yield(item, nil) {
+				return
+			}
+		}
+	}
 }
 func (s entryStoreStub) GetByID(ctx context.Context, uid, id string) (*model.Entry, error) {
 	return s.getByID(ctx, uid, id)
@@ -41,11 +58,11 @@ func (s entryStoreStub) Update(ctx context.Context, uid string, e *model.Entry) 
 func (s entryStoreStub) Delete(ctx context.Context, uid, id string) error {
 	return s.del(ctx, uid, id)
 }
-func (s entryStoreStub) Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error) {
+func (s entryStoreStub) Changes(ctx context.Context, uid string, since time.Time) iter.Seq2[*model.EntryChange, error] {
 	if s.changes == nil {
-		return nil, nil
+		return sliceSeq[model.EntryChange](nil, nil)
 	}
-	return s.changes(ctx, uid, since)
+	return sliceSeq(s.changes(ctx, uid, since))
 }
 
 func authed(userID string) context.Context {

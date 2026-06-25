@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"iter"
 	"testing"
 	"time"
 
@@ -18,8 +19,24 @@ type entryRepoStub struct {
 	changes   func(context.Context, string, time.Time) ([]*model.EntryChange, error)
 }
 
-func (s entryRepoStub) GetByUser(ctx context.Context, uid, lastID string, limit, offset int) ([]*model.Entry, error) {
-	return s.getByUser(ctx, uid, lastID, limit, offset)
+func (s entryRepoStub) GetByUser(ctx context.Context, uid, lastID string, limit, offset int) iter.Seq2[*model.Entry, error] {
+	return sliceSeq(s.getByUser(ctx, uid, lastID, limit, offset))
+}
+
+// sliceSeq adapts a slice-or-error result into the streaming iterator the
+// repository now returns, so the table-driven cases keep returning plain slices.
+func sliceSeq[T any](items []*T, err error) iter.Seq2[*T, error] {
+	return func(yield func(*T, error) bool) {
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		for _, item := range items {
+			if !yield(item, nil) {
+				return
+			}
+		}
+	}
 }
 
 func (s entryRepoStub) GetByID(ctx context.Context, uid, id string) (*model.Entry, error) {
@@ -38,11 +55,11 @@ func (s entryRepoStub) Delete(ctx context.Context, uid, id string) error {
 	return s.del(ctx, uid, id)
 }
 
-func (s entryRepoStub) Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error) {
+func (s entryRepoStub) Changes(ctx context.Context, uid string, since time.Time) iter.Seq2[*model.EntryChange, error] {
 	if s.changes == nil {
-		return nil, nil
+		return sliceSeq[model.EntryChange](nil, nil)
 	}
-	return s.changes(ctx, uid, since)
+	return sliceSeq(s.changes(ctx, uid, since))
 }
 
 func TestEntryServiceAdd(t *testing.T) {

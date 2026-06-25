@@ -8,6 +8,7 @@ import (
 	"gophkeeper/internal/server/db/conn"
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	"iter"
 	"strings"
 	"time"
 )
@@ -20,12 +21,12 @@ const TableNote = "notes"
 // passwords or cards. Every kind is served by its own EntryRepo bound to the
 // matching table; the payload is opaque to the store and stays encrypted.
 type Store interface {
-	GetByUser(ctx context.Context, uid string, lastID string, limit, offset int) ([]*model.Entry, error)
+	GetByUser(ctx context.Context, uid string, lastID string, limit, offset int) iter.Seq2[*model.Entry, error]
 	GetByID(ctx context.Context, uid string, id string) (*model.Entry, error)
 	Create(ctx context.Context, uid string, secret *model.Entry) (*model.Entry, error)
 	Update(ctx context.Context, uid string, secret *model.Entry) (*model.Entry, error)
 	Delete(ctx context.Context, uid string, id string) error
-	Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error)
+	Changes(ctx context.Context, uid string, since time.Time) iter.Seq2[*model.EntryChange, error]
 }
 
 // EntryRepo is a Store backed by a single table. Notes, passwords and cards
@@ -60,14 +61,16 @@ func NewEntryRepo(db *conn.DB, table string) *EntryRepo {
 	}
 }
 
-// GetByUser returns one page of the user's entries, ordered by id and starting
-// after lastID for keyset pagination.
-func (e *EntryRepo) GetByUser(ctx context.Context, uid string, lastID string, limit, offset int) ([]*model.Entry, error) {
+// GetByUser streams one page of the user's entries, ordered by id and starting
+// after lastID for keyset pagination. The query is issued when the consumer
+// begins ranging, and the first failure is delivered through the iterator's
+// error half.
+func (e *EntryRepo) GetByUser(ctx context.Context, uid string, lastID string, limit, offset int) iter.Seq2[*model.Entry, error] {
 	var cursor any
 	if lastID != "" {
 		cursor = lastID
 	}
-	return queryRows(ctx, e.q(ctx), e.label+".GetByUser", e.listByUserQuery, scanEntry, uid, cursor, limit, offset)
+	return queryRowsSeq(ctx, e.q(ctx), e.label+".GetByUser", e.listByUserQuery, scanEntry, uid, cursor, limit, offset)
 }
 
 func scanEntry(s scanner) (*model.Entry, error) {
@@ -139,14 +142,16 @@ func (e *EntryRepo) Delete(ctx context.Context, uid string, id string) error {
 }
 
 // Changes returns the user's entries, including tombstones, changed after since.
-// A zero since returns the full history and is used for the initial sync.
-func (e *EntryRepo) Changes(ctx context.Context, uid string, since time.Time) ([]*model.EntryChange, error) {
+// A zero since returns the full history and is used for the initial sync. Like
+// GetByUser it streams: the query runs when ranging starts and the first
+// failure is delivered through the iterator's error half.
+func (e *EntryRepo) Changes(ctx context.Context, uid string, since time.Time) iter.Seq2[*model.EntryChange, error] {
 	var cursor any
 	if !since.IsZero() {
 		cursor = since
 	}
 
-	return queryRows(ctx, e.q(ctx), e.label+".Changes", e.changesQuery, scanEntryChange, uid, cursor)
+	return queryRowsSeq(ctx, e.q(ctx), e.label+".Changes", e.changesQuery, scanEntryChange, uid, cursor)
 }
 
 func scanEntryChange(s scanner) (*model.EntryChange, error) {

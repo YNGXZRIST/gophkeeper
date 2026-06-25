@@ -5,6 +5,7 @@ import (
 	"gophkeeper/internal/server/db/conn"
 	"gophkeeper/internal/server/db/trmanager"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	"iter"
 )
 
 const labelRepository = "Repository"
@@ -39,6 +40,36 @@ func queryRows[T any](ctx context.Context, q trmanager.Querier, label, query str
 		return nil, labelerrors.NewLabelError(label+".Rows", err)
 	}
 	return out, nil
+}
+
+// queryRowsSeq is the streaming twin of queryRows: it yields each decoded row
+// lazily and surfaces the first Query/Scan/Rows failure through the error half
+// of the pair, after which iteration stops. The query runs when the consumer
+// starts ranging, and the rows are closed when ranging ends.
+func queryRowsSeq[T any](ctx context.Context, q trmanager.Querier, label, query string, scan func(scanner) (T, error), args ...any) iter.Seq2[T, error] {
+	return func(yield func(T, error) bool) {
+		var zero T
+		rows, err := q.QueryContext(ctx, query, args...)
+		if err != nil {
+			yield(zero, labelerrors.NewLabelError(label+".Query", err))
+			return
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			v, err := scan(rows)
+			if err != nil {
+				yield(zero, labelerrors.NewLabelError(label+".Scan", err))
+				return
+			}
+			if !yield(v, nil) {
+				return
+			}
+		}
+		if err := rows.Err(); err != nil {
+			yield(zero, labelerrors.NewLabelError(label+".Rows", err))
+		}
+	}
 }
 
 type Repositories struct {
