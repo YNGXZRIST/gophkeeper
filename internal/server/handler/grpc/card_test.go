@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"iter"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/card/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -72,7 +72,7 @@ func authed(userID string) context.Context {
 func newCardServer(repo entryStoreStub) *CardServer {
 	return NewCardServer(CardServerProp{
 		Service: service.NewEntryService(repo),
-		Logger:  zap.NewNop(),
+		Logger:  slog.New(slog.DiscardHandler),
 	})
 }
 

@@ -11,9 +11,9 @@ import (
 	pbN "gophkeeper/internal/shared/proto/note/v1"
 	pbP "gophkeeper/internal/shared/proto/password/v1"
 	pbU "gophkeeper/internal/shared/proto/user/v1"
+	"log/slog"
 	"net"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -23,7 +23,7 @@ type Deps struct {
 	CertFile    string
 	KeyFile     string
 	Services    *service.Services
-	Logger      *zap.Logger
+	Logger      *slog.Logger
 	TokenParser TokenParser
 }
 

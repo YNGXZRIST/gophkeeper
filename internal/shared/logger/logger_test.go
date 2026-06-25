@@ -29,10 +29,6 @@ func TestInitialize_Production(t *testing.T) {
 		}
 		log.Info("info record")
 		log.Error("error record")
-		if err = log.Sync(); err != nil {
-
-			t.Logf("sync: %v", err)
-		}
 
 		entries, err := os.ReadDir(dir)
 		if err != nil {

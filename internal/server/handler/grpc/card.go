@@ -7,8 +7,8 @@ import (
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/card/v1"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -25,7 +25,7 @@ func NewCardServer(cardServerProp CardServerProp) *CardServer {
 
 type CardServerProp struct {
 	Service *service.EntryService
-	Logger  *zap.Logger
+	Logger  *slog.Logger
 }
 
 func (c *CardServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddResponse, error) {
@@ -35,7 +35,7 @@ func (c *CardServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRespons
 	}
 	card, err := c.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
-		c.Logger.Error("card add failed", zap.Error(err))
+		c.Logger.Error("card add failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.AddResponse{}
@@ -53,7 +53,7 @@ func (c *CardServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetRespons
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrCardNotFound.Error())
 		}
-		c.Logger.Error("card get failed", zap.Error(err))
+		c.Logger.Error("card get failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.GetResponse{}
@@ -68,7 +68,7 @@ func (c *CardServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListResp
 	}
 	cards, err := c.Service.List(ctx, userID, in.GetLastId(), int(in.GetLimit()), int(in.GetOffset()))
 	if err != nil {
-		c.Logger.Error("card list failed", zap.Error(err))
+		c.Logger.Error("card list failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbCards := make([]*pb.Card, 0, len(cards))
@@ -90,7 +90,7 @@ func (c *CardServer) Update(ctx context.Context, in *pb.UpdateRequest) (*pb.Upda
 		if errors.Is(err, model.ErrVersionConflict) {
 			return nil, status.Error(codes.Aborted, "card version conflict")
 		}
-		c.Logger.Error("card update failed", zap.Error(err))
+		c.Logger.Error("card update failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.UpdateResponse{}
@@ -107,7 +107,7 @@ func (c *CardServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrCardNotFound.Error())
 		}
-		c.Logger.Error("card delete failed", zap.Error(err))
+		c.Logger.Error("card delete failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	return &pb.DeleteResponse{}, nil
@@ -120,7 +120,7 @@ func (c *CardServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.Ch
 	}
 	changes, err := c.Service.Changes(ctx, userID, in.GetSince())
 	if err != nil {
-		c.Logger.Error("card changes failed", zap.Error(err))
+		c.Logger.Error("card changes failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbChanges := make([]*pb.CardChange, 0, len(changes))

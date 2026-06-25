@@ -7,8 +7,8 @@ import (
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/password/v1"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -21,7 +21,7 @@ type PasswordServer struct {
 
 type PasswordServerProp struct {
 	Service *service.EntryService
-	Logger  *zap.Logger
+	Logger  *slog.Logger
 }
 
 func NewPasswordServer(passwordServerProp PasswordServerProp) *PasswordServer {
@@ -35,7 +35,7 @@ func (p *PasswordServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRes
 	}
 	entry, err := p.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
-		p.Logger.Error("password add failed", zap.Error(err))
+		p.Logger.Error("password add failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.AddResponse{}
@@ -53,7 +53,7 @@ func (p *PasswordServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetRes
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrPasswordNotFound.Error())
 		}
-		p.Logger.Error("password get failed", zap.Error(err))
+		p.Logger.Error("password get failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.GetResponse{}
@@ -68,7 +68,7 @@ func (p *PasswordServer) List(ctx context.Context, in *pb.ListRequest) (*pb.List
 	}
 	passwordEntries, err := p.Service.List(ctx, userID, in.GetLastId(), int(in.GetLimit()), int(in.GetOffset()))
 	if err != nil {
-		p.Logger.Error("password list failed", zap.Error(err))
+		p.Logger.Error("password list failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbPasswords := make([]*pb.Password, 0, len(passwordEntries))
@@ -90,7 +90,7 @@ func (p *PasswordServer) Update(ctx context.Context, in *pb.UpdateRequest) (*pb.
 		if errors.Is(err, model.ErrVersionConflict) {
 			return nil, status.Error(codes.Aborted, "password version conflict")
 		}
-		p.Logger.Error("password update failed", zap.Error(err))
+		p.Logger.Error("password update failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.UpdateResponse{}
@@ -107,7 +107,7 @@ func (p *PasswordServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrPasswordNotFound.Error())
 		}
-		p.Logger.Error("password delete failed", zap.Error(err))
+		p.Logger.Error("password delete failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	return &pb.DeleteResponse{}, nil
@@ -120,7 +120,7 @@ func (p *PasswordServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*p
 	}
 	changes, err := p.Service.Changes(ctx, userID, in.GetSince())
 	if err != nil {
-		p.Logger.Error("password changes failed", zap.Error(err))
+		p.Logger.Error("password changes failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbChanges := make([]*pb.PasswordChange, 0, len(changes))

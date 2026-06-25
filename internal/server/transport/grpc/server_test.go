@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"path/filepath"
 	"testing"
 	"time"
@@ -12,7 +13,6 @@ import (
 	"gophkeeper/internal/shared/certgen"
 	pbU "gophkeeper/internal/shared/proto/user/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -145,7 +145,7 @@ func TestNewRegistersAndServes(t *testing.T) {
 		CertFile:    cert,
 		KeyFile:     key,
 		Services:    &service.Services{},
-		Logger:      zap.NewNop(),
+		Logger:      slog.New(slog.DiscardHandler),
 		TokenParser: parserStub{fn: func(string) (string, error) { return "", nil }},
 	})
 	if err != nil {
@@ -176,7 +176,7 @@ func TestNewListenError(t *testing.T) {
 		CertFile:    cert,
 		KeyFile:     key,
 		Services:    &service.Services{},
-		Logger:      zap.NewNop(),
+		Logger:      slog.New(slog.DiscardHandler),
 		TokenParser: parserStub{},
 	})
 	if err == nil {

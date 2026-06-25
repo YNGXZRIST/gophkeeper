@@ -7,8 +7,8 @@ import (
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/note/v1"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -25,7 +25,7 @@ func NewNoteServer(noteServiceProp NoteServerProp) *NoteServer {
 
 type NoteServerProp struct {
 	Service *service.EntryService
-	Logger  *zap.Logger
+	Logger  *slog.Logger
 }
 
 func (n *NoteServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddResponse, error) {
@@ -35,7 +35,7 @@ func (n *NoteServer) Add(ctx context.Context, in *pb.AddRequest) (*pb.AddRespons
 	}
 	note, err := n.Service.Add(ctx, userID, in.GetId(), in.GetData())
 	if err != nil {
-		n.Logger.Error("note add failed", zap.Error(err))
+		n.Logger.Error("note add failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.AddResponse{}
@@ -54,7 +54,7 @@ func (n *NoteServer) Get(ctx context.Context, in *pb.GetRequest) (*pb.GetRespons
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrNoteNotFound.Error())
 		}
-		n.Logger.Error("note get failed", zap.Error(err))
+		n.Logger.Error("note get failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.GetResponse{}
@@ -69,7 +69,7 @@ func (n *NoteServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListResp
 	}
 	notes, err := n.Service.List(ctx, userID, in.GetLastId(), int(in.GetLimit()), int(in.GetOffset()))
 	if err != nil {
-		n.Logger.Error("note list failed", zap.Error(err))
+		n.Logger.Error("note list failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbNotes := make([]*pb.Note, 0, len(notes))
@@ -91,7 +91,7 @@ func (n *NoteServer) Update(ctx context.Context, in *pb.UpdateRequest) (*pb.Upda
 		if errors.Is(err, model.ErrVersionConflict) {
 			return nil, status.Error(codes.Aborted, "note version conflict")
 		}
-		n.Logger.Error("note update failed", zap.Error(err))
+		n.Logger.Error("note update failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	resp := &pb.UpdateResponse{}
@@ -108,7 +108,7 @@ func (n *NoteServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		if errors.Is(err, model.ErrEntryNotFound) {
 			return nil, status.Error(codes.NotFound, model.ErrNoteNotFound.Error())
 		}
-		n.Logger.Error("note delete failed", zap.Error(err))
+		n.Logger.Error("note delete failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	return &pb.DeleteResponse{}, nil
@@ -121,7 +121,7 @@ func (n *NoteServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.Ch
 	}
 	changes, err := n.Service.Changes(ctx, userID, in.GetSince())
 	if err != nil {
-		n.Logger.Error("note changes failed", zap.Error(err))
+		n.Logger.Error("note changes failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, model.ErrInternalServerError.Error())
 	}
 	pbChanges := make([]*pb.NoteChange, 0, len(changes))

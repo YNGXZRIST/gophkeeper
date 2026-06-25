@@ -1,13 +1,14 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"gophkeeper/internal/shared/errors/labelerrors"
+	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
@@ -25,6 +26,10 @@ const (
 	logMaxBackups = 5    // keep this many rotated files
 	logMaxAgeDays = 30   // delete rotated files older than this
 	logCompress   = true // gzip rotated files
+
+	// levelCeiling sits above every slog level, bounding the open-ended upper
+	// half of the error file's range.
+	levelCeiling = slog.Level(1 << 30)
 )
 
 // Config defines how the logger is built for the server.
@@ -41,11 +46,10 @@ type Config struct {
 // Initialize builds a ready-to-use logger for the configured run mode.
 // Development mode logs human-readable output to the console; production mode
 // records structured logs to files, keeping errors separate from informational
-// records, and mirrors them to stdout only when Config.Console is set. The
-// returned logger should be flushed with Sync before the program exits.
-func Initialize(c *Config) (*zap.Logger, error) {
+// records, and mirrors them to stdout only when Config.Console is set.
+func Initialize(c *Config) (*slog.Logger, error) {
 	var (
-		log *zap.Logger
+		log *slog.Logger
 		err error
 	)
 
@@ -53,7 +57,7 @@ func Initialize(c *Config) (*zap.Logger, error) {
 	case ModeProduction:
 		log, err = newProduction(c)
 	case ModeDevelopment:
-		log, err = newDevelopment()
+		log = newDevelopment()
 	default:
 		err = fmt.Errorf("invalid mode: %s", c.Mode)
 	}
@@ -64,36 +68,32 @@ func Initialize(c *Config) (*zap.Logger, error) {
 	return log, nil
 }
 
-// newDevelopment builds a logger for local development.
-func newDevelopment() (*zap.Logger, error) {
-	log, err := zap.NewDevelopment()
-	if err != nil {
-		return nil, fmt.Errorf("could not create development logger: %w", err)
-	}
-	return log, nil
+// newDevelopment builds a logger for local development that writes
+// human-readable records to stderr down to the debug level.
+func newDevelopment() *slog.Logger {
+	return slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}))
 }
 
 // newProduction builds a logger for production, routing informational records
 // and errors to separate files, optionally mirroring them to stdout.
-func newProduction(c *Config) (*zap.Logger, error) {
+func newProduction(c *Config) (*slog.Logger, error) {
 	if err := os.MkdirAll(c.Dir, dirPerm); err != nil {
 		return nil, fmt.Errorf("could not create log directory %q: %w", c.Dir, err)
 	}
 
-	encCfg := zap.NewProductionEncoderConfig()
-	encCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoder := zapcore.NewJSONEncoder(encCfg)
-	infoLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool { return l < zapcore.ErrorLevel })
-	errLevel := zap.LevelEnablerFunc(func(l zapcore.Level) bool { return l >= zapcore.ErrorLevel })
-	cores := []zapcore.Core{
-		zapcore.NewCore(encoder, zapcore.AddSync(newLogWriter(c, "info")), infoLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(newLogWriter(c, "errors")), errLevel),
+	opts := &slog.HandlerOptions{Level: slog.LevelDebug, AddSource: true}
+	handlers := []slog.Handler{
+		newRangeHandler(newLogWriter(c, "info"), opts, slog.LevelDebug, slog.LevelError),
+		newRangeHandler(newLogWriter(c, "errors"), opts, slog.LevelError, levelCeiling),
 	}
 	if c.Console {
-		cores = append(cores, zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zap.InfoLevel))
+		handlers = append(handlers, slog.NewJSONHandler(os.Stdout, opts))
 	}
 
-	return zap.New(zapcore.NewTee(cores...), zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel)), nil
+	return slog.New(newFanoutHandler(handlers...)), nil
 }
 
 // newLogWriter builds a rotating log writer for the given record kind, bounding
@@ -111,4 +111,75 @@ func newLogWriter(c *Config, kind string) *lumberjack.Logger {
 		MaxAge:     logMaxAgeDays,
 		Compress:   logCompress,
 	}
+}
+
+// rangeHandler enables an underlying handler only for records whose level falls
+// in [min, max); it lets a single logger send informational records and errors
+// to different writers.
+type rangeHandler struct {
+	slog.Handler
+	min, max slog.Level
+}
+
+func newRangeHandler(w io.Writer, opts *slog.HandlerOptions, min, max slog.Level) rangeHandler {
+	return rangeHandler{Handler: slog.NewJSONHandler(w, opts), min: min, max: max}
+}
+
+func (h rangeHandler) Enabled(_ context.Context, l slog.Level) bool {
+	return l >= h.min && l < h.max
+}
+
+func (h rangeHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return rangeHandler{Handler: h.Handler.WithAttrs(attrs), min: h.min, max: h.max}
+}
+
+func (h rangeHandler) WithGroup(name string) slog.Handler {
+	return rangeHandler{Handler: h.Handler.WithGroup(name), min: h.min, max: h.max}
+}
+
+// fanoutHandler dispatches each record to every child handler that enables it,
+// so one logger can write to several destinations at once.
+type fanoutHandler struct {
+	handlers []slog.Handler
+}
+
+func newFanoutHandler(handlers ...slog.Handler) fanoutHandler {
+	return fanoutHandler{handlers: handlers}
+}
+
+func (h fanoutHandler) Enabled(ctx context.Context, l slog.Level) bool {
+	for _, sub := range h.handlers {
+		if sub.Enabled(ctx, l) {
+			return true
+		}
+	}
+	return false
+}
+
+func (h fanoutHandler) Handle(ctx context.Context, r slog.Record) error {
+	for _, sub := range h.handlers {
+		if !sub.Enabled(ctx, r.Level) {
+			continue
+		}
+		if err := sub.Handle(ctx, r.Clone()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (h fanoutHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	next := make([]slog.Handler, len(h.handlers))
+	for i, sub := range h.handlers {
+		next[i] = sub.WithAttrs(attrs)
+	}
+	return fanoutHandler{handlers: next}
+}
+
+func (h fanoutHandler) WithGroup(name string) slog.Handler {
+	next := make([]slog.Handler, len(h.handlers))
+	for i, sub := range h.handlers {
+		next[i] = sub.WithGroup(name)
+	}
+	return fanoutHandler{handlers: next}
 }

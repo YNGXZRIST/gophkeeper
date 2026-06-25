@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/note/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,7 +18,7 @@ import (
 func newNoteServer(repo entryStoreStub) *NoteServer {
 	return NewNoteServer(NoteServerProp{
 		Service: service.NewEntryService(repo),
-		Logger:  zap.NewNop(),
+		Logger:  slog.New(slog.DiscardHandler),
 	})
 }
 

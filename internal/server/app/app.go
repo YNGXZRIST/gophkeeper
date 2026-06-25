@@ -15,8 +15,7 @@ import (
 	"gophkeeper/internal/shared/errors/labelerrors"
 	"gophkeeper/internal/shared/logger"
 	mg "gophkeeper/migrations/server"
-
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 const (
@@ -32,7 +31,7 @@ type dbCloser interface {
 // any of them via the With* options.
 type appDeps struct {
 	cfg *config.Flags
-	log *zap.Logger
+	log *slog.Logger
 	db  *conn.DB
 }
 
@@ -53,7 +52,7 @@ func WithArgs(args []string) Option {
 }
 
 // WithLogger overrides the logger that Bootstrap would otherwise build.
-func WithLogger(log *zap.Logger) Option {
+func WithLogger(log *slog.Logger) Option {
 	return func(d *appDeps) error {
 		if log == nil {
 			return errors.New("logger is nil")

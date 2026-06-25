@@ -27,10 +27,10 @@ import (
 	passwordlist "gophkeeper/internal/client/view/tui/views/passwords/passwordlist"
 	filev1 "gophkeeper/internal/shared/proto/file/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
+	"log/slog"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -48,7 +48,7 @@ type Syncer interface {
 }
 
 type Logger interface {
-	Error(msg string, fields ...zap.Field)
+	Error(msg string, args ...any)
 }
 
 type conflictCount struct {
@@ -202,7 +202,7 @@ func (m rootModel) syncCmd() tea.Cmd {
 		var done syncDoneMsg
 		if err := sync.SyncAll(context.Background()); err != nil {
 			if log != nil {
-				log.Error("sync all", zap.Error(err))
+				log.Error("sync all", slog.Any("error", err))
 			}
 			if isOffline(err) {
 				done.offline = true
@@ -214,7 +214,7 @@ func (m rootModel) syncCmd() tea.Cmd {
 			rows, err := l.lister.ListConflicts(context.Background())
 			if err != nil {
 				if log != nil {
-					log.Error("list conflicts", zap.Error(err))
+					log.Error("list conflicts", slog.Any("error", err))
 				}
 				continue
 			}

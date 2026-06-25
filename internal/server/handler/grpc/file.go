@@ -7,8 +7,8 @@ import (
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/file/v1"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -29,7 +29,7 @@ func NewFileServer(prop FileServerProp) *FileServer {
 
 type FileServerProp struct {
 	Service *service.FileService
-	Logger  *zap.Logger
+	Logger  *slog.Logger
 }
 
 func (f *FileServer) Upload(stream pb.FileService_UploadServer) error {
@@ -62,7 +62,7 @@ func (f *FileServer) Upload(stream pb.FileService_UploadServer) error {
 	}
 	id, err := f.Service.Create(ctx, userID, header.GetMeta(), int(header.GetChunkCount()), next)
 	if err != nil {
-		f.Logger.Error("file upload failed", zap.Error(err))
+		f.Logger.Error("file upload failed", slog.Any("error", err))
 		return status.Error(codes.Internal, "internal error")
 	}
 	resp := &pb.UploadResponse{}
@@ -94,7 +94,7 @@ func (f *FileServer) Download(in *pb.DownloadRequest, stream pb.FileService_Down
 		if errors.Is(err, model.ErrFileNotFound) {
 			return status.Error(codes.NotFound, "file not found")
 		}
-		f.Logger.Error("file download failed", zap.Error(err))
+		f.Logger.Error("file download failed", slog.Any("error", err))
 		return status.Error(codes.Internal, "internal error")
 	}
 	return nil
@@ -107,7 +107,7 @@ func (f *FileServer) List(ctx context.Context, in *pb.ListRequest) (*pb.ListResp
 	}
 	files, err := f.Service.List(ctx, userID, in.GetLastId(), int(in.GetLimit()), int(in.GetOffset()))
 	if err != nil {
-		f.Logger.Error("file list failed", zap.Error(err))
+		f.Logger.Error("file list failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	pbFiles := make([]*pb.File, 0, len(files))
@@ -132,7 +132,7 @@ func (f *FileServer) UpdateMeta(ctx context.Context, in *pb.UpdateMetaRequest) (
 		if errors.Is(err, model.ErrFileNotFound) {
 			return nil, status.Error(codes.NotFound, "file not found")
 		}
-		f.Logger.Error("file update meta failed", zap.Error(err))
+		f.Logger.Error("file update meta failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	resp := &pb.UpdateMetaResponse{}
@@ -149,7 +149,7 @@ func (f *FileServer) Delete(ctx context.Context, in *pb.DeleteRequest) (*pb.Dele
 		if errors.Is(err, model.ErrFileNotFound) {
 			return nil, status.Error(codes.NotFound, "file not found")
 		}
-		f.Logger.Error("file delete failed", zap.Error(err))
+		f.Logger.Error("file delete failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &pb.DeleteResponse{}, nil
@@ -162,7 +162,7 @@ func (f *FileServer) Changes(ctx context.Context, in *pb.ChangesRequest) (*pb.Ch
 	}
 	changes, err := f.Service.Changes(ctx, userID, in.GetSince())
 	if err != nil {
-		f.Logger.Error("file changes failed", zap.Error(err))
+		f.Logger.Error("file changes failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	pbChanges := make([]*pb.FileChange, 0, len(changes))
