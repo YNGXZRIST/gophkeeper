@@ -1,0 +1,48 @@
+edition = "2023";
+
+package user.v1;
+
+option go_package = "gophkeeper/internal/shared/proto/user/v1;userv1";
+import "google/protobuf/timestamp.proto";
+
+message User {
+  string id = 1;
+  string login = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+message RegisterRequest{
+  string login = 1;
+  string password = 2;
+  bytes enc_salt = 3;
+  bytes wrapped_dek = 4;
+}
+message RegisterResponse{
+  User user = 1;
+  string access_token = 2;
+  string refresh_token=3;
+}
+message LoginRequest{
+  string login = 1;
+  string password = 2;
+}
+message LoginResponse{
+  User user = 1;
+  string access_token = 2;
+  string refresh_token=3;
+  bytes enc_salt = 4;
+  bytes wrapped_dek = 5;
+}
+message RefreshRequest{
+  string refresh_token = 1;
+}
+message RefreshResponse{
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+service UserService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+}

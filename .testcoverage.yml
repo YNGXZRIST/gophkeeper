@@ -1,0 +1,19 @@
+# Конфиг для github.com/vladopajic/go-test-coverage (workflow coverage.yml).
+# Локально: go test ./... -coverprofile=cover.out, затем go-test-coverage --config .testcoverage.yml
+profile: cover.out
+
+# Сгенерированный и не покрываемый юнит-тестами код не учитываем в проценте.
+exclude:
+  paths:
+    - ^internal/shared/proto
+    - ^cmd/
+    - ^migrations
+    - ^internal/server/db/conn/mock
+    - ^internal/server/model
+    - ^internal/client/model
+
+threshold:
+  file: 0
+  package: 0
+  # ТЗ требует не менее 70%; локально total ~90%.
+  total: 70

@@ -1,0 +1,49 @@
+name: coverage
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    container: golang:1.26
+    env:
+      GOFLAGS: -buildvcs=false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate test coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Клиент встраивает TLS-сертификат через go:embed — он нужен на компиляции.
+          go run ./cmd/certgen
+          # cmd/statictest и cmd/linter — утилиты статического анализа, тестов нет.
+          go list ./... | grep -vE '/cmd/(statictest|linter)$' | xargs -r go test \
+            -coverprofile=cover.out -covermode=atomic -coverpkg=./...
+          go tool cover -func=cover.out
+
+      - name: Check test coverage (thresholds)
+        uses: vladopajic/go-test-coverage@v2
+        with:
+          config: .testcoverage.yml
+          profile: cover.out
+
+      # При push в любую ветку бейдж коммитится в эту же ветку (.badges/coverage.svg).
+      # На pull_request не публикуем — нет push в репозиторий.
+      - name: Publish coverage badge to repository
+        if: github.event_name == 'push'
+        uses: vladopajic/go-test-coverage@v2
+        with:
+          config: .testcoverage.yml
+          profile: cover.out
+          git-token: ${{ secrets.GITHUB_TOKEN }}
+          git-branch: ${{ github.ref_name }}
+          git-file-name: .badges/coverage.svg
