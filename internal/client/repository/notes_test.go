@@ -10,7 +10,7 @@ import (
 
 func TestNotesCreateAndList(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("first"))
@@ -32,7 +32,7 @@ func TestNotesCreateAndList(t *testing.T) {
 
 func TestNotesListKeysetPaging(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	for i := 0; i < 3; i++ {
@@ -53,7 +53,7 @@ func TestNotesListKeysetPaging(t *testing.T) {
 
 func TestNotesListExcludesDeleted(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("x"))
@@ -72,7 +72,7 @@ func TestNotesListExcludesDeleted(t *testing.T) {
 
 func TestNotesUpdate(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("v1"))
@@ -91,7 +91,7 @@ func TestNotesUpdate(t *testing.T) {
 
 func TestNotesUpdateClearsConflict(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("v1"))
@@ -112,7 +112,7 @@ func TestNotesUpdateClearsConflict(t *testing.T) {
 
 func TestNotesListDirtyExcludesConflict(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	clean, err := repo.Create(ctx, []byte("dirty"))
@@ -131,7 +131,7 @@ func TestNotesListDirtyExcludesConflict(t *testing.T) {
 
 func TestNotesGetRow(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("data"))
@@ -150,7 +150,7 @@ func TestNotesGetRow(t *testing.T) {
 
 func TestNotesUpsert(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	require.NoError(t, repo.Upsert(ctx, "id-1", []byte("server"), 7))
@@ -167,7 +167,7 @@ func TestNotesUpsert(t *testing.T) {
 
 func TestNotesHardDelete(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("data"))
@@ -178,7 +178,7 @@ func TestNotesHardDelete(t *testing.T) {
 
 func TestNotesMarkSynced(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("data"))
@@ -193,7 +193,7 @@ func TestNotesMarkSynced(t *testing.T) {
 
 func TestNotesMarkConflict(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("data"))
@@ -208,7 +208,7 @@ func TestNotesMarkConflict(t *testing.T) {
 
 func TestNotesListConflicts(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	withBlob, err := repo.Create(ctx, []byte("mine"))
@@ -231,7 +231,7 @@ func TestNotesListConflicts(t *testing.T) {
 
 func TestNotesResolveKeepMine(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("mine"))
@@ -248,7 +248,7 @@ func TestNotesResolveKeepMine(t *testing.T) {
 
 func TestNotesResolveTakeServer(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewNotesRepo(db)
+	repo := NewEntryRepo(db, TableNote)
 	ctx := context.Background()
 
 	n, err := repo.Create(ctx, []byte("mine"))

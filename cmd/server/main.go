@@ -44,7 +44,7 @@ func main() {
 	log.Println("application stopped")
 }
 func run(args []string) (*app.App, error) {
-	a, err := app.Bootstrap(args)
+	a, err := app.Bootstrap(app.WithArgs(args))
 	if err != nil {
 		return nil, fmt.Errorf("fatal error: %v", err)
 	}

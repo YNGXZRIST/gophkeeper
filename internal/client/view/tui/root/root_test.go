@@ -18,7 +18,6 @@ import (
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
 	tea "charm.land/bubbletea/v2"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -169,7 +168,7 @@ func (f *fakeSyncer) SyncAll(ctx context.Context) error {
 
 type fakeLogger struct{ errors int }
 
-func (f *fakeLogger) Error(msg string, fields ...zap.Field) { f.errors++ }
+func (f *fakeLogger) Error(msg string, args ...any) { f.errors++ }
 
 type fakeUserClient struct {
 	userv1.UserServiceClient
@@ -196,9 +195,9 @@ func baseDeps(t *testing.T) Deps {
 	db := newTestDB(t)
 	return Deps{
 		Vault:         testVault(t),
-		NotesRepo:     repository.NewNotesRepo(db),
-		CardsRepo:     repository.NewCardsRepo(db),
-		PasswordsRepo: repository.NewPasswordsRepo(db),
+		NotesRepo:     repository.NewEntryRepo(db, repository.TableNote),
+		CardsRepo:     repository.NewEntryRepo(db, repository.TableCard),
+		PasswordsRepo: repository.NewEntryRepo(db, repository.TablePassword),
 		FilesRepo:     repository.NewFilesRepo(db),
 		Sync:          &fakeSyncer{},
 		Logger:        &fakeLogger{},

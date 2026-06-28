@@ -6,8 +6,8 @@ import (
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/user/v1"
+	"log/slog"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -18,7 +18,7 @@ type UserServer struct {
 }
 type UserServerProp struct {
 	Service *service.UserService
-	Logger  *zap.Logger
+	Logger  *slog.Logger
 }
 
 func NewUserServer(prop UserServerProp) *UserServer {
@@ -30,7 +30,7 @@ func (s *UserServer) Register(ctx context.Context, in *pb.RegisterRequest) (*pb.
 		if errors.Is(err, model.ErrLoginTaken) {
 			return nil, status.Error(codes.AlreadyExists, "user already registered")
 		}
-		s.Logger.Error("register failed", zap.Error(err))
+		s.Logger.Error("register failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	pbUser := &pb.User{}
@@ -48,7 +48,7 @@ func (s *UserServer) Login(ctx context.Context, in *pb.LoginRequest) (*pb.LoginR
 		if errors.Is(err, model.ErrInvalidCredentials) {
 			return nil, status.Error(codes.Unauthenticated, "invalid login or password")
 		}
-		s.Logger.Error("login failed", zap.Error(err))
+		s.Logger.Error("login failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	pbUser := &pb.User{}
@@ -69,7 +69,7 @@ func (s *UserServer) Refresh(ctx context.Context, in *pb.RefreshRequest) (*pb.Re
 		if errors.Is(err, model.ErrInvalidRefreshToken) {
 			return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
 		}
-		s.Logger.Error("refresh failed", zap.Error(err))
+		s.Logger.Error("refresh failed", slog.Any("error", err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	resp := &pb.RefreshResponse{}

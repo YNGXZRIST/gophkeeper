@@ -3,13 +3,13 @@ package grpc
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"testing"
 
 	"gophkeeper/internal/server/model"
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/user/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -53,7 +53,7 @@ func (s userIssuerStub) Issue(userID string) (string, error) {
 func newUserServer(repo userRepoStub, auth userAuthStub, issuer userIssuerStub) *UserServer {
 	return NewUserServer(UserServerProp{
 		Service: service.NewUserService(repo, auth, issuer),
-		Logger:  zap.NewNop(),
+		Logger:  slog.New(slog.DiscardHandler),
 	})
 }
 

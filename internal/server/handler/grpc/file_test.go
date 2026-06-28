@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"io"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"gophkeeper/internal/server/service"
 	pb "gophkeeper/internal/shared/proto/file/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -66,7 +66,7 @@ func (fileTxStub) WithinTx(ctx context.Context, _ *sql.TxOptions, fn func(ctx co
 func newFileServer(repo fileRepoStub) *FileServer {
 	return NewFileServer(FileServerProp{
 		Service: service.NewFileService(repo, fileTxStub{}),
-		Logger:  zap.NewNop(),
+		Logger:  slog.New(slog.DiscardHandler),
 	})
 }
 

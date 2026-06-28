@@ -10,11 +10,11 @@ import (
 const entity = "passwords"
 
 type Repo struct {
-	passwords *repository.PasswordsRepo
+	passwords *repository.EntryRepo
 	state     *repository.SyncStateRepo
 }
 
-func NewRepo(passwords *repository.PasswordsRepo, state *repository.SyncStateRepo) *Repo {
+func NewRepo(passwords *repository.EntryRepo, state *repository.SyncStateRepo) *Repo {
 	return &Repo{passwords: passwords, state: state}
 }
 

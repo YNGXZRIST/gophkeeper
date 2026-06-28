@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"gophkeeper/internal/server/service"
 	grpcServer "gophkeeper/internal/server/transport/grpc"
-
-	"go.uber.org/zap"
+	"log/slog"
 )
 
 const (
@@ -29,7 +28,7 @@ type Config struct {
 type ServerProp struct {
 	Config      *Config
 	Services    *service.Services
-	Logger      *zap.Logger
+	Logger      *slog.Logger
 	TokenParser grpcServer.TokenParser
 }
 

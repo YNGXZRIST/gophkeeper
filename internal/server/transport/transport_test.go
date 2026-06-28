@@ -2,14 +2,13 @@ package transport
 
 import (
 	"context"
+	"log/slog"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"gophkeeper/internal/server/service"
 	"gophkeeper/internal/shared/certgen"
-
-	"go.uber.org/zap"
 )
 
 type parserStub struct{}
@@ -36,7 +35,7 @@ func TestNewServerGRPC(t *testing.T) {
 	srv, err := NewServer(ServerProp{
 		Config:      &Config{Transport: GRPC, Address: "127.0.0.1:0", CertFile: cert, KeyFile: key},
 		Services:    &service.Services{},
-		Logger:      zap.NewNop(),
+		Logger:      slog.New(slog.DiscardHandler),
 		TokenParser: parserStub{},
 	})
 	if err != nil {
@@ -56,7 +55,7 @@ func TestNewServerGRPCStartStop(t *testing.T) {
 	srv, err := NewServer(ServerProp{
 		Config:      &Config{Transport: GRPC, Address: "127.0.0.1:0", CertFile: cert, KeyFile: key},
 		Services:    &service.Services{},
-		Logger:      zap.NewNop(),
+		Logger:      slog.New(slog.DiscardHandler),
 		TokenParser: parserStub{},
 	})
 	if err != nil {
@@ -85,7 +84,7 @@ func TestNewServerUnsupportedTransport(t *testing.T) {
 	_, err := NewServer(ServerProp{
 		Config:   &Config{Transport: HTTP, Address: "127.0.0.1:0"},
 		Services: &service.Services{},
-		Logger:   zap.NewNop(),
+		Logger:   slog.New(slog.DiscardHandler),
 	})
 	if err == nil {
 		t.Fatal("NewServer() error = nil, want not-implemented error")
@@ -97,7 +96,7 @@ func TestNewServerGRPCListenError(t *testing.T) {
 	_, err := NewServer(ServerProp{
 		Config:   &Config{Transport: GRPC, Address: "256.256.256.256:99999", CertFile: cert, KeyFile: key},
 		Services: &service.Services{},
-		Logger:   zap.NewNop(),
+		Logger:   slog.New(slog.DiscardHandler),
 	})
 	if err == nil {
 		t.Fatal("NewServer() error = nil, want listen error")

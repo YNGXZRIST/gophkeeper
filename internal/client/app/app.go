@@ -25,9 +25,9 @@ import (
 	passwordv1 "gophkeeper/internal/shared/proto/password/v1"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 	mg "gophkeeper/migrations/client"
+	"log/slog"
 
 	tea "charm.land/bubbletea/v2"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -35,13 +35,12 @@ type App struct {
 	program *tea.Program
 	grpc    *grpc.ClientConn
 	db      *sql.DB
-	logger  *zap.Logger
 }
 
 type repos struct {
-	notes     *repository.NotesRepo
-	passwords *repository.PasswordsRepo
-	cards     *repository.CardsRepo
+	notes     *repository.EntryRepo
+	passwords *repository.EntryRepo
+	cards     *repository.EntryRepo
 	files     *repository.FilesRepo
 	session   *repository.SessionRepo
 	syncState *repository.SyncStateRepo
@@ -87,7 +86,7 @@ func Bootstrap(addr string) (*App, error) {
 	pool := buildPool(r, c)
 	program := tea.NewProgram(root.New(buildDeps(r, c, pool, lg)))
 
-	return &App{program: program, grpc: grpcConn, db: dbConn, logger: lg}, nil
+	return &App{program: program, grpc: grpcConn, db: dbConn}, nil
 }
 
 func (a *App) Run() error {
@@ -99,15 +98,14 @@ func (a *App) Shutdown() error {
 	return errors.Join(
 		a.grpc.Close(),
 		a.db.Close(),
-		a.logger.Sync(),
 	)
 }
 
 func buildRepos(dbConn *sql.DB) repos {
 	return repos{
-		notes:     repository.NewNotesRepo(dbConn),
-		passwords: repository.NewPasswordsRepo(dbConn),
-		cards:     repository.NewCardsRepo(dbConn),
+		notes:     repository.NewEntryRepo(dbConn, repository.TableNote),
+		passwords: repository.NewEntryRepo(dbConn, repository.TablePassword),
+		cards:     repository.NewEntryRepo(dbConn, repository.TableCard),
 		files:     repository.NewFilesRepo(dbConn),
 		session:   repository.NewSessionRepo(dbConn),
 		syncState: repository.NewSyncStateRepo(dbConn),
@@ -132,7 +130,7 @@ func buildPool(r repos, c clients) *syncclient.Pool {
 	return syncclient.New(notesSyncer, cardsSyncer, passwordsSyncer, filesSyncer)
 }
 
-func buildDeps(r repos, c clients, pool *syncclient.Pool, lg *zap.Logger) root.Deps {
+func buildDeps(r repos, c clients, pool *syncclient.Pool, lg *slog.Logger) root.Deps {
 	return root.Deps{
 		UserClient:    c.user,
 		NotesRepo:     r.notes,
@@ -147,7 +145,7 @@ func buildDeps(r repos, c clients, pool *syncclient.Pool, lg *zap.Logger) root.D
 	}
 }
 
-func dialGRPC(addr string, sessions *repository.SessionRepo, lg *zap.Logger) (*grpc.ClientConn, error) {
+func dialGRPC(addr string, sessions *repository.SessionRepo, lg *slog.Logger) (*grpc.ClientConn, error) {
 	creds, err := tlsclient.Credentials()
 	if err != nil {
 		return nil, fmt.Errorf("tls credentials: %w", err)
@@ -166,7 +164,7 @@ func dialGRPC(addr string, sessions *repository.SessionRepo, lg *zap.Logger) (*g
 	)
 }
 
-func checkSession(sessions *repository.SessionRepo, lg *zap.Logger) error {
+func checkSession(sessions *repository.SessionRepo, lg *slog.Logger) error {
 	_, err := sessions.Get(context.Background())
 	if err == nil {
 		return nil
@@ -175,7 +173,7 @@ func checkSession(sessions *repository.SessionRepo, lg *zap.Logger) error {
 		return nil
 	}
 	if parseErr, ok := errors.AsType[*repository.ErrParseToken](err); ok {
-		lg.Error("parse stored session", zap.Error(parseErr))
+		lg.Error("parse stored session", slog.Any("error", parseErr))
 		return nil
 	}
 	return err

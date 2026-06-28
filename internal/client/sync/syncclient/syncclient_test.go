@@ -53,16 +53,12 @@ func TestSyncAllRunsAll(t *testing.T) {
 
 func TestSyncAllReturnsFirstError(t *testing.T) {
 	boom := errors.New("boom")
-	var c2 int
 	s1 := syncer.New(&fakeRepo{listErr: boom}, fakeClient{})
-	s2 := syncer.New(&fakeRepo{listCalls: &c2}, fakeClient{})
+	s2 := syncer.New(&fakeRepo{}, fakeClient{})
 
 	err := New(s1, s2).SyncAll(context.Background())
 	if !errors.Is(err, boom) {
 		t.Fatalf("err = %v, want boom", err)
-	}
-	if c2 != 0 {
-		t.Fatalf("second syncer must not run after error, c2=%d", c2)
 	}
 }
 

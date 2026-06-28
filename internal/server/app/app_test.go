@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"gophkeeper/internal/server/config"
@@ -146,9 +147,25 @@ func TestAppShutdown(t *testing.T) {
 	})
 }
 
+func TestBootstrapOptionValidation(t *testing.T) {
+	t.Run("WithDB nil", func(t *testing.T) {
+		_, err := Bootstrap(WithDB(nil))
+		if err == nil || !strings.Contains(err.Error(), "db is nil") {
+			t.Fatalf("want db-nil error, got %v", err)
+		}
+	})
+
+	t.Run("WithLogger nil", func(t *testing.T) {
+		_, err := Bootstrap(WithLogger(nil))
+		if err == nil || !strings.Contains(err.Error(), "logger is nil") {
+			t.Fatalf("want logger-nil error, got %v", err)
+		}
+	})
+}
+
 func TestBootstrapConfigError(t *testing.T) {
 
-	if _, err := Bootstrap([]string{"--this-flag-does-not-exist"}); err == nil {
+	if _, err := Bootstrap(WithArgs([]string{"--this-flag-does-not-exist"})); err == nil {
 		t.Fatal("expected config load error")
 	}
 }
@@ -164,7 +181,7 @@ func TestBootstrapMigrateError(t *testing.T) {
 		"-l", t.TempDir(),
 		"-d", "postgres://u:p@127.0.0.1:1/nodb?sslmode=disable&connect_timeout=1",
 	}
-	app, err := Bootstrap(args)
+	app, err := Bootstrap(WithArgs(args))
 	if err == nil {
 		if app != nil {
 			_ = app.Shutdown(context.Background())

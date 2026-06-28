@@ -10,7 +10,7 @@ import (
 
 func TestPasswordsCRUDAndPaging(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewPasswordsRepo(db)
+	repo := NewEntryRepo(db, TablePassword)
 	ctx := context.Background()
 
 	var ids []string
@@ -44,7 +44,7 @@ func TestPasswordsCRUDAndPaging(t *testing.T) {
 
 func TestPasswordsUpdateClearsConflict(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewPasswordsRepo(db)
+	repo := NewEntryRepo(db, TablePassword)
 	ctx := context.Background()
 
 	p, err := repo.Create(ctx, []byte("v1"))
@@ -60,7 +60,7 @@ func TestPasswordsUpdateClearsConflict(t *testing.T) {
 
 func TestPasswordsSyncFlow(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewPasswordsRepo(db)
+	repo := NewEntryRepo(db, TablePassword)
 	ctx := context.Background()
 
 	clean, err := repo.Create(ctx, []byte("dirty"))
@@ -99,7 +99,7 @@ func TestPasswordsSyncFlow(t *testing.T) {
 
 func TestPasswordsConflictResolution(t *testing.T) {
 	db := newTestDB(t)
-	repo := NewPasswordsRepo(db)
+	repo := NewEntryRepo(db, TablePassword)
 	ctx := context.Background()
 
 	mine, err := repo.Create(ctx, []byte("mine"))

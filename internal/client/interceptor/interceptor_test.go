@@ -2,6 +2,7 @@ package interceptor
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"sync"
 	"testing"
@@ -10,7 +11,6 @@ import (
 	"gophkeeper/internal/client/auth"
 	userv1 "gophkeeper/internal/shared/proto/user/v1"
 
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -167,7 +167,7 @@ func TestUnaryRefreshInterceptor_RefreshesNearExpiry(t *testing.T) {
 		return nil
 	}
 
-	err := UnaryRefreshInterceptor(store, zap.NewNop())(
+	err := UnaryRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), "/card.v1.CardService/Add", nil, nil, conn, invoker)
 	if err != nil {
 		t.Fatalf("interceptor: %v", err)
@@ -195,7 +195,7 @@ func TestUnaryRefreshInterceptor_SkipsWhenNotNearExpiry(t *testing.T) {
 	store := &fakeStore{session: sessionWith("acc", time.Now().Add(time.Hour), "ref")}
 
 	invoker := func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error { return nil }
-	if err := UnaryRefreshInterceptor(store, zap.NewNop())(
+	if err := UnaryRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), "/svc/M", nil, nil, conn, invoker); err != nil {
 		t.Fatalf("interceptor: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestUnaryRefreshInterceptor_SkipsRefreshMethod(t *testing.T) {
 	store := &fakeStore{session: sessionWith("acc", time.Now().Add(time.Second), "ref")}
 
 	invoker := func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error { return nil }
-	if err := UnaryRefreshInterceptor(store, zap.NewNop())(
+	if err := UnaryRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), userv1.UserService_Refresh_FullMethodName, nil, nil, conn, invoker); err != nil {
 		t.Fatalf("interceptor: %v", err)
 	}
@@ -229,7 +229,7 @@ func TestUnaryRefreshInterceptor_RefreshError(t *testing.T) {
 		invoked = true
 		return nil
 	}
-	if err := UnaryRefreshInterceptor(store, zap.NewNop())(
+	if err := UnaryRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), "/svc/M", nil, nil, conn, invoker); err != nil {
 		t.Fatalf("interceptor: %v", err)
 	}
@@ -247,7 +247,7 @@ func TestUnaryRefreshInterceptor_NoSession(t *testing.T) {
 	store := &fakeStore{session: nil}
 
 	invoker := func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error { return nil }
-	if err := UnaryRefreshInterceptor(store, zap.NewNop())(
+	if err := UnaryRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), "/svc/M", nil, nil, conn, invoker); err != nil {
 		t.Fatalf("interceptor: %v", err)
 	}
@@ -266,7 +266,7 @@ func TestStreamRefreshInterceptor_RefreshesNearExpiry(t *testing.T) {
 		opened = true
 		return nil, nil
 	}
-	_, err := StreamRefreshInterceptor(store, zap.NewNop())(
+	_, err := StreamRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), &grpc.StreamDesc{}, conn, "/svc/Stream", streamer)
 	if err != nil {
 		t.Fatalf("interceptor: %v", err)
@@ -292,7 +292,7 @@ func TestStreamRefreshInterceptor_Error(t *testing.T) {
 		opened = true
 		return nil, nil
 	}
-	if _, err := StreamRefreshInterceptor(store, zap.NewNop())(
+	if _, err := StreamRefreshInterceptor(store, slog.New(slog.DiscardHandler))(
 		context.Background(), &grpc.StreamDesc{}, conn, "/svc/Stream", streamer); err != nil {
 		t.Fatalf("interceptor: %v", err)
 	}

@@ -51,7 +51,7 @@ func newDB(t *testing.T) *sql.DB {
 func TestRepoDelegates(t *testing.T) {
 	ctx := context.Background()
 	db := newDB(t)
-	notes := repository.NewNotesRepo(db)
+	notes := repository.NewEntryRepo(db, repository.TableNote)
 	r := NewRepo(notes, repository.NewSyncStateRepo(db))
 
 	var _ syncer.Repo = r
