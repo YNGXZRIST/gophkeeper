@@ -21,5 +21,6 @@ func Open() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open db: %w", err)
 	}
+	db.SetMaxOpenConns(1)
 	return db, nil
 }
